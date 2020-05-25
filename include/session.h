@@ -5,12 +5,13 @@ template <typename T>
 class Session
 {
 public:
-    Session();
-    // Runs calculation of the node:
+    // Runs calculation of the node and returns the output value for the node;
     // Takes input data for placeholders with an unordered map using placeholder's name
-    auto Run(*Node, std::unordered_map<std::string, *T> feed);
+    auto Run(Node* n, std::unordered_map<std::string, T* t> feed);
 
 private:
-    void getNodesList();
-    std::vector<*Node> _nodesList;
+    // Perform post-order traversal     
+    void getNodesList(Node* n); 
+    std::vector<Node*> _nodesList = {};
 };
+
