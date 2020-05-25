@@ -99,6 +99,7 @@ void add::add(Node *a, Node *b)
 
 virtual auto getValue() override
 {
+    std::cout << "Compute add" << std::endl;
     _output = a.getValue() + b.getValue();
     return _output;
 }

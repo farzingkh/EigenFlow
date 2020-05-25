@@ -87,7 +87,7 @@ template <typename T>
 class add : public Operation
 {
 public:
-    void add(Node *a, Node *b); 
+    void add(Node *a, Node *b);
     Node *Node(); // return the base node class
     virtual auto getValue() override;
 
