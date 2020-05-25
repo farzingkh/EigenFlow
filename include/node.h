@@ -6,7 +6,7 @@
 typedef Eigen::Matrix<int, Dynamic, Dynamic> matrixXi;
 
 /* Class for nodes of the computational graph; 
-each node can have one of the three:
+each node is one of the three:
  - an operation
  - a variable
  - a placeholder
@@ -36,14 +36,14 @@ private:
 };
 
 // Class for operations with data value of type T1
-template <typename T>
 class Operation : public Node
 {
 public:
-    virtual T getValue();
+    Operation();
+    virtual auto getValue() override;
 
 private:
-    T _output;
+    auto _output;
 };
 
 // A class for variables of type T
@@ -51,11 +51,14 @@ template <typename T>
 class Variable : public Node
 {
 public:
-    Variable(T a); // Constructor
+    Variable(T a);
+
     virtual T getValue() override;
+    Node *Node(); // return the base node class
 
 private:
     T _output;
+    Node *_baseNode{this}; // Get the base Node class
 };
 
 // A class for placeholders for values of type T
@@ -63,24 +66,31 @@ template <typename T>
 class Placeholder : public Node
 {
 public:
+    Placeholder(std::string n);
     void setValue(T *t);
-    void setName(std::string n);
-    T getValue() override { return _output; };
+
+    Node *Node(); // return the base node class
+    virtual T getValue() override;
     std::string getName();
 
 private:
     T _output;
     std::string _name;
+    Node *_baseNode{this}; // Object slicing
+    bool _dataAvailable;
 };
 
 // Operations
 
 // A class for add operation with T type value
 template <typename T>
-class add : public Operation<T>
+class add : public Operation
 {
 public:
-    // constructor creates a node of type operation
-    void add(Node *a, Node *b);
-    virtual T getValue() override { return _output; };
+    void add(Node *a, Node *b); 
+    Node *Node(); // return the base node class
+    virtual auto getValue() override;
+
+private:
+    Node *_baseNode{this}; // Object slicing
 };
