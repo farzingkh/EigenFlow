@@ -1,9 +1,34 @@
+#ifndef NODE_H
+#define NODE_H
+
 #include <vector>
 #include <memory>
 #include <Eigen/Dense>
 
 // A matrix of ints with a dynamic size, Use it when the size is not known
-typedef Eigen::Matrix<int, Dynamic, Dynamic> matrixXi;
+typedef Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> matrixXi;
+
+// Node types
+enum nodeType
+{
+    operation,
+    variable,
+    placeholder
+};
+
+// Base node class
+class BaseNode
+{
+public:
+    void addInputs(BaseNode *n);
+    void addConsumers(BaseNode *n);
+    std::vector<BaseNode *> getInputs();
+    std::vector<BaseNode *> getConsumers();
+
+private:
+    std::vector<BaseNode *> _consumers = {}; // child nodes
+    std::vector<BaseNode *> _inputs = {};    // parent nodes
+};
 
 /* Class for nodes of the computational graph; 
 each node is one of the three:
@@ -11,86 +36,52 @@ each node is one of the three:
  - a variable
  - a placeholder
 */
-class Node
+template <typename T>
+class Node: public BaseNode
 {
 public:
-    enum nodeType
-    {
-        operation,
-        variable,
-        placeholder
-    };
+    Node(nodeType tp);
 
-    void addInputs(Node *n);
-    void addConsumer(Node *n);
+    void setName(std::string n);
 
-    virtual auto getValue();
+    T getValue();
+    void setValue(T t);
+
     nodeType getType();
-    std::vector<Node *> getInputs();
-    std::vector<Node *> getConsumers();
+    std::string getName();
 
 private:
-    std::vector<Node *> _consumers = {}; // child nodes
-    std::vector<Node *> _inputs = {};    // parent nodes
     nodeType _tp;
-};
-
-// Class for operations with data value of type T1
-class Operation : public Node
-{
-public:
-    Operation();
-    virtual auto getValue() override;
-
-private:
-    auto _output;
+    std::string _name = "";
 };
 
 // A class for variables of type T
 template <typename T>
-class Variable : public Node
+class Variable : public Node<T>
 {
 public:
     Variable(T a);
-
-    virtual T getValue() override;
-    Node *Node(); // return the base node class
+    T getValue();
 
 private:
     T _output;
-    Node *_baseNode{this}; // Get the base Node class
+    bool _dataAvailable = false;
 };
 
 // A class for placeholders for values of type T
 template <typename T>
-class Placeholder : public Node
+class Placeholder : public Node<T>
 {
 public:
     Placeholder(std::string n);
-    void setValue(T *t);
-
-    Node *Node(); // return the base node class
-    virtual T getValue() override;
-    std::string getName();
+    T getValue();
+    void setValue(T t);
 
 private:
     T _output;
-    std::string _name;
-    Node *_baseNode{this}; // Object slicing
     bool _dataAvailable;
 };
 
-// Operations
+#include "../src/node.tpp"
 
-// A class for add operation with T type value
-template <typename T>
-class add : public Operation
-{
-public:
-    void add(Node *a, Node *b);
-    Node *Node(); // return the base node class
-    virtual auto getValue() override;
-
-private:
-    Node *_baseNode{this}; // Object slicing
-};
+#endif /* NODE_H */

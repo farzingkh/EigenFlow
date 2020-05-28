@@ -1,5 +1,9 @@
+#ifndef GRAPH_H
+#define GRAPH_H
+
 #include "node.h"
 
+template <typename T>
 class Graph
 {
 public:
@@ -7,12 +11,14 @@ public:
     void addOperation();
     void addVariable();
 
-    std::vector<Node*> getOperations();
-    std::vector<Node*> getPlaceholders();
-    std::vector<Node*> getVariables();
+    std::vector<Node<T>*> getOperations();
+    std::vector<Node<T>*> getPlaceholders();
+    std::vector<Node<T>*> getVariables();
 
 private:
-    std::vector<Node*> _operations;
-    std::vector<Node*> _variables;
-    std::vector<Node*> _placeholders;
-}
+    std::vector<Node<T>*> _operations;
+    std::vector<Node<T>*> _variables;
+    std::vector<Node<T>*> _placeholders;
+};
+
+#endif /* GRAPH_H */
