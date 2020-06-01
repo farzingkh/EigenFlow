@@ -8,6 +8,13 @@
 // A matrix of ints with a dynamic size, Use it when the size is not known
 typedef Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> matrixXi;
 
+// enum for operation types
+enum class operationType
+{
+    addition,
+    negative
+};
+
 // Node types
 enum nodeType
 {
@@ -22,12 +29,20 @@ class BaseNode
 public:
     void addInputs(BaseNode *n);
     void addConsumers(BaseNode *n);
-    std::vector<BaseNode *> getInputs();
+
+    template <typename T>
+    T getValue();
+
     std::vector<BaseNode *> getConsumers();
+    std::vector<BaseNode *> &getInputs();
+
+protected:
+    nodeType _nType;       // node type
+    operationType _opType; // type if node is operation
 
 private:
-    std::vector<BaseNode *> _consumers = {}; // child nodes
-    std::vector<BaseNode *> _inputs = {};    // parent nodes
+    std::vector<BaseNode *> _consumers = {}; // parent nodes
+    std::vector<BaseNode *> _inputs = {};    // child nodes
 };
 
 /* Class for nodes of the computational graph; 
@@ -36,41 +51,37 @@ each node is one of the three:
  - a variable
  - a placeholder
 */
-template <typename T>
-class Node: public BaseNode
+template <template <typename> class U, typename T>
+class Node : public BaseNode
 {
 public:
-    Node(nodeType tp);
-
     void setName(std::string n);
 
     T getValue();
     void setValue(T t);
-
-    nodeType getType();
     std::string getName();
 
 private:
-    nodeType _tp;
-    std::string _name = "";
+    std::string _name = " ";
 };
 
 // A class for variables of type T
 template <typename T>
-class Variable : public Node<T>
+class Variable : public Node<Variable, T>
 {
 public:
-    Variable(T a);
+    Variable(T &&a);
+    Variable(Variable<T> &v);
     T getValue();
 
 private:
-    T _output;
+    std::unique_ptr<T> _output = nullptr;
     bool _dataAvailable = false;
 };
 
 // A class for placeholders for values of type T
 template <typename T>
-class Placeholder : public Node<T>
+class Placeholder : public Node<Placeholder, T>
 {
 public:
     Placeholder(std::string n);
@@ -78,7 +89,7 @@ public:
     void setValue(T t);
 
 private:
-    T _output;
+    std::unique_ptr<T> _output = nullptr;
     bool _dataAvailable;
 };
 

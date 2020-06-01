@@ -5,11 +5,11 @@
 
 int main()
 {
-    Variable<int> A(1);
-    Variable<int> B(2);
+    //Variable<int> A(1);
+    //Variable<int> B(2);
     //negative<int> E(B);
 
-    auto C = add<int>(A, B);
+    auto C = add<int>(Variable<int>(1), Variable<int>(2));
     //auto D = add<int>(negative<int>(B), add<int>(A, B));
 
     std::unordered_map<std::string, int *> feed = {};

@@ -11,14 +11,14 @@ public:
     void addOperation();
     void addVariable();
 
-    std::vector<Node<T>*> getOperations();
-    std::vector<Node<T>*> getPlaceholders();
-    std::vector<Node<T>*> getVariables();
+    std::vector<Operation<T>*> getOperations();
+    std::vector<Placeholder<T>*> getPlaceholders();
+    std::vector<Variable<T>*> getVariables();
 
 private:
-    std::vector<Node<T>*> _operations;
-    std::vector<Node<T>*> _variables;
-    std::vector<Node<T>*> _placeholders;
+    std::vector<Operation<T>*> _operations;
+    std::vector<Variable<T>*> _variables;
+    std::vector<Placeholder<T>*> _placeholders;
 };
 
 #endif /* GRAPH_H */

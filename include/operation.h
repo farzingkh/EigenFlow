@@ -3,41 +3,31 @@
 
 //#include "node.h"
 
-// enum for operation types
-enum class opType
-{
-    addition,
-    negative
-};
-
 // Class for operations with data value of type T
 template <typename T>
-class Operation : public Node<T>
+class Operation : public Node<Operation, T>
 {
 public:
-    Operation(opType ot);
+    Operation();
     T getValue();
-    opType getType();
 
     void setValue(T t);
     void compute();
-    void setType(opType otp);
 
 private:
-    T _output;
-    opType _otp;
+    std::unique_ptr<T> _output = nullptr;
     bool _dataAvailable = false;
 };
 
 // Operations
 
-// addition operation with T type value
+// addition operation with T return type value, T1 and T2 input type value
 template <typename T>
 class add : public Operation<T>
 {
 public:
     add(BaseNode &a, BaseNode &b);
-    //add(Node<T> &&a, Node<T> &&b);
+    add(BaseNode &&a, BaseNode &&b);
 
     void compute();
 };
