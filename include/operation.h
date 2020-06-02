@@ -4,26 +4,19 @@
 //#include "node.h"
 
 // Class for operations with data value of type T
-template <typename T>
+template <template <> class U, typename T>
 class Operation : public Node<T>
 {
 public:
     Operation();
-    T getValue();
-
-    void setValue(T t);
     void compute();
-
-private:
-    std::unique_ptr<T> _output = nullptr;
-    bool _dataAvailable = false;
 };
 
 // Operations
 
 // addition operation with T return type value, T1 and T2 input type value
 template <typename T>
-class add : public Operation<T>
+class add : public Operation<add,T>
 {
 public:
     add(BaseNode &a, BaseNode &b);
@@ -34,7 +27,7 @@ public:
 
 // negative operation
 template <typename T>
-class negative : public Operation<T>
+class negative : public Operation<negative,T>
 {
 public:
     negative(BaseNode &a);

@@ -3,48 +3,17 @@
 
 // --- Operation ---
 
-template <typename T>
-Operation<T>::Operation()
+template <template <> class U, typename T>
+Operation<U, T>::Operation()
 {
     this->_nType = nodeType::operation;
 }
 
-template <typename T>
-T Operation<T>::getValue()
-{
-    std::cout << "Operation get value..." << std::endl;
-    if (_dataAvailable)
-    {
-        std::cout << "Operation output is: " << *_output << std::endl;
-        return *_output;
-    }
-    else
-    {
-        std::cout << "Data not available" << std::endl;
-        return T();
-    }
-}
-
-template <typename T>
-void Operation<T>::setValue(T t)
-{
-    _dataAvailable = true;
-    _output.reset(new T(t));
-}
-
-template <typename T>
-void Operation<T>::compute()
+template <template <> class U, typename T>
+void Operation<U, T>::compute()
 {
     std::cout << "Operation compute ..." << std::endl;
-    switch (this->_opType)
-    {
-    case operationType::addition:
-        static_cast<add<T> *>(this)->compute();
-        break;
-    case operationType::negative:
-        static_cast<negative<T> *>(this)->compute();
-        break;
-    }
+    static_cast<U *>(this)->compute();
 };
 
 // --- add operation ---
@@ -79,14 +48,10 @@ add<T>::add(BaseNode &&a, BaseNode &&b)
 template <typename T>
 void add<T>::compute()
 {
-    Node<Operation, T> *pNode = static_cast<Node<Operation, T> *>(this);
+    Node<T> *pNode = static_cast<Node<T> *>(this);
     std::cout << "Compute add operation ..." << std::endl;
-    auto inputs = pNode->getInputs();
-    auto n = static_cast<Operation<T> *>(inputs[0]);
-    auto m = static_cast<Operation<T> *>(inputs[1]);
-    std::cout << "Variable " << n->getName() << " is " << n->getValue() << std::endl;
-    std::cout << "Variable " << m->getName() << " is " << m->getValue() << std::endl;
-    pNode->setValue(n->getValue() + m->getValue());
+    std::vector<BaseNode *> inputs = this->getInputs();
+    pNode->setValue(inputs[0]->getValue<T>() + inputs[1]->getValue<T>());
 }
 
 // --- negative operation---
@@ -94,7 +59,7 @@ void add<T>::compute()
 template <typename T>
 negative<T>::negative(BaseNode &a)
 {
-    this->_opType =operationType::negative;
+    this->_opType = operationType::negative;
     this->addInputs(&a);
     a.addConsumers(this);
 }
