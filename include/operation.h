@@ -5,7 +5,7 @@
 
 // Class for operations with data value of type T
 template <typename T>
-class Operation : public Node<Operation, T>
+class Operation : public Node<T>
 {
 public:
     Operation();

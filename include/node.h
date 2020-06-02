@@ -29,10 +29,12 @@ class BaseNode
 public:
     void addInputs(BaseNode *n);
     void addConsumers(BaseNode *n);
+    void setName(std::string n);
 
     template <typename T>
     T getValue();
 
+    std::string _name = " ";
     std::vector<BaseNode *> getConsumers();
     std::vector<BaseNode *> &getInputs();
 
@@ -51,46 +53,33 @@ each node is one of the three:
  - a variable
  - a placeholder
 */
-template <template <typename> class U, typename T>
+template <typename T>
 class Node : public BaseNode
 {
 public:
-    void setName(std::string n);
-
     T getValue();
-    void setValue(T t);
-    std::string getName();
-
-private:
-    std::string _name = " ";
-};
-
-// A class for variables of type T
-template <typename T>
-class Variable : public Node<Variable, T>
-{
-public:
-    Variable(T &&a);
-    Variable(Variable<T> &v);
-    T getValue();
+    void setValue(T t);     
 
 private:
     std::unique_ptr<T> _output = nullptr;
     bool _dataAvailable = false;
 };
 
+// A class for variables of type T
+template <typename T>
+class Variable : public Node<T>
+{
+public:
+    Variable(T &&a);
+    Variable(Variable<T> &v);
+};
+
 // A class for placeholders for values of type T
 template <typename T>
-class Placeholder : public Node<Placeholder, T>
+class Placeholder : public Node<T>
 {
 public:
     Placeholder(std::string n);
-    T getValue();
-    void setValue(T t);
-
-private:
-    std::unique_ptr<T> _output = nullptr;
-    bool _dataAvailable;
 };
 
 #include "../src/node.tpp"
