@@ -34,11 +34,16 @@ public:
     template <typename T>
     T getValue();
 
-    std::string _name = " ";
+    virtual void compute() = 0;
+
+    nodeType getNodeType();
+    operationType getOperationType();
     std::vector<BaseNode *> getConsumers();
     std::vector<BaseNode *> &getInputs();
+    std::string getName();
 
 protected:
+    std::string _name = " ";
     nodeType _nType;       // node type
     operationType _opType; // type if node is operation
 
@@ -58,7 +63,7 @@ class Node : public BaseNode
 {
 public:
     T getValue();
-    void setValue(T t);     
+    void setValue(T t);
 
 private:
     std::unique_ptr<T> _output = nullptr;
@@ -72,6 +77,7 @@ class Variable : public Node<T>
 public:
     Variable(T &&a);
     Variable(Variable<T> &v);
+    void compute();
 };
 
 // A class for placeholders for values of type T
@@ -80,6 +86,7 @@ class Placeholder : public Node<T>
 {
 public:
     Placeholder(std::string n);
+    void compute();
 };
 
 #include "../src/node.tpp"

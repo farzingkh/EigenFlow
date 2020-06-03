@@ -4,19 +4,19 @@
 //#include "node.h"
 
 // Class for operations with data value of type T
-template <template <> class U, typename T>
+template <typename T>
 class Operation : public Node<T>
 {
 public:
     Operation();
-    void compute();
+    void compute() = 0;
 };
 
 // Operations
 
 // addition operation with T return type value, T1 and T2 input type value
 template <typename T>
-class add : public Operation<add,T>
+class add : public Operation<T>
 {
 public:
     add(BaseNode &a, BaseNode &b);
@@ -27,7 +27,7 @@ public:
 
 // negative operation
 template <typename T>
-class negative : public Operation<negative,T>
+class negative : public Operation<T>
 {
 public:
     negative(BaseNode &a);

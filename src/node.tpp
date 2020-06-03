@@ -3,7 +3,7 @@
 #include <iostream>
 
 // --- BaseNode ---
-void BasNode::setName(std::string n) { _name = n; }
+void BaseNode::setName(std::string n) { _name = n; }
 
 void BaseNode::addInputs(BaseNode *n)
 {
@@ -21,16 +21,15 @@ T BaseNode::getValue()
     return static_cast<Node<T> *>(this)->getValue();
 }
 
-nodeType BaseNode::getNodeType()
-{
-    return _nType;
-}
-
-std::string BasNode::getName() { return _name; }
+std::string BaseNode::getName() { return _name; }
 
 std::vector<BaseNode *> &BaseNode::getInputs() { return _inputs; }
 
 std::vector<BaseNode *> BaseNode::getConsumers() { return _consumers; }
+
+nodeType BaseNode::getNodeType() { return _nType; }
+
+operationType BaseNode::getOperationType() { return _opType; }
 
 // --- Node  ---
 
@@ -60,19 +59,23 @@ void Node<T>::setValue(T t)
 // --- Variable ---
 
 template <typename T>
-Variable<T>::Variable(T &&a) : _dataAvailable(true), _output(std::move(std::unique_ptr<T>((new T(a)))))
+Variable<T>::Variable(T &&a)
 {
     this->_nType = nodeType::variable;
+    this->setValue(a);
     std::cout << "Variable contructor ..." << std::endl;
 }
 
 template <typename T>
-Variable<T>::Variable(Variable<T> &v) : _dataAvailable(true), _output(std::move(std::unique_ptr<T>(new T(v.getValue()))))
+Variable<T>::Variable(Variable<T> &v)
 {
-    this->_nType = nodeType::variable;
     std::cout << "Variable copy contructor ..." << std::endl;
+    this->_nType = nodeType::variable;
+    this->setValue((&v)->getValue());
 }
 
+template <typename T>
+void Variable<T>::compute() { return; }
 
 // --- Placeholder ---
 
@@ -80,6 +83,8 @@ template <typename T>
 Placeholder<T>::Placeholder(std::string n)
 {
     this->_nType = nodeType::placeholder;
-    static_cast<Node<Placeholder, T> *>(this)->setName(n);
+    this->setName(n);
 }
 
+template <typename T>
+void Placeholder<T>::compute() { return; }

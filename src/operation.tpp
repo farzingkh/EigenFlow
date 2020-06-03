@@ -3,18 +3,11 @@
 
 // --- Operation ---
 
-template <template <> class U, typename T>
-Operation<U, T>::Operation()
+template <typename T>
+Operation<T>::Operation()
 {
     this->_nType = nodeType::operation;
 }
-
-template <template <> class U, typename T>
-void Operation<U, T>::compute()
-{
-    std::cout << "Operation compute ..." << std::endl;
-    static_cast<U *>(this)->compute();
-};
 
 // --- add operation ---
 
@@ -67,8 +60,8 @@ negative<T>::negative(BaseNode &a)
 template <typename T>
 void negative<T>::compute()
 {
-    Operation<T> *pOp = static_cast<Operation<T> *>(this);
+    Node<T> *pN = static_cast<Node<T> *>(this);
     std::cout << "Compute negative operation ..." << std::endl;
     std::vector<BaseNode *> inputs = this->getInputs();
-    pOp->setValue(-(inputs[0]->getValue<T>()));
+    pN->setValue(-(inputs[0]->getValue<T>()));
 }
