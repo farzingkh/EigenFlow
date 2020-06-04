@@ -16,14 +16,14 @@ public:
     template <typename T>
     Placeholder<T> *placeholder(std::string n);
 
-    template <typename T,typename T1, typename T2>
-    Add<T,T1,T2> *add(BaseNode *a, BaseNode *b);
+    template <typename T, typename T1, typename T2>
+    Add<T, T1, T2> *add(BaseNode *a, BaseNode *b);
 
     template <typename T>
     Negative<T> *negative(BaseNode *a);
 
-    template <typename T,typename T1, typename T2>
-    Multiply<T,T1,T2> *multiply(BaseNode *a, BaseNode *b);
+    template <typename T, typename T1, typename T2>
+    Multiply<T, T1, T2> *multiply(BaseNode *a, BaseNode *b);
 
     template <typename T>
     T run(BaseNode *n, std::unordered_map<std::string, T *> feed);

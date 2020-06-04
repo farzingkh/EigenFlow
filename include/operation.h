@@ -37,7 +37,7 @@ public:
 };
 
 template <typename T, typename T1, typename T2>
-class Multiply: public Operation<T>
+class Multiply : public Operation<T>
 {
 public:
     Multiply(BaseNode &a, BaseNode &b);

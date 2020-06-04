@@ -76,7 +76,6 @@ template <typename T>
 class Variable : public Node<T>
 {
 public:
-
     Variable(T &&a);
     Variable(Variable<T> &v);
     Variable(Variable<T> &&v);
@@ -90,6 +89,7 @@ class Placeholder : public Node<T>
 {
 public:
     Placeholder(std::string n);
+
     void compute();
 };
 

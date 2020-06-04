@@ -6,7 +6,6 @@
 class Graph
 {
 public:
-
     template <typename T>
     void addPlaceholder(std::shared_ptr<Placeholder<T>> plc);
 

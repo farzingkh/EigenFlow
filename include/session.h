@@ -4,7 +4,6 @@
 #include "graph.h"
 #include <unordered_map>
 
-
 class Session
 {
 public:

@@ -25,7 +25,7 @@ T Session::Run(BaseNode *n, std::unordered_map<std::string, T *> feed)
 
 // Return post order list of nodes
 
-void Session::getNodesList(BaseNode * n)
+void Session::getNodesList(BaseNode *n)
 {
     if (n->getNodeType() == nodeType::operation) // only operations have input nodes
     {

@@ -9,7 +9,7 @@ NN::NN()
 template <typename T>
 Variable<T> *NN::variable(T &&t)
 {
-    std::cout << "nn variable contructor" << std::endl;
+    std::cout << "nn variable constructor" << std::endl;
     auto v = std::shared_ptr<Variable<T>>(new Variable<T>(std::move(t)));
     _graph.addVariable<T>(v);
     return v.get();
@@ -18,15 +18,16 @@ Variable<T> *NN::variable(T &&t)
 template <typename T>
 Placeholder<T> *NN::placeholder(std::string n)
 {
+     std::cout << "nn placeholder constructor" << std::endl;
     auto plc = std::shared_ptr<Placeholder<T>>(new Placeholder<T>(n));
     _graph.addPlaceholder<T>(plc);
     return plc.get();
 }
 
 template <typename T, typename T1, typename T2>
-Add<T,T1,T2> *NN::add(BaseNode *a, BaseNode *b)
+Add<T, T1, T2> *NN::add(BaseNode *a, BaseNode *b)
 {
-    auto c = std::shared_ptr<Add<T,T1,T2>>(new Add<T,T1,T2>(a, b));
+    auto c = std::shared_ptr<Add<T, T1, T2>>(new Add<T, T1, T2>(a, b));
     _graph.addOperation<T>(c);
     return c.get();
 }
@@ -47,9 +48,9 @@ T NN::run(BaseNode *n, std::unordered_map<std::string, T *> feed)
 }
 
 template <typename T, typename T1, typename T2>
-Multiply<T,T1,T2> *NN::multiply(BaseNode *a, BaseNode *b)
+Multiply<T, T1, T2> *NN::multiply(BaseNode *a, BaseNode *b)
 {
-    auto c = std::shared_ptr<Multiply<T,T1,T2>>(new Multiply<T,T1,T2>(a, b));
+    auto c = std::shared_ptr<Multiply<T, T1, T2>>(new Multiply<T, T1, T2>(a, b));
     _graph.addOperation<T>(c);
     return c.get();
 }
