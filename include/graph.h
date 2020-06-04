@@ -6,23 +6,22 @@
 class Graph
 {
 public:
-    template <typename T>
-    void addPlaceholder();
 
     template <typename T>
-    void addOperation();
+    void addPlaceholder(std::shared_ptr<Placeholder<T>> plc);
 
     template <typename T>
-    void addVariable();
+    void addOperation(std::shared_ptr<Operation<T>> op);
 
-    std::vector<Operation<T> *> getOperations();
-    std::vector<Placeholder<T> *> getPlaceholders();
-    std::vector<Variable<T> *> getVariables();
+    template <typename T>
+    void addVariable(std::shared_ptr<Variable<T>> vr);
+
+    std::vector<std::shared_ptr<BaseNode>> &getNodes();
 
 private:
-    std::vector<Operation<T> *> _operations;
-    std::vector<Variable<T> *> _variables;
-    std::vector<Placeholder<T> *> _placeholders;
+    std::vector<std::shared_ptr<BaseNode>> _baseNodes;
 };
+
+#include "../src/graph.tpp"
 
 #endif /* GRAPH_H */

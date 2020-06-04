@@ -4,12 +4,13 @@
 #include "graph.h"
 #include <unordered_map>
 
-template <typename T>
+
 class Session
 {
 public:
     // Runs calculation of the node and returns the output value for the node;
     // Takes input data for placeholders with an unordered map using placeholder's name
+    template <typename T>
     T Run(BaseNode &n, std::unordered_map<std::string, T *> feed);
 
 private:

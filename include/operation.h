@@ -16,21 +16,21 @@ public:
 
 // addition operation with T return type value, T1 and T2 input type value
 template <typename T>
-class add : public Operation<T>
+class Add : public Operation<T>
 {
 public:
-    add(BaseNode &a, BaseNode &b);
-    add(Variable<T> &&a, Variable<T> &&b);
+    Add(BaseNode &a, BaseNode &b);
+    Add(BaseNode *a, BaseNode *b);
 
     void compute();
 };
 
 // negative operation
 template <typename T>
-class negative : public Operation<T>
+class Negative : public Operation<T>
 {
 public:
-    negative(BaseNode &a);
+    Negative(BaseNode &a);
     void compute();
 };
 

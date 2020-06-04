@@ -36,21 +36,21 @@ operationType BaseNode::getOperationType() { return _opType; }
 template <typename T>
 T Node<T>::getValue()
 {
-    std::cout << "Variable get value..." << std::endl;
+    //std::cout << "Variable get value..." << std::endl;
     if (_dataAvailable)
     {
-        std::cout << "Output is: " << *_output << std::endl;
+        //std::cout << "Output is: " << *_output << std::endl;
         return *_output;
     }
     else
     {
-        std::cout << "Data not available" << std::endl;
+        //std::cout << "Data not available" << std::endl;
         return T();
     }
 }
 
 template <typename T>
-void Node<T>::setValue(T t)
+void Node<T>::setValue(T &&t)
 {
     _dataAvailable = true;
     _output.reset(new T(t));
@@ -61,17 +61,24 @@ void Node<T>::setValue(T t)
 template <typename T>
 Variable<T>::Variable(T &&a)
 {
-    this->_nType = nodeType::variable;
-    this->setValue(a);
     std::cout << "Variable contructor ..." << std::endl;
+    this->_nType = nodeType::variable;
+    this->setValue(std::move(a));
 }
 
 template <typename T>
-Variable<T>::Variable(const Variable<T> &v)
+Variable<T>::Variable(Variable<T> &v)
 {
     std::cout << "Variable copy contructor ..." << std::endl;
     this->_nType = nodeType::variable;
     this->setValue((&v)->getValue());
+}
+template <typename T>
+Variable<T>::Variable(Variable<T> &&v)
+{
+    std::cout << "Variable move contructor ..." << std::endl;
+    this->_nType = nodeType::variable;
+    this->_output = std::move(v->_output);
 }
 
 template <typename T>

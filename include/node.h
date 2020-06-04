@@ -63,7 +63,7 @@ class Node : public BaseNode
 {
 public:
     T getValue();
-    void setValue(T t);
+    void setValue(T &&t);
 
 private:
     std::unique_ptr<T> _output = nullptr;
@@ -75,8 +75,11 @@ template <typename T>
 class Variable : public Node<T>
 {
 public:
+
     Variable(T &&a);
-    Variable(const Variable<T> &v);
+    Variable(Variable<T> &v);
+    Variable(Variable<T> &&v);
+
     void compute();
 };
 

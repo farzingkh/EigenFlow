@@ -1,6 +1,6 @@
 
 template <typename T>
-T Session<T>::Run(BaseNode &n, std::unordered_map<std::string, T *> feed)
+T Session::Run(BaseNode &n, std::unordered_map<std::string, T *> feed)
 {
     // obtain inputs for node n in post-order, to resolve inputs befor computation of an operation
     getNodesList(&n);
@@ -12,7 +12,7 @@ T Session<T>::Run(BaseNode &n, std::unordered_map<std::string, T *> feed)
         {
             // set the output value
             Placeholder<T> *plc = static_cast<Placeholder<T> *>(m);
-            plc->setValue(*feed[plc->getName()]);
+            plc->setValue(std::move(*feed[plc->getName()]));
         } // if it's a operation then compute the value
         else if (m->getNodeType() == nodeType::operation)
         {
@@ -24,8 +24,8 @@ T Session<T>::Run(BaseNode &n, std::unordered_map<std::string, T *> feed)
 }
 
 // Return post order list of nodes
-template <typename T>
-void Session<T>::getNodesList(BaseNode * n)
+
+void Session::getNodesList(BaseNode * n)
 {
     if (n->getNodeType() == nodeType::operation) // only operations have input nodes
     {
