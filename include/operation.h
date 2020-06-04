@@ -15,7 +15,7 @@ public:
 // Operations
 
 // addition operation with T return type value, T1 and T2 input type value
-template <typename T>
+template <typename T, typename T1, typename T2>
 class Add : public Operation<T>
 {
 public:
@@ -31,6 +31,8 @@ class Negative : public Operation<T>
 {
 public:
     Negative(BaseNode &a);
+    Negative(BaseNode *a);
+
     void compute();
 };
 

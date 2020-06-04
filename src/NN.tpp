@@ -1,3 +1,4 @@
+#include <iostream>
 
 NN::NN()
 {
@@ -6,37 +7,40 @@ NN::NN()
 };
 
 template <typename T>
-Variable<T> NN::variable(T &&t)
+Variable<T> *NN::variable(T &&t)
 {
+    std::cout << "nn variable contructor" << std::endl;
     auto v = std::shared_ptr<Variable<T>>(new Variable<T>(std::move(t)));
     _graph.addVariable<T>(v);
-    return *v;
+    return v.get();
 }
 
 template <typename T>
-Placeholder<T> NN::placeholder()
+Placeholder<T> *NN::placeholder()
 {
     auto plc = std::shared_ptr<Placeholder<T>>(new Placeholder<T>());
     _graph.addPlaceholder<T>(plc);
-    return *plc;
+    return plc.get();
 }
 
-template <typename Tout, typename Tin1, typename Tin2>
-Add<Tout> NN::add(Variable<Tin1> &&a, Variable<Tin2> &&b)
+template <typename T, typename T1, typename T2>
+Add<T,T1,T2> *NN::add(BaseNode *a, BaseNode *b)
 {
-    auto A = std::shared_ptr<Variable<Tin1>>(new Variable<Tin1>(a));
-    auto B = std::shared_ptr<Variable<Tin2>>(new Variable<Tin2>(b));
-
-    _graph.addVariable<Tin1>(A);
-    _graph.addVariable<Tin2>(B);
-
-    auto C = Add<Tout>(A.get(), B.get());
-
-    return C;
+    auto c = std::shared_ptr<Add<T,T1,T2>>(new Add<T,T1,T2>(a, b));
+    _graph.addOperation<T>(c);
+    return c.get();
 }
 
 template <typename T>
-T NN::run(BaseNode &n, std::unordered_map<std::string, T *> feed)
+Negative<T> *NN::negative(BaseNode *a)
+{
+    auto c = std::shared_ptr<Negative<T>>(new Negative<T>(a));
+    _graph.addOperation<T>(c);
+    return c.get();
+}
+
+template <typename T>
+T NN::run(BaseNode *n, std::unordered_map<std::string, T *> feed)
 {
     T r = _session.Run<T>(n, feed);
     return r;

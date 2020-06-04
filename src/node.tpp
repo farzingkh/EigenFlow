@@ -39,7 +39,7 @@ T Node<T>::getValue()
     //std::cout << "Variable get value..." << std::endl;
     if (_dataAvailable)
     {
-        //std::cout << "Output is: " << *_output << std::endl;
+        std::cout << "Output get: " << *_output << std::endl;
         return *_output;
     }
     else
@@ -54,6 +54,7 @@ void Node<T>::setValue(T &&t)
 {
     _dataAvailable = true;
     _output.reset(new T(t));
+    std::cout << "Output set: " << *_output << std::endl;
 }
 
 // --- Variable ---
