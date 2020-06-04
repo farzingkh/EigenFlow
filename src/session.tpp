@@ -5,7 +5,7 @@ T Session<T>::Run(BaseNode &n, std::unordered_map<std::string, T *> feed)
     // obtain inputs for node n in post-order, to resolve inputs befor computation of an operation
     getNodesList(&n);
 
-    for (BaseNode *m : _nodesList)
+    for (auto m : _nodesList)
     {
         // if it's a placeholder then feed the data
         if (m->getNodeType() == nodeType::placeholder)
@@ -17,8 +17,7 @@ T Session<T>::Run(BaseNode &n, std::unordered_map<std::string, T *> feed)
         else if (m->getNodeType() == nodeType::operation)
         {
             // compute add and set the output value
-            Operation<T> *op = static_cast<Operation<T> *>(m);
-            op->compute();
+            m->compute();
         }
     }
     return n.getValue<T>();
@@ -26,11 +25,11 @@ T Session<T>::Run(BaseNode &n, std::unordered_map<std::string, T *> feed)
 
 // Return post order list of nodes
 template <typename T>
-void Session<T>::getNodesList(BaseNode *n)
+void Session<T>::getNodesList(BaseNode * n)
 {
     if (n->getNodeType() == nodeType::operation) // only operations have input nodes
     {
-        std::vector<BaseNode *> &list = n->getInputs();
+        auto list = n->getInputs();
         for (auto &m : list)
         {
             getNodesList(m);

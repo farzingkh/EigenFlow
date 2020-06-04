@@ -25,7 +25,7 @@ std::string BaseNode::getName() { return _name; }
 
 std::vector<BaseNode *> &BaseNode::getInputs() { return _inputs; }
 
-std::vector<BaseNode *> BaseNode::getConsumers() { return _consumers; }
+std::vector<BaseNode *> &BaseNode::getConsumers() { return _consumers; }
 
 nodeType BaseNode::getNodeType() { return _nType; }
 
@@ -67,7 +67,7 @@ Variable<T>::Variable(T &&a)
 }
 
 template <typename T>
-Variable<T>::Variable(Variable<T> &v)
+Variable<T>::Variable(const Variable<T> &v)
 {
     std::cout << "Variable copy contructor ..." << std::endl;
     this->_nType = nodeType::variable;

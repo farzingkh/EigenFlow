@@ -18,5 +18,5 @@ private:
     std::vector<BaseNode *> _nodesList = {};
 };
 
-#include "../src/session.tpp" 
+#include "../src/session.tpp"
 #endif /* SESSION_H */

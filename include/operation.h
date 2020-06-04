@@ -9,7 +9,7 @@ class Operation : public Node<T>
 {
 public:
     Operation();
-    void compute() = 0;
+    virtual void compute() = 0;
 };
 
 // Operations
@@ -20,7 +20,7 @@ class add : public Operation<T>
 {
 public:
     add(BaseNode &a, BaseNode &b);
-    add(BaseNode &&a, BaseNode &&b);
+    add(Variable<T> &&a, Variable<T> &&b);
 
     void compute();
 };

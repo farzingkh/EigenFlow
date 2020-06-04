@@ -24,7 +24,7 @@ enum nodeType
 };
 
 // Base node class
-class BaseNode
+class BaseNode : public std::enable_shared_from_this<BaseNode>
 {
 public:
     void addInputs(BaseNode *n);
@@ -38,7 +38,7 @@ public:
 
     nodeType getNodeType();
     operationType getOperationType();
-    std::vector<BaseNode *> getConsumers();
+    std::vector<BaseNode *> &getConsumers();
     std::vector<BaseNode *> &getInputs();
     std::string getName();
 
@@ -76,7 +76,7 @@ class Variable : public Node<T>
 {
 public:
     Variable(T &&a);
-    Variable(Variable<T> &v);
+    Variable(const Variable<T> &v);
     void compute();
 };
 
