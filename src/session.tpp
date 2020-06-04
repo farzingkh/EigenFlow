@@ -1,9 +1,9 @@
 
 template <typename T>
-T Session::Run(BaseNode &n, std::unordered_map<std::string, T *> feed)
+T Session::Run(BaseNode *n, std::unordered_map<std::string, T *> feed)
 {
     // obtain inputs for node n in post-order, to resolve inputs befor computation of an operation
-    getNodesList(&n);
+    getNodesList(n);
 
     for (auto m : _nodesList)
     {
@@ -20,7 +20,7 @@ T Session::Run(BaseNode &n, std::unordered_map<std::string, T *> feed)
             m->compute();
         }
     }
-    return n.getValue<T>();
+    return n->getValue<T>();
 }
 
 // Return post order list of nodes
