@@ -36,6 +36,16 @@ public:
     void compute();
 };
 
+template <typename T, typename T1, typename T2>
+class Multiply: public Operation<T>
+{
+public:
+    Multiply(BaseNode &a, BaseNode &b);
+    Multiply(BaseNode *a, BaseNode *b);
+
+    void compute();
+};
+
 #include "../src/operation.tpp"
 
 #endif /* OPERATION_H */

@@ -16,9 +16,9 @@ Variable<T> *NN::variable(T &&t)
 }
 
 template <typename T>
-Placeholder<T> *NN::placeholder()
+Placeholder<T> *NN::placeholder(std::string n)
 {
-    auto plc = std::shared_ptr<Placeholder<T>>(new Placeholder<T>());
+    auto plc = std::shared_ptr<Placeholder<T>>(new Placeholder<T>(n));
     _graph.addPlaceholder<T>(plc);
     return plc.get();
 }
@@ -44,4 +44,12 @@ T NN::run(BaseNode *n, std::unordered_map<std::string, T *> feed)
 {
     T r = _session.Run<T>(n, feed);
     return r;
+}
+
+template <typename T, typename T1, typename T2>
+Multiply<T,T1,T2> *NN::multiply(BaseNode *a, BaseNode *b)
+{
+    auto c = std::shared_ptr<Multiply<T,T1,T2>>(new Multiply<T,T1,T2>(a, b));
+    _graph.addOperation<T>(c);
+    return c.get();
 }

@@ -12,7 +12,8 @@ typedef Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> matrixXi;
 enum class operationType
 {
     addition,
-    negative
+    negative,
+    multiply
 };
 
 // Node types
