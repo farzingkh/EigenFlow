@@ -18,7 +18,7 @@ void BaseNode::addConsumers(BaseNode *n)
 template <typename T>
 T BaseNode::getValue()
 {
-    return static_cast<Node<T> *>(this)->getValue();
+    return dynamic_cast<Node<T> *>(this)->getValue();
 }
 
 std::string BaseNode::getName() { return _name; }
