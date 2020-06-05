@@ -1,20 +1,14 @@
 
-template <typename T>
-void Graph::addPlaceholder(std::shared_ptr<Placeholder<T>> plc)
+template <template <typename> class U, typename T>
+void Graph::addNodeOne(std::shared_ptr<U<T>> n)
 {
-    _baseNodes.push_back(std::move(plc));
+    _baseNodes.push_back(std::move(n));
 }
 
-template <typename T>
-void Graph::addOperation(std::shared_ptr<Operation<T>> op)
+template <template <typename, typename, typename> class U, typename T, typename T1, typename T2>
+void Graph::addNodeTwo(std::shared_ptr<U<T, T1, T2>> n)
 {
-    _baseNodes.push_back(std::move(op));
-}
-
-template <typename T>
-void Graph::addVariable(std::shared_ptr<Variable<T>> vr)
-{
-    _baseNodes.push_back(std::move(vr));
+    _baseNodes.push_back(std::move(n));
 }
 
 std::vector<std::shared_ptr<BaseNode>> &Graph::getNodes()

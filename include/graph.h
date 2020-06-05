@@ -6,14 +6,11 @@
 class Graph
 {
 public:
-    template <typename T>
-    void addPlaceholder(std::shared_ptr<Placeholder<T>> plc);
+    template <template <typename> class U, typename T>
+    void addNodeOne(std::shared_ptr<U<T>> n);
 
-    template <typename T>
-    void addOperation(std::shared_ptr<Operation<T>> op);
-
-    template <typename T>
-    void addVariable(std::shared_ptr<Variable<T>> vr);
+    template <template <typename, typename, typename> class U, typename T, typename T1, typename T2>
+    void addNodeTwo(std::shared_ptr<U<T,T1,T2>> n);
 
     std::vector<std::shared_ptr<BaseNode>> &getNodes();
 
