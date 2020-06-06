@@ -44,6 +44,9 @@ void Add<T, T1, T2>::compute()
     pNode->setValue(inputs[0]->getValue<T1>() + inputs[1]->getValue<T2>());
 }
 
+template <typename T, typename T1, typename T2>
+void Add<T, T1, T2>::gradient() { return; };
+
 // --- negative operation---
 
 template <typename T>
@@ -71,6 +74,9 @@ void Negative<T>::compute()
     pN->setValue(-(inputs[0]->getValue<T>()));
 }
 
+template <typename T>
+void Negative<T>::gradient() { return; };
+
 // --- Multiply Operation ---
 
 template <typename T, typename T1, typename T2>
@@ -93,3 +99,6 @@ void Multiply<T, T1, T2>::compute()
     std::vector<BaseNode *> inputs = this->getInputs();
     pNode->setValue(inputs[0]->getValue<T1>() * inputs[1]->getValue<T2>());
 }
+
+template <typename T, typename T1, typename T2>
+void Multiply<T, T1, T2>::gradient() { return; };
