@@ -102,3 +102,32 @@ void Multiply<T, T1, T2>::compute()
 
 template <typename T, typename T1, typename T2>
 void Multiply<T, T1, T2>::gradient() { return; };
+
+// --- Sigmoid ---
+
+template <typename T>
+Sigmoid<T>::Sigmoid(BaseNode &a)
+{
+    this->_opType = operationType::sigmoid;
+    this->addInputs(&a);
+    a.addConsumers(this);
+}
+
+template <typename T>
+Sigmoid<T>::Sigmoid(BaseNode *a)
+{
+    this->_opType = operationType::sigmoid;
+    this->addInputs(a);
+    a->addConsumers(this);
+}
+
+
+template <typename T>
+void Sigmoid<T>::compute()
+{
+    Node<T> *pNode = static_cast<Node<T> *>(this);
+    std::cout << "Compute sigmoid operation ..." << std::endl;
+    std::vector<BaseNode *> inputs = this->getInputs();
+    pNode->setValue(1/(1+exp(inputs[0]->getValue<T>())));
+}
+

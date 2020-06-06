@@ -50,6 +50,17 @@ public:
     void gradient();
 };
 
+template <typename T>
+class Sigmoid : public Operation<T>
+{
+public:
+    Sigmoid(BaseNode &a);
+    Sigmoid(BaseNode *a);
+
+    void compute();
+    void gradient();
+};
+
 #include "../src/operation.tpp"
 
 #endif /* OPERATION_H */

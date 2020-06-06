@@ -13,7 +13,8 @@ enum class operationType
 {
     addition,
     negative,
-    multiply
+    multiply,
+    sigmoid
 };
 
 // Node types
