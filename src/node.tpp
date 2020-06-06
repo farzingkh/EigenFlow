@@ -50,11 +50,35 @@ T Node<T>::getValue()
 }
 
 template <typename T>
+T Node<T>::getGradient()
+{
+    //std::cout << "Variable get value..." << std::endl;
+    if (_gradientAvailable)
+    {
+        std::cout << "Gradient get: " << *_output << std::endl;
+        return *_grad;
+    }
+    else
+    {
+        //std::cout << "Data not available" << std::endl;
+        return T();
+    }
+}
+
+template <typename T>
 void Node<T>::setValue(T &&t)
 {
     _dataAvailable = true;
     _output.reset(new T(t));
     std::cout << "Output set: " << *_output << std::endl;
+}
+
+template <typename T>
+void Node<T>::setGrad(T &t)
+{
+    _gradientAvailable = true;
+    _output.reset(new T(t));
+    std::cout << "Gradient set: " << *_output << std::endl;
 }
 
 // --- Variable ---
@@ -85,6 +109,9 @@ Variable<T>::Variable(Variable<T> &&v)
 template <typename T>
 void Variable<T>::compute() { return; }
 
+template <typename T>
+void Variable<T>::gradient() { return; }
+
 // --- Placeholder ---
 
 template <typename T>
@@ -96,3 +123,6 @@ Placeholder<T>::Placeholder(std::string n)
 
 template <typename T>
 void Placeholder<T>::compute() { return; }
+
+template <typename T>
+void Placeholder<T>::gradient() { return; }

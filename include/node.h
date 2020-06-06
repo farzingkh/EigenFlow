@@ -25,7 +25,7 @@ enum nodeType
 };
 
 // Base node class
-class BaseNode : public std::enable_shared_from_this<BaseNode>
+class BaseNode 
 {
 public:
     void addInputs(BaseNode *n);
@@ -36,6 +36,7 @@ public:
     T getValue();
 
     virtual void compute() = 0;
+    virtual void gradient() = 0;
 
     nodeType getNodeType();
     operationType getOperationType();
@@ -64,11 +65,17 @@ class Node : public BaseNode
 {
 public:
     T getValue();
+    T getGradient();
+
     void setValue(T &&t);
+    void setGrad(T &t);
 
 private:
     std::unique_ptr<T> _output = nullptr;
+    std::unique_ptr<std::vector<T>> _grad = nullptr;
+
     bool _dataAvailable = false;
+    bool _gradientAvailable = false;
 };
 
 // A class for variables of type T
@@ -81,6 +88,7 @@ public:
     Variable(Variable<T> &&v);
 
     void compute();
+    void gradient();
 };
 
 // A class for placeholders for values of type T
@@ -91,6 +99,7 @@ public:
     Placeholder(std::string n);
 
     void compute();
+    void gradient();
 };
 
 #include "../src/node.tpp"

@@ -10,6 +10,7 @@ class Operation : public Node<T>
 public:
     Operation();
     virtual void compute() = 0;
+    virtual void gradient() = 0;
 };
 
 // Operations
@@ -23,6 +24,7 @@ public:
     Add(BaseNode *a, BaseNode *b);
 
     void compute();
+    void gradient();
 };
 
 // negative operation
@@ -34,6 +36,7 @@ public:
     Negative(BaseNode *a);
 
     void compute();
+    void gradient();
 };
 
 template <typename T, typename T1, typename T2>
@@ -44,6 +47,7 @@ public:
     Multiply(BaseNode *a, BaseNode *b);
 
     void compute();
+    void gradient();
 };
 
 #include "../src/operation.tpp"
