@@ -26,6 +26,9 @@ public:
     Multiply<T, T1, T2> *multiply(BaseNode *a, BaseNode *b);
 
     template <typename T>
+    Sigmoid<T> *sigmoid(BaseNode *a);
+
+    template <typename T>
     T run(BaseNode *n, std::unordered_map<std::string, T *> feed);
 
 private:

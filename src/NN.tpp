@@ -54,3 +54,11 @@ Multiply<T, T1, T2> *NN::multiply(BaseNode *a, BaseNode *b)
     _graph.addNodeTwo<Multiply, T, T1, T2>(c);
     return c.get();
 }
+
+template <typename T>
+Sigmoid<T> *NN::sigmoid(BaseNode *a)
+{
+    auto c = std::shared_ptr<Sigmoid<T>>(new Sigmoid<T>(a));
+    _graph.addNodeOne<Sigmoid, T>(c);
+    return c.get();
+}

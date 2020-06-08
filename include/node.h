@@ -4,9 +4,10 @@
 #include <vector>
 #include <memory>
 #include <Eigen/Dense>
+#include <Eigen/Core>
 
 // A matrix of ints with a dynamic size, Use it when the size is not known
-typedef Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> matrixXi;
+typedef Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> matXXi;
 
 // enum for operation types
 enum class operationType
