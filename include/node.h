@@ -28,7 +28,7 @@ enum nodeType
 };
 
 // Base node class
-class BaseNode 
+class BaseNode
 {
 public:
     void addInputs(BaseNode *n);
@@ -37,6 +37,9 @@ public:
 
     template <typename T>
     T getValue();
+
+    template <typename T>
+    T getGradient();
 
     virtual void compute() = 0;
     virtual void gradient() = 0;

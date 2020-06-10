@@ -21,6 +21,12 @@ T BaseNode::getValue()
     return dynamic_cast<Node<T> *>(this)->getValue();
 }
 
+template <typename T>
+T BaseNode::getGradient()
+{
+    return dynamic_cast<Node<T> *>(this)->getGradient();
+}
+
 std::string BaseNode::getName() { return _name; }
 
 std::vector<BaseNode *> &BaseNode::getInputs() { return _inputs; }
