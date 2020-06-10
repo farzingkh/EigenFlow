@@ -44,28 +44,28 @@ void Add<T, T1, T2>::compute()
     std::vector<BaseNode *> inputs = this->getInputs();
     T1 A = inputs[0]->getValue<T1>();
     T2 B = inputs[1]->getValue<T2>();
-    // broadcast column or row vectors 
+    // broadcast column or row vectors
     if (A.rows() != B.rows() & A.cols() == B.cols())
     {
         if (B.rows() == 1)
         {
-            
-            pNode->setValue(A.rowwise() + B.row(1));
+
+            pNode->setValue(A.rowwise() + B.row(0));
         }
         else if (A.rows() == 1)
         {
-            pNode->setValue(B.rowwise() + A.row(1));
+            pNode->setValue(B.rowwise() + A.row(0));
         }
     }
     else if (A.cols() != B.cols() & A.rows() == B.rows())
     {
         if (B.cols() == 1)
         {
-            pNode->setValue(A.colwise() + B.col(1));
+            pNode->setValue(A.colwise() + B.col(0));
         }
         else if (A.cols() == 1)
         {
-            pNode->setValue(B.colwise() + A.col(1));
+            pNode->setValue(B.colwise() + A.col(0));
         }
     }
     // element-wise addition without broadcasting
@@ -125,7 +125,24 @@ void Multiply<T, T1, T2>::compute()
     Node<T> *pNode = static_cast<Node<T> *>(this);
     std::cout << "Compute multiplication operation ..." << std::endl;
     std::vector<BaseNode *> inputs = this->getInputs();
-    pNode->setValue(inputs[0]->getValue<T1>() * inputs[1]->getValue<T2>());
+    // multiplication of scalar and matrix
+    T1 A = inputs[0]->getValue<T1>();
+    T2 B = inputs[1]->getValue<T2>();
+    // if A is scalar
+    if (A.cols() == 1 and A.rows() == 1)
+    {
+        // perform c-wise multiplication
+        pNode->setValue(A(0) * B.array());
+    } // if B is scalar
+    else if (B.cols() == 1 and B.rows() == 1)
+    {
+        pNode->setValue(B(0) * A.array());
+    }
+    else
+    {
+        // if neither A or B is scalar
+        pNode->setValue(inputs[0]->getValue<T1>() * inputs[1]->getValue<T2>());
+    }
 }
 
 template <typename T, typename T1, typename T2>
@@ -149,7 +166,7 @@ template <typename T, typename T1, typename T2>
 void Dot<T, T1, T2>::compute()
 {
     Node<T> *pNode = static_cast<Node<T> *>(this);
-    std::cout << "Compute multiplication operation ..." << std::endl;
+    std::cout << "Compute dot product operation ..." << std::endl;
     std::vector<BaseNode *> inputs = this->getInputs();
     pNode->setValue(inputs[0]->getValue<T1>().dot(inputs[1]->getValue<T2>()));
 }
@@ -181,7 +198,7 @@ void Sigmoid<T>::compute()
     Node<T> *pNode = static_cast<Node<T> *>(this);
     std::cout << "Compute sigmoid operation ..." << std::endl;
     std::vector<BaseNode *> inputs = this->getInputs();
-    pNode->setValue(1 / (1 + exp(inputs[0]->getValue<T>().array())));
+    pNode->setValue(1 / (1 + exp(-(inputs[0]->getValue<T>().array()))));
 }
 
 template <typename T>
