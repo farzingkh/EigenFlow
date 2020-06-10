@@ -1,6 +1,6 @@
 
 template <typename T>
-T Session::Run(BaseNode *n, std::unordered_map<std::string, Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> *> feed)
+Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> Session::Run(BaseNode *n, std::unordered_map<std::string, Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> *> feed)
 {
     // obtain inputs for node n in post-order, to resolve inputs befor computation of an operation
     getNodesList(n);
@@ -20,7 +20,7 @@ T Session::Run(BaseNode *n, std::unordered_map<std::string, Eigen::Matrix<T, Eig
             m->compute();
         }
     }
-    return n->getValue<T>();
+    return n->getValue<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>>();
 }
 
 // Return post order list of nodes
