@@ -34,7 +34,7 @@ public:
     Sigmoid<Matrix<T,Dynamic,Dynamic>> *sigmoid(BaseNode *a);
 
     template <typename T>
-    T run(BaseNode *n, std::unordered_map<std::string, Matrix<T,Dynamic,Dynamic> *> feed);
+    Matrix<T,Dynamic,Dynamic> run(BaseNode *n, std::unordered_map<std::string, Matrix<T,Dynamic,Dynamic> *> feed);
 
 private:
     Graph _graph;

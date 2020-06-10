@@ -9,10 +9,9 @@ NN::NN()
 };
 
 template <typename T>
-T NN::run(BaseNode *n, std::unordered_map<std::string, Matrix<T, Dynamic, Dynamic> *> feed)
+Matrix<T, Dynamic, Dynamic> NN::run(BaseNode *n, std::unordered_map<std::string, Matrix<T, Dynamic, Dynamic> *> feed)
 {
-    T r = _session.Run<T>(n, feed);
-    return r;
+    return _session.Run<T>(n, feed);
 }
 
 template <typename T>
@@ -61,7 +60,7 @@ template <typename T>
 Dot<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>> *NN::dot(BaseNode *a, BaseNode *b)
 {
     auto c = std::shared_ptr<Dot<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>>(new Dot<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>(a, b));
-    _graph.addNodeTwo<Dot,Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>,Matrix<T, Dynamic, Dynamic>>(c);
+    _graph.addNodeTwo<Dot, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>(c);
     return c.get();
 }
 
