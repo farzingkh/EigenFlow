@@ -1,8 +1,6 @@
 #ifndef OPERATION_H
 #define OPERATION_H
 
-//#include "node.h"
-
 // Class for operations with data value of type T
 template <typename T>
 class Operation : public Node<T>
@@ -45,6 +43,17 @@ class Multiply : public Operation<T>
 public:
     Multiply(BaseNode &a, BaseNode &b);
     Multiply(BaseNode *a, BaseNode *b);
+
+    void compute();
+    void gradient();
+};
+
+template <typename T, typename T1, typename T2>
+class Dot : public Operation<T>
+{
+public:
+    Dot(BaseNode &a, BaseNode &b);
+    Dot(BaseNode *a, BaseNode *b);
 
     void compute();
     void gradient();

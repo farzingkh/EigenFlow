@@ -15,6 +15,7 @@ enum class operationType
     addition,
     negative,
     multiply,
+    dotproduct,
     sigmoid
 };
 
