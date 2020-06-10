@@ -44,28 +44,31 @@ void Add<T, T1, T2>::compute()
     std::vector<BaseNode *> inputs = this->getInputs();
     T1 A = inputs[0]->getValue<T1>();
     T2 B = inputs[1]->getValue<T2>();
-    if (A.rows() != B.rows())
+    // broadcast column or row vectors 
+    if (A.rows() != B.rows() & A.cols() == B.cols())
     {
         if (B.rows() == 1)
         {
-            pNode->setValue(B.rowwise() + A);
+            
+            pNode->setValue(A.rowwise() + B.row(1));
         }
         else if (A.rows() == 1)
         {
-            pNode->setValue(A.rowwise() + B);
+            pNode->setValue(B.rowwise() + A.row(1));
         }
     }
-    else if (A.cols() != B.cols())
+    else if (A.cols() != B.cols() & A.rows() == B.rows())
     {
         if (B.cols() == 1)
         {
-            pNode->setValue(B.colwise() + A);
+            pNode->setValue(A.colwise() + B.col(1));
         }
         else if (A.cols() == 1)
         {
-            pNode->setValue(A.colwise() + B);
+            pNode->setValue(B.colwise() + A.col(1));
         }
     }
+    // element-wise addition without broadcasting
     pNode->setValue(A + B);
 }
 
