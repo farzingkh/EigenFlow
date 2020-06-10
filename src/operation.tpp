@@ -108,8 +108,10 @@ void Negative<T>::compute()
 template <typename T>
 void Negative<T>::gradient()
 {
-
-    return;
+    Node<T> *pN = static_cast<Node<T> *>(this);
+    std::cout << "Compute negative operation ..." << std::endl;
+    std::vector<BaseNode *> consumer = this->getConsumers();
+    pN->setGrad(-(inputs[0]->getGradient<T>()));
 }
 
 // --- Multiply Operation ---
