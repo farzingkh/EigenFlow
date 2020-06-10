@@ -1,9 +1,8 @@
 #include "../include/NN.h"
-#include <assert.h>
 #include <iostream>
+
 int main()
 {
-    // Example with 2x2 matrix calculations
 
     typedef Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic> matxxf;
 
@@ -23,7 +22,7 @@ int main()
     // sigmoid(w^T*x+b)
     auto G = nn.sigmoid<float>(nn.add<float>(nn.multiply<float>(nn.variable<float>(std::move(W)), nn.placeholder<float>("X")), nn.variable<float>(std::move(b))));
 
-    // Create map to feed data to the placeholders (i.e. X = X)
+    // Create a map to feed data to the placeholders (i.e. X = X)
     std::unordered_map<std::string, matxxf *> feed = {};
     feed["X"] = &x;
 

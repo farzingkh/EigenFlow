@@ -68,8 +68,11 @@ void Add<T, T1, T2>::compute()
             pNode->setValue(B.colwise() + A.col(0));
         }
     }
-    // element-wise addition without broadcasting
-    pNode->setValue(A + B);
+    else
+    {
+        // element-wise addition without broadcasting
+        pNode->setValue(A + B);
+    }
 }
 
 template <typename T, typename T1, typename T2>
@@ -103,7 +106,11 @@ void Negative<T>::compute()
 }
 
 template <typename T>
-void Negative<T>::gradient() { return; }
+void Negative<T>::gradient()
+{
+
+    return;
+}
 
 // --- Multiply Operation ---
 
