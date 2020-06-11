@@ -83,7 +83,7 @@ template <typename T>
 void Node<T>::setGrad(T &t)
 {
     _gradientAvailable = true;
-    _output.reset(new T(t));
+    *_grad.push_back(stad::move(new T(t)));
     std::cout << "Gradient set: " << *_output << std::endl;
 }
 
