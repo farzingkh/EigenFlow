@@ -39,7 +39,10 @@ public:
     T getValue();
 
     template <typename T>
-    std::vector<T> getGradient();
+    T getGradient(int i);
+    
+    template <typename T>
+    T getOutGradient(); // get output gradient from node's consumer
 
     virtual void compute() = 0;
     virtual void gradient() = 0;
@@ -71,14 +74,14 @@ class Node : public BaseNode
 {
 public:
     T getValue();
-    std::vector<T> getGradient();
+    T getGradient(int i);
 
     void setValue(T &&t);
     void setGrad(T &t);
 
 private:
     std::unique_ptr<T> _output = nullptr;
-    std::unique_ptr<std::vector<T>> _grad = nullptr;
+    std::vector<std::unique_ptr<T>> _grad;
 
     bool _dataAvailable = false;
     bool _gradientAvailable = false;

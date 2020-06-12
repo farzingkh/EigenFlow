@@ -22,9 +22,31 @@ T BaseNode::getValue()
 }
 
 template <typename T>
-std::vector<T> BaseNode::getGradient()
+T BaseNode::getGradient(int i)
 {
-    return dynamic_cast<Node<T> *>(this)->getGradient();
+    return dynamic_cast<Node<T> *>(this)->getGradient(i);
+}
+
+template <typename T>
+T BaseNode::getOutGradient()
+{
+    std::vector<BaseNode *> consumer = this->getConsumers();
+    //check if node has a consumer
+    if (consumer.size() > 0)
+    {
+        // check which input node of the consumer is this
+        int nodeIndex;
+        std::vector<BaseNode *> consumerInputs = consumer[0]->getInputs();
+        for (int i = 0; i < 2; i++)
+        {
+            if (this == &consumerInputs[i])
+            {
+                int nodeIndex = i;
+            }
+        }
+    }
+    // get the output gradient for this node; cnosidering we only have one consumer 
+    return consumer[0]->getGradient<T>(nodeIndex);
 }
 
 std::string BaseNode::getName() { return _name; }
@@ -56,18 +78,18 @@ T Node<T>::getValue()
 }
 
 template <typename T>
-std::vector<T> Node<T>::getGradient()
+T Node<T>::getGradient(int i)
 {
     //std::cout << "Variable get value..." << std::endl;
     if (_gradientAvailable)
     {
         std::cout << "Gradient get: " << *_output << std::endl;
-        return *_grad;
+        return *(_grad[i]);
     }
     else
     {
         //std::cout << "Data not available" << std::endl;
-        return {};
+        return T();
     }
 }
 
@@ -83,7 +105,7 @@ template <typename T>
 void Node<T>::setGrad(T &t)
 {
     _gradientAvailable = true;
-    *_grad.push_back(std::move(new T(t)));
+    _grad.push_back(std::move(std::unique_ptr<T>((new T(t)))));
     std::cout << "Gradient set: " << *_output << std::endl;
 }
 
