@@ -3,10 +3,19 @@
 
 // Class for operations with data value of type T
 template <typename T>
-class Operation : public Node<T>
+class UnaryOperation : public Node<T>
 {
 public:
-    Operation();
+    UnaryOperation(BaseNode *rhs);
+    virtual void compute() = 0;
+    virtual void gradient() = 0;
+};
+
+template <typename T>
+class BinaryOperation : public Node<T>
+{
+public:
+    BinaryOperation(BaseNode *lhs, BaseNode *rhs);
     virtual void compute() = 0;
     virtual void gradient() = 0;
 };
@@ -15,7 +24,7 @@ public:
 
 // addition operation with T return type value, T1 and T2 input type value
 template <typename T, typename T1, typename T2>
-class Add : public Operation<T>
+class Add : public BinaryOperation<T>
 {
 public:
     Add(BaseNode &a, BaseNode &b);
@@ -27,7 +36,7 @@ public:
 
 // negative operation
 template <typename T>
-class Negative : public Operation<T>
+class Negative : public UnaryOperation<T>
 {
 public:
     Negative(BaseNode &a);
@@ -38,7 +47,7 @@ public:
 };
 
 template <typename T, typename T1, typename T2>
-class Multiply : public Operation<T>
+class Multiply : public BinaryOperation<T>
 {
 public:
     Multiply(BaseNode &a, BaseNode &b);
@@ -49,7 +58,7 @@ public:
 };
 
 template <typename T, typename T1, typename T2>
-class MatMultiply : public Operation<T>
+class MatMultiply : public BinaryOperation<T>
 {
 public:
     MatMultiply(BaseNode &a, BaseNode &b);
@@ -59,9 +68,8 @@ public:
     void gradient();
 };
 
-
 template <typename T, typename T1, typename T2>
-class Dot : public Operation<T>
+class Dot : public BinaryOperation<T>
 {
 public:
     Dot(BaseNode &a, BaseNode &b);
@@ -72,7 +80,7 @@ public:
 };
 
 template <typename T>
-class Sigmoid : public Operation<T>
+class Sigmoid : public UnaryOperation<T>
 {
 public:
     Sigmoid(BaseNode &a);

@@ -2,38 +2,38 @@
 #include <memory>
 #include <math.h>
 
-// --- Operation ---
-
+// --- UnaryOperation ---
 template <typename T>
-Operation<T>::Operation()
+UnaryOperation<T>::UnaryOperation(BaseNode *rhs)
 {
     this->_nType = nodeType::operation;
+    this->addInputs(rhs);
+    rhs->addConsumers(this);
+}
+
+// --- BinaryOperation ---
+template <typename T>
+BinaryOperation<T>::BinaryOperation(BaseNode *lhs, BaseNode *rhs)
+{
+    this->_nType = nodeType::operation;
+    this->addInputs(lhs);
+    this->addInputs(rhs);
+    lhs->addConsumers(this);
+    rhs->addConsumers(this);
 }
 
 // --- add operation ---
 
 template <typename T, typename T1, typename T2>
-Add<T, T1, T2>::Add(BaseNode &a, BaseNode &b)
+Add<T, T1, T2>::Add(BaseNode &a, BaseNode &b) : BinaryOperation<T>(&a, &b)
 {
     this->_opType = operationType::addition;
-
-    this->addInputs(&a);
-    this->addInputs(&b);
-
-    a.addConsumers(this);
-    b.addConsumers(this);
 }
 
 template <typename T, typename T1, typename T2>
-Add<T, T1, T2>::Add(BaseNode *a, BaseNode *b)
+Add<T, T1, T2>::Add(BaseNode *a, BaseNode *b) : BinaryOperation<T>(a, b)
 {
     this->_opType = operationType::addition;
-
-    this->addInputs(a);
-    this->addInputs(b);
-
-    a->addConsumers(this);
-    b->addConsumers(this);
 }
 
 template <typename T, typename T1, typename T2>
@@ -121,19 +121,15 @@ void Add<T, T1, T2>::gradient()
 // --- negative operation---
 
 template <typename T>
-Negative<T>::Negative(BaseNode &a)
+Negative<T>::Negative(BaseNode &a) : UnaryOperation<T>(&a)
 {
     this->_opType = operationType::negative;
-    this->addInputs(&a);
-    a.addConsumers(this);
 }
 
 template <typename T>
-Negative<T>::Negative(BaseNode *a)
+Negative<T>::Negative(BaseNode *a) : UnaryOperation<T>(a)
 {
     this->_opType = operationType::negative;
-    this->addInputs(a);
-    a->addConsumers(this);
 }
 
 template <typename T>
@@ -153,15 +149,9 @@ void Negative<T>::gradient()
 // --- Multiply Operation ---
 
 template <typename T, typename T1, typename T2>
-Multiply<T, T1, T2>::Multiply(BaseNode *a, BaseNode *b)
+Multiply<T, T1, T2>::Multiply(BaseNode *a, BaseNode *b) : BinaryOperation<T>(a, b)
 {
     this->_opType = operationType::multiply;
-
-    this->addInputs(a);
-    this->addInputs(b);
-
-    a->addConsumers(this);
-    b->addConsumers(this);
 }
 
 template <typename T, typename T1, typename T2>
@@ -195,15 +185,9 @@ void Multiply<T, T1, T2>::gradient()
 // --- MatMultiply Operation ---
 
 template <typename T, typename T1, typename T2>
-MatMultiply<T, T1, T2>::MatMultiply(BaseNode *a, BaseNode *b)
+MatMultiply<T, T1, T2>::MatMultiply(BaseNode *a, BaseNode *b) : BinaryOperation<T>(a, b)
 {
     this->_opType = operationType::multiply;
-
-    this->addInputs(a);
-    this->addInputs(b);
-
-    a->addConsumers(this);
-    b->addConsumers(this);
 }
 
 template <typename T, typename T1, typename T2>
@@ -239,15 +223,9 @@ void MatMultiply<T, T1, T2>::gradient()
 // --- DotProduct ---
 
 template <typename T, typename T1, typename T2>
-Dot<T, T1, T2>::Dot(BaseNode *a, BaseNode *b)
+Dot<T, T1, T2>::Dot(BaseNode *a, BaseNode *b) : BinaryOperation<T>(a, b)
 {
     this->_opType = operationType::dotproduct;
-
-    this->addInputs(a);
-    this->addInputs(b);
-
-    a->addConsumers(this);
-    b->addConsumers(this);
 }
 
 template <typename T, typename T1, typename T2>
@@ -263,19 +241,15 @@ void Dot<T, T1, T2>::gradient() { return; }
 // --- Sigmoid ---
 
 template <typename T>
-Sigmoid<T>::Sigmoid(BaseNode &a)
+Sigmoid<T>::Sigmoid(BaseNode &a) : UnaryOperation<T>(&a)
 {
     this->_opType = operationType::sigmoid;
-    this->addInputs(&a);
-    a.addConsumers(this);
 }
 
 template <typename T>
-Sigmoid<T>::Sigmoid(BaseNode *a)
+Sigmoid<T>::Sigmoid(BaseNode *a) : UnaryOperation<T>(a)
 {
     this->_opType = operationType::sigmoid;
-    this->addInputs(a);
-    a->addConsumers(this);
 }
 
 template <typename T>
