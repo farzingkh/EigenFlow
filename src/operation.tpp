@@ -167,7 +167,7 @@ Multiply<T, T1, T2>::Multiply(BaseNode *a, BaseNode *b)
 template <typename T, typename T1, typename T2>
 void Multiply<T, T1, T2>::compute()
 {
-    std::cout << "Compute multiplication operation ..." << std::endl;
+    std::cout << "Compute multiplication operation..." << std::endl;
     std::vector<BaseNode *> inputs = this->getInputs();
     // multiplication of scalar and matrix
     T1 A = inputs[0]->getValue<T1>();
@@ -177,7 +177,20 @@ void Multiply<T, T1, T2>::compute()
 }
 
 template <typename T, typename T1, typename T2>
-void Multiply<T, T1, T2>::gradient() { return; }
+void Multiply<T, T1, T2>::gradient()
+{
+    std::cout << "Compute multiplication operation gradient..." << std::endl;
+    // get output gradient from consumer
+    T G = ((BaseNode *)this)->getOutGradient<T>();
+    // get inputs of this node
+    std::vector<BaseNode *> inputs = this->getInputs();
+    T1 A = inputs[0]->getValue<T1>();
+    T2 B = inputs[1]->getValue<T2>();
+    // calculate and set gradient for first input "A"
+    this->setGrad(G.array() * A.array());
+    // calculate and set gradient for first input "B"
+    this->setGrad(G.array() * B.array());
+}
 
 // --- MatMultiply Operation ---
 
@@ -196,7 +209,7 @@ MatMultiply<T, T1, T2>::MatMultiply(BaseNode *a, BaseNode *b)
 template <typename T, typename T1, typename T2>
 void MatMultiply<T, T1, T2>::compute()
 {
-    std::cout << "Compute matrix multiplication operation ..." << std::endl;
+    std::cout << "Compute matrix multiplication operation..." << std::endl;
     std::vector<BaseNode *> inputs = this->getInputs();
     // multiplication of scalar and matrix
     T1 A = inputs[0]->getValue<T1>();
@@ -206,10 +219,22 @@ void MatMultiply<T, T1, T2>::compute()
 }
 
 template <typename T, typename T1, typename T2>
-void MatMultiply<T, T1, T2>::gradient() { return; }
+void MatMultiply<T, T1, T2>::gradient()
+{
+    std::cout << "Compute matrix multiplication operation gradient..." << std::endl;
+    // get output gradient from consumer
+    T G = ((BaseNode *)this)->getOutGradient<T>();
+    // get inputs of this node
+    std::vector<BaseNode *> inputs = this->getInputs();
+    T1 A = inputs[0]->getValue<T1>();
+    T2 B = inputs[1]->getValue<T2>();
+    // calculate and set gradient for first input "A"
+    this->setGrad(G * B.transpose());
+    // calculate and set gradient for first input "B"
+    this->setGrad(A.transpose() * G);
+}
 
 // --- DotProduct ---
-
 
 template <typename T, typename T1, typename T2>
 Dot<T, T1, T2>::Dot(BaseNode *a, BaseNode *b)
