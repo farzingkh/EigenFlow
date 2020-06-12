@@ -140,16 +140,14 @@ template <typename T>
 void Negative<T>::compute()
 {
     std::cout << "Compute negative operation ..." << std::endl;
-    std::vector<BaseNode *> inputs = this->getInputs();
-    this->setValue(-(inputs[0]->getValue<T>()));
+    this->setValue(-(this->getInputs()[0]->getValue<T>()));
 }
 
 template <typename T>
 void Negative<T>::gradient()
 {
     std::cout << "Compute negative operation geradient ..." << std::endl;
-    std::vector<BaseNode *> consumer = this->getConsumers();
-    this->setGrad(-(consumer[0]->getGradient<T>()[0]));
+    this->setGrad(-(this->getOutGradient<T>()));
 }
 
 // --- Multiply Operation ---
@@ -188,7 +186,7 @@ void Multiply<T, T1, T2>::compute()
     else
     {
         // if neither A or B is scalar perform matrix multiplication
-        this->setValue(inputs[0]->getValue<T1>() * inputs[1]->getValue<T2>());
+        this->setValue(A * B);
     }
 }
 
@@ -213,8 +211,7 @@ template <typename T, typename T1, typename T2>
 void Dot<T, T1, T2>::compute()
 {
     std::cout << "Compute dot product operation ..." << std::endl;
-    std::vector<BaseNode *> inputs = this->getInputs();
-    this->setValue(inputs[0]->getValue<T1>().dot(inputs[1]->getValue<T2>()));
+    this->setValue(this->getInputs()[0]->getValue<T1>().dot(this->getInputs()[1]->getValue<T2>()));
 }
 
 template <typename T, typename T1, typename T2>
@@ -242,8 +239,7 @@ template <typename T>
 void Sigmoid<T>::compute()
 {
     std::cout << "Compute sigmoid operation ..." << std::endl;
-    std::vector<BaseNode *> inputs = this->getInputs();
-    this->setValue(1 / (1 + exp(-(inputs[0]->getValue<T>().array()))));
+    this->setValue(1 / (1 + exp(-(this->getInputs()[0]->getValue<T>().array()))));
 }
 
 template <typename T>
