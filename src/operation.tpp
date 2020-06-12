@@ -39,7 +39,6 @@ Add<T, T1, T2>::Add(BaseNode *a, BaseNode *b)
 template <typename T, typename T1, typename T2>
 void Add<T, T1, T2>::compute()
 {
-    Node<T> *pNode = static_cast<Node<T> *>(this);
     std::cout << "Compute add operation ..." << std::endl;
     std::vector<BaseNode *> inputs = this->getInputs();
     T1 A = inputs[0]->getValue<T1>();
@@ -50,28 +49,28 @@ void Add<T, T1, T2>::compute()
         if (B.rows() == 1)
         {
 
-            pNode->setValue(A.rowwise() + B.row(0));
+            this->setValue(A.rowwise() + B.row(0));
         }
         else if (A.rows() == 1)
         {
-            pNode->setValue(B.rowwise() + A.row(0));
+            this->setValue(B.rowwise() + A.row(0));
         }
     }
     else if (A.cols() != B.cols() & A.rows() == B.rows())
     {
         if (B.cols() == 1)
         {
-            pNode->setValue(A.colwise() + B.col(0));
+            this->setValue(A.colwise() + B.col(0));
         }
         else if (A.cols() == 1)
         {
-            pNode->setValue(B.colwise() + A.col(0));
+            this->setValue(B.colwise() + A.col(0));
         }
     }
     else
     {
         // element-wise addition without broadcasting
-        pNode->setValue(A + B);
+        this->setValue(A + B);
     }
 }
 
@@ -140,19 +139,17 @@ Negative<T>::Negative(BaseNode *a)
 template <typename T>
 void Negative<T>::compute()
 {
-    Node<T> *pN = static_cast<Node<T> *>(this);
     std::cout << "Compute negative operation ..." << std::endl;
     std::vector<BaseNode *> inputs = this->getInputs();
-    pN->setValue(-(inputs[0]->getValue<T>()));
+    this->setValue(-(inputs[0]->getValue<T>()));
 }
 
 template <typename T>
 void Negative<T>::gradient()
 {
-    Node<T> *pN = static_cast<Node<T> *>(this);
     std::cout << "Compute negative operation geradient ..." << std::endl;
     std::vector<BaseNode *> consumer = this->getConsumers();
-    pN->setGrad(-(consumer[0]->getGradient<T>()[0]));
+    this->setGrad(-(consumer[0]->getGradient<T>()[0]));
 }
 
 // --- Multiply Operation ---
@@ -172,7 +169,6 @@ Multiply<T, T1, T2>::Multiply(BaseNode *a, BaseNode *b)
 template <typename T, typename T1, typename T2>
 void Multiply<T, T1, T2>::compute()
 {
-    Node<T> *pNode = static_cast<Node<T> *>(this);
     std::cout << "Compute multiplication operation ..." << std::endl;
     std::vector<BaseNode *> inputs = this->getInputs();
     // multiplication of scalar and matrix
@@ -182,17 +178,17 @@ void Multiply<T, T1, T2>::compute()
     if (A.cols() == 1 and A.rows() == 1)
     {
         // perform element-wise multiplication
-        pNode->setValue(A(0) * B.array());
+        this->setValue(A(0) * B.array());
     } // if B is scalar
     else if (B.cols() == 1 and B.rows() == 1)
     {
         // perform element-wise multiplication
-        pNode->setValue(B(0) * A.array());
+        this->setValue(B(0) * A.array());
     }
     else
     {
         // if neither A or B is scalar perform matrix multiplication
-        pNode->setValue(inputs[0]->getValue<T1>() * inputs[1]->getValue<T2>());
+        this->setValue(inputs[0]->getValue<T1>() * inputs[1]->getValue<T2>());
     }
 }
 
@@ -216,10 +212,9 @@ Dot<T, T1, T2>::Dot(BaseNode *a, BaseNode *b)
 template <typename T, typename T1, typename T2>
 void Dot<T, T1, T2>::compute()
 {
-    Node<T> *pNode = static_cast<Node<T> *>(this);
     std::cout << "Compute dot product operation ..." << std::endl;
     std::vector<BaseNode *> inputs = this->getInputs();
-    pNode->setValue(inputs[0]->getValue<T1>().dot(inputs[1]->getValue<T2>()));
+    this->setValue(inputs[0]->getValue<T1>().dot(inputs[1]->getValue<T2>()));
 }
 
 template <typename T, typename T1, typename T2>
@@ -246,10 +241,9 @@ Sigmoid<T>::Sigmoid(BaseNode *a)
 template <typename T>
 void Sigmoid<T>::compute()
 {
-    Node<T> *pNode = static_cast<Node<T> *>(this);
     std::cout << "Compute sigmoid operation ..." << std::endl;
     std::vector<BaseNode *> inputs = this->getInputs();
-    pNode->setValue(1 / (1 + exp(-(inputs[0]->getValue<T>().array()))));
+    this->setValue(1 / (1 + exp(-(inputs[0]->getValue<T>().array()))));
 }
 
 template <typename T>
