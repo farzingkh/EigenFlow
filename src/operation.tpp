@@ -229,9 +229,11 @@ void MatMultiply<T, T1, T2>::gradient()
     T1 A = inputs[0]->getValue<T1>();
     T2 B = inputs[1]->getValue<T2>();
     // calculate and set gradient for first input "A"
-    this->setGrad(G * B.transpose());
+    T C = G * B.transpose();
+    this->setGrad(C);
     // calculate and set gradient for first input "B"
-    this->setGrad(A.transpose() * G);
+    T D = A.transpose() * G;
+    this->setGrad(D);
 }
 
 // --- DotProduct ---
