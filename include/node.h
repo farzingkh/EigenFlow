@@ -39,7 +39,7 @@ public:
     T getValue();
 
     template <typename T>
-    T getGradient();
+    std::vector<T> getGradient();
 
     virtual void compute() = 0;
     virtual void gradient() = 0;
@@ -71,7 +71,7 @@ class Node : public BaseNode
 {
 public:
     T getValue();
-    T getGradient();
+    std::vector<T> getGradient();
 
     void setValue(T &&t);
     void setGrad(T &t);

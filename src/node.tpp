@@ -22,7 +22,7 @@ T BaseNode::getValue()
 }
 
 template <typename T>
-T BaseNode::getGradient()
+std::vector<T> BaseNode::getGradient()
 {
     return dynamic_cast<Node<T> *>(this)->getGradient();
 }
@@ -56,7 +56,7 @@ T Node<T>::getValue()
 }
 
 template <typename T>
-T Node<T>::getGradient()
+std::vector<T> Node<T>::getGradient()
 {
     //std::cout << "Variable get value..." << std::endl;
     if (_gradientAvailable)
@@ -67,7 +67,7 @@ T Node<T>::getGradient()
     else
     {
         //std::cout << "Data not available" << std::endl;
-        return T();
+        return {};
     }
 }
 
@@ -83,7 +83,7 @@ template <typename T>
 void Node<T>::setGrad(T &t)
 {
     _gradientAvailable = true;
-    *_grad.push_back(stad::move(new T(t)));
+    *_grad.push_back(std::move(new T(t)));
     std::cout << "Gradient set: " << *_output << std::endl;
 }
 
