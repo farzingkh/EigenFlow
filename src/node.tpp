@@ -50,6 +50,7 @@ T BaseNode::getOutGradient()
     else
     {
         std::cout << "No consumer" << std::endl;
+        return T();
     }
 }
 
@@ -76,7 +77,7 @@ T Node<T>::getValue()
     }
     else
     {
-        //std::cout << "Data not available" << std::endl;
+        std::cout << "Data not available" << std::endl;
         return T();
     }
 }
@@ -92,7 +93,7 @@ T Node<T>::getGradient(int i)
     }
     else
     {
-        //std::cout << "Data not available" << std::endl;
+        std::cout << "Data not available" << std::endl;
         return T();
     }
 }
