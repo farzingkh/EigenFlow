@@ -79,10 +79,10 @@ void Add<T, T1, T2>::gradient()
 {
     std::cout << "Compute Add operation geradient ..." << std::endl;
 
-    // get output gradient from consumer 
-    T grad = ((BaseNode*)this)->getOutGradient<T>();
-    
-    // get inputs of this node 
+    // get output gradient from consumer
+    T grad = ((BaseNode *)this)->getOutGradient<T>();
+
+    // get inputs of this node
     std::vector<BaseNode *> inputs = this->getInputs();
     T1 A = inputs[0]->getValue<T1>();
     T2 B = inputs[1]->getValue<T2>();
@@ -140,14 +140,14 @@ template <typename T>
 void Negative<T>::compute()
 {
     std::cout << "Compute negative operation ..." << std::endl;
-    this->setValue(-(this->getInputs()[0]->getValue<T>()));
+    this->setValue(-(((BaseNode *)this)->getInputs()[0]->getValue<T>()));
 }
 
 template <typename T>
 void Negative<T>::gradient()
 {
     std::cout << "Compute negative operation geradient ..." << std::endl;
-    this->setGrad(-(this->getOutGradient<T>()));
+    this->setGrad(-(((BaseNode *)this)->getOutGradient<T>()));
 }
 
 // --- Multiply Operation ---
@@ -211,7 +211,7 @@ template <typename T, typename T1, typename T2>
 void Dot<T, T1, T2>::compute()
 {
     std::cout << "Compute dot product operation ..." << std::endl;
-    this->setValue(this->getInputs()[0]->getValue<T1>().dot(this->getInputs()[1]->getValue<T2>()));
+    this->setValue(((BaseNode *)this)->getInputs()[0]->getValue<T1>().dot(((BaseNode *)this)->getInputs()[1]->getValue<T2>()));
 }
 
 template <typename T, typename T1, typename T2>
@@ -239,7 +239,7 @@ template <typename T>
 void Sigmoid<T>::compute()
 {
     std::cout << "Compute sigmoid operation ..." << std::endl;
-    this->setValue(1 / (1 + exp(-(this->getInputs()[0]->getValue<T>().array()))));
+    this->setValue(1 / (1 + exp(-(((BaseNode *)this)->getInputs()[0]->getValue<T>().array()))));
 }
 
 template <typename T>
