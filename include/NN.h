@@ -13,28 +13,31 @@ public:
     NN();
 
     template <typename T>
-    Variable<Matrix<T,Dynamic,Dynamic>> *variable(Matrix<T,Dynamic,Dynamic> &&t);
+    Variable<Matrix<T, Dynamic, Dynamic>> *variable(Matrix<T, Dynamic, Dynamic> &&t);
 
     template <typename T>
-    Placeholder<Matrix<T,Dynamic,Dynamic>> *placeholder(std::string n);
+    Placeholder<Matrix<T, Dynamic, Dynamic>> *placeholder(std::string n);
 
     template <typename T>
-    Add<Matrix<T,Dynamic,Dynamic>, Matrix<T,Dynamic,Dynamic>, Matrix<T,Dynamic,Dynamic>> *add(BaseNode *a, BaseNode *b);
+    Add<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>> *add(BaseNode *a, BaseNode *b);
 
     template <typename T>
-    Negative<Matrix<T,Dynamic,Dynamic>> *negative(BaseNode *a);
+    Negative<Matrix<T, Dynamic, Dynamic>> *negative(BaseNode *a);
 
     template <typename T>
-    Multiply<Matrix<T,Dynamic,Dynamic>, Matrix<T,Dynamic,Dynamic>, Matrix<T,Dynamic,Dynamic>> *multiply(BaseNode *a, BaseNode *b);
+    Multiply<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>> *multiply(BaseNode *a, BaseNode *b);
 
     template <typename T>
-    Dot<Matrix<T,Dynamic,Dynamic>, Matrix<T,Dynamic,Dynamic>, Matrix<T,Dynamic,Dynamic>> *dot(BaseNode *a, BaseNode *b);
+    MatMultiply<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>> *matmultiply(BaseNode *a, BaseNode *b);
 
     template <typename T>
-    Sigmoid<Matrix<T,Dynamic,Dynamic>> *sigmoid(BaseNode *a);
+    Dot<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>> *dot(BaseNode *a, BaseNode *b);
 
     template <typename T>
-    Matrix<T,Dynamic,Dynamic> run(BaseNode *n, std::unordered_map<std::string, Matrix<T,Dynamic,Dynamic> *> feed);
+    Sigmoid<Matrix<T, Dynamic, Dynamic>> *sigmoid(BaseNode *a);
+
+    template <typename T>
+    Matrix<T, Dynamic, Dynamic> run(BaseNode *n, std::unordered_map<std::string, Matrix<T, Dynamic, Dynamic> *> feed);
 
 private:
     Graph _graph;

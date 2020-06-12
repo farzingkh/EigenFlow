@@ -49,6 +49,18 @@ public:
 };
 
 template <typename T, typename T1, typename T2>
+class MatMultiply : public Operation<T>
+{
+public:
+    MatMultiply(BaseNode &a, BaseNode &b);
+    MatMultiply(BaseNode *a, BaseNode *b);
+
+    void compute();
+    void gradient();
+};
+
+
+template <typename T, typename T1, typename T2>
 class Dot : public Operation<T>
 {
 public:

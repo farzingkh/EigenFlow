@@ -172,28 +172,44 @@ void Multiply<T, T1, T2>::compute()
     // multiplication of scalar and matrix
     T1 A = inputs[0]->getValue<T1>();
     T2 B = inputs[1]->getValue<T2>();
-    // if A is scalar
-    if (A.cols() == 1 and A.rows() == 1)
-    {
-        // perform element-wise multiplication
-        this->setValue(A(0) * B.array());
-    } // if B is scalar
-    else if (B.cols() == 1 and B.rows() == 1)
-    {
-        // perform element-wise multiplication
-        this->setValue(B(0) * A.array());
-    }
-    else
-    {
-        // if neither A or B is scalar perform matrix multiplication
-        this->setValue(A * B);
-    }
+    // if neither A or B is scalar perform matrix multiplication
+    this->setValue(A.array() * B.array());
 }
 
 template <typename T, typename T1, typename T2>
 void Multiply<T, T1, T2>::gradient() { return; }
 
+// --- MatMultiply Operation ---
+
+template <typename T, typename T1, typename T2>
+MatMultiply<T, T1, T2>::MatMultiply(BaseNode *a, BaseNode *b)
+{
+    this->_opType = operationType::multiply;
+
+    this->addInputs(a);
+    this->addInputs(b);
+
+    a->addConsumers(this);
+    b->addConsumers(this);
+}
+
+template <typename T, typename T1, typename T2>
+void MatMultiply<T, T1, T2>::compute()
+{
+    std::cout << "Compute matrix multiplication operation ..." << std::endl;
+    std::vector<BaseNode *> inputs = this->getInputs();
+    // multiplication of scalar and matrix
+    T1 A = inputs[0]->getValue<T1>();
+    T2 B = inputs[1]->getValue<T2>();
+    // if neither A or B is scalar perform matrix multiplication
+    this->setValue(A * B);
+}
+
+template <typename T, typename T1, typename T2>
+void MatMultiply<T, T1, T2>::gradient() { return; }
+
 // --- DotProduct ---
+
 
 template <typename T, typename T1, typename T2>
 Dot<T, T1, T2>::Dot(BaseNode *a, BaseNode *b)

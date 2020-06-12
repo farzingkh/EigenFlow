@@ -20,7 +20,7 @@ int main()
     matxxf x = X.transpose();
 
     // sigmoid(w^T*x+b)
-    auto G = nn.sigmoid<float>(nn.add<float>(nn.multiply<float>(nn.variable<float>(std::move(W)), nn.placeholder<float>("X")), nn.variable<float>(std::move(b))));
+    auto G = nn.sigmoid<float>(nn.add<float>(nn.matmultiply<float>(nn.variable<float>(std::move(W)), nn.placeholder<float>("X")), nn.variable<float>(std::move(b))));
 
     // Create a map to feed data to the placeholders (i.e. X = X)
     std::unordered_map<std::string, matxxf *> feed = {};
