@@ -76,7 +76,48 @@ void Add<T, T1, T2>::compute()
 }
 
 template <typename T, typename T1, typename T2>
-void Add<T, T1, T2>::gradient() { return; }
+void Add<T, T1, T2>::gradient()
+{
+    std::cout << "Compute Add operation geradient ..." << std::endl;
+
+    // get output gradient from consumer 
+    T grad = ((BaseNode*)this)->getOutGradient<T>();
+    
+    // get inputs of this node 
+    std::vector<BaseNode *> inputs = this->getInputs();
+    T1 A = inputs[0]->getValue<T1>();
+    T2 B = inputs[1]->getValue<T2>();
+
+    // Check for broadcasting
+    // If Gradient is larger than A, then A was broadcasted
+    if (grad.cols() > A.cols() or grad.rows() > A.rows())
+    {
+        // Input gradient is matrix ones of size B multiplied by output gradient
+        T g;
+        g.setOnes(B.rows(), B.cols());
+        grad *= g;
+        this->setGrad(grad);
+    }
+    else
+    {
+        // Input gradient is the same as output gradient
+        this->setGrad(grad);
+    }
+    // If Gradient is larger than B, then B was broadcasted
+    if (grad.cols() > B.cols() or grad.rows() > B.rows())
+    {
+        // Input gradient is matrix ones of size A multiplied by output gradient
+        T g;
+        g.setOnes(A.rows(), A.cols());
+        grad *= g;
+        this->setGrad(grad);
+    }
+    else
+    {
+        // Input gradient is the same as output gradient
+        this->setGrad(grad);
+    }
+}
 
 // --- negative operation---
 
@@ -109,9 +150,9 @@ template <typename T>
 void Negative<T>::gradient()
 {
     Node<T> *pN = static_cast<Node<T> *>(this);
-    std::cout << "Compute negative operation ..." << std::endl;
+    std::cout << "Compute negative operation geradient ..." << std::endl;
     std::vector<BaseNode *> consumer = this->getConsumers();
-    pN->setGrad(-(inputs[0]->getGradient<T>()));
+    pN->setGrad(-(consumer[0]->getGradient<T>()[0]));
 }
 
 // --- Multiply Operation ---
@@ -140,16 +181,17 @@ void Multiply<T, T1, T2>::compute()
     // if A is scalar
     if (A.cols() == 1 and A.rows() == 1)
     {
-        // perform c-wise multiplication
+        // perform element-wise multiplication
         pNode->setValue(A(0) * B.array());
     } // if B is scalar
     else if (B.cols() == 1 and B.rows() == 1)
     {
+        // perform element-wise multiplication
         pNode->setValue(B(0) * A.array());
     }
     else
     {
-        // if neither A or B is scalar
+        // if neither A or B is scalar perform matrix multiplication
         pNode->setValue(inputs[0]->getValue<T1>() * inputs[1]->getValue<T2>());
     }
 }
