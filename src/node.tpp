@@ -34,19 +34,23 @@ T BaseNode::getOutGradient()
     //check if node has a consumer
     if (consumer.size() > 0)
     {
-        // check which input node of the consumer is this
+        // check which input node of the consumer is this; cnosidering we only have one consumer
         int nodeIndex;
         std::vector<BaseNode *> consumerInputs = consumer[0]->getInputs();
         for (int i = 0; i < 2; i++)
         {
-            if (this == &consumerInputs[i])
+            if (this == consumerInputs[i])
             {
                 int nodeIndex = i;
             }
         }
+        // get the output gradient for this node
+        return consumer[0]->getGradient<T>(nodeIndex);
     }
-    // get the output gradient for this node; cnosidering we only have one consumer 
-    return consumer[0]->getGradient<T>(nodeIndex);
+    else
+    {
+        std::cout << "No consumer" << std::endl;
+    }
 }
 
 std::string BaseNode::getName() { return _name; }
