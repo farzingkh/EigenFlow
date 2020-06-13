@@ -149,6 +149,12 @@ void Negative<T>::gradient()
 // --- Multiply Operation ---
 
 template <typename T, typename T1, typename T2>
+Multiply<T, T1, T2>::Multiply(BaseNode &a, BaseNode &b) : BinaryOperation<T>(&a, &b)
+{
+    this->_opType = operationType::multiply;
+}
+
+template <typename T, typename T1, typename T2>
 Multiply<T, T1, T2>::Multiply(BaseNode *a, BaseNode *b) : BinaryOperation<T>(a, b)
 {
     this->_opType = operationType::multiply;
@@ -183,6 +189,12 @@ void Multiply<T, T1, T2>::gradient()
 }
 
 // --- MatMultiply Operation ---
+
+template <typename T, typename T1, typename T2>
+MatMultiply<T, T1, T2>::MatMultiply(BaseNode &a, BaseNode &b) : BinaryOperation<T>(&a, &b)
+{
+    this->_opType = operationType::multiply;
+}
 
 template <typename T, typename T1, typename T2>
 MatMultiply<T, T1, T2>::MatMultiply(BaseNode *a, BaseNode *b) : BinaryOperation<T>(a, b)
@@ -221,6 +233,12 @@ void MatMultiply<T, T1, T2>::gradient()
 }
 
 // --- DotProduct ---
+
+template <typename T, typename T1, typename T2>
+Dot<T, T1, T2>::Dot(BaseNode &a, BaseNode &b) : BinaryOperation<T>(&a, &b)
+{
+    this->_opType = operationType::dotproduct;
+}
 
 template <typename T, typename T1, typename T2>
 Dot<T, T1, T2>::Dot(BaseNode *a, BaseNode *b) : BinaryOperation<T>(a, b)
