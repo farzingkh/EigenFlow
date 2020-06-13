@@ -278,4 +278,14 @@ void Sigmoid<T>::compute()
 }
 
 template <typename T>
-void Sigmoid<T>::gradient() { return; }
+void Sigmoid<T>::gradient()
+{
+    std::cout << "Compute sigmoid gradient..." << std::endl;
+    // get output gradient from consumer
+    T G = ((BaseNode *)this)->getOutGradient<T>();
+    // get sigmoid value
+    T sig = ((BaseNode *)this)->getValue<T>();
+    // compute gradient
+    T grad = G.array() * sig.array() * (1 - sig.array());
+    this->setGrad(grad);
+}
