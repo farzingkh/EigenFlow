@@ -16,7 +16,8 @@ enum class operationType
     negative,
     multiply,
     dotproduct,
-    sigmoid
+    sigmoid,
+    log
 };
 
 // Node types

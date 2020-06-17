@@ -210,7 +210,7 @@ void MatMultiply<T, T1, T2>::compute()
     // multiplication of scalar and matrix
     T1 A = inputs[0]->getValue<T1>();
     T2 B = inputs[1]->getValue<T2>();
-    // if neither A or B is scalar perform matrix multiplication
+    // perform matrix multiplication
     this->setValue(A * B);
 }
 
@@ -302,5 +302,39 @@ void Sigmoid<T>::gradient()
     T sig = ((BaseNode *)this)->getValue<T>();
     // compute gradient
     T grad = G.array() * sig.array() * (1 - sig.array());
+    this->setGrad(grad);
+}
+
+// --- log ---
+
+template <typename T>
+Log<T>::Log(BaseNode &a) : UnaryOperation<T>(&a)
+{
+    this->_opType = operationType::log;
+}
+
+template <typename T>
+Log<T>::Log(BaseNode *a) : UnaryOperation<T>(a)
+{
+    this->_opType = operationType::log;
+}
+
+template <typename T>
+void Log<T>::compute()
+{
+    std::cout << "Compute log operation ..." << std::endl;
+    this->setValue(log(((BaseNode *)this)->getInputs()[0]->getValue<T>().array()));
+}
+
+template <typename T>
+void Log<T>::gradient()
+{
+    std::cout << "Compute log gradient..." << std::endl;
+    // get output gradient from consumer
+    T G = ((BaseNode *)this)->getOutGradient<T>();
+    // get log value
+    T log = ((BaseNode *)this)->getValue<T>();
+    // compute gradient; elementwise division
+    T grad = G.array() / log.array();
     this->setGrad(grad);
 }

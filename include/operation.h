@@ -90,6 +90,17 @@ public:
     void gradient();
 };
 
+template <typename T>
+class Log : public UnaryOperation<T>
+{
+public:
+    Log(BaseNode &a);
+    Log(BaseNode *a);
+
+    void compute();
+    void gradient();
+};
+
 #include "../src/operation.tpp"
 
 #endif /* OPERATION_H */
