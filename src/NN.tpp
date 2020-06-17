@@ -79,3 +79,19 @@ Sigmoid<Matrix<T, Dynamic, Dynamic>> *NN::sigmoid(BaseNode *a)
     _graph.addNodeOne<Sigmoid, Matrix<T, Dynamic, Dynamic>>(c);
     return c.get();
 }
+
+template <typename T>
+Log<Matrix<T, Dynamic, Dynamic>> *NN::log(BaseNode *a)
+{
+    auto c = std::shared_ptr<Log<Matrix<T, Dynamic, Dynamic>>>(new Log<Matrix<T, Dynamic, Dynamic>>(a));
+    _graph.addNodeOne<Log, Matrix<T, Dynamic, Dynamic>>(c);
+    return c.get();
+}
+
+template <typename T>
+Sum<Matrix<T, Dynamic, Dynamic>> *NN::sum(BaseNode *a)
+{
+    auto c = std::shared_ptr<Sum<Matrix<T, Dynamic, Dynamic>>>(new Sum<Matrix<T, Dynamic, Dynamic>>(a));
+    _graph.addNodeOne<Sum, Matrix<T, Dynamic, Dynamic>>(c);
+    return c.get();
+}

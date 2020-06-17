@@ -37,6 +37,12 @@ public:
     Sigmoid<Matrix<T, Dynamic, Dynamic>> *sigmoid(BaseNode *a);
 
     template <typename T>
+    Log<Matrix<T, Dynamic, Dynamic>> *log(BaseNode *a);
+
+    template <typename T>
+    Sum<Matrix<T, Dynamic, Dynamic>> *sum(BaseNode *a);
+
+    template <typename T>
     Matrix<T, Dynamic, Dynamic> run(BaseNode *n, std::unordered_map<std::string, Matrix<T, Dynamic, Dynamic> *> feed);
 
 private:
