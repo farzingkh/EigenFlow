@@ -254,7 +254,22 @@ void Dot<T, T1, T2>::compute()
 }
 
 template <typename T, typename T1, typename T2>
-void Dot<T, T1, T2>::gradient() { return; }
+void Dot<T, T1, T2>::gradient()
+{
+    std::cout << "Compute dot product operation gradient..." << std::endl;
+    // get output gradient from consumer
+    T G = ((BaseNode *)this)->getOutGradient<T>();
+    // get inputs of this node
+    std::vector<BaseNode *> inputs = this->getInputs();
+    T1 A = inputs[0]->getValue<T1>();
+    T2 B = inputs[1]->getValue<T2>();
+    // calculate and set gradient for first input "A"
+    T C = G * B.transpose();
+    this->setGrad(C);
+    // calculate and set gradient for first input "B"
+    T D = A.transpose() * G;
+    this->setGrad(D);
+}
 
 // --- Sigmoid ---
 
