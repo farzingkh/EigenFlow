@@ -101,6 +101,20 @@ public:
     void gradient();
 };
 
+template <typename T>
+class Sum : public UnaryOperation<T>
+{
+public:
+    Sum(BaseNode &a, int axis);
+    Sum(BaseNode *a, int axis);
+
+    void compute();
+    void gradient();
+
+private:
+    int _axis = 0;
+};
+
 #include "../src/operation.tpp"
 
 #endif /* OPERATION_H */

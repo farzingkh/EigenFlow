@@ -17,7 +17,8 @@ enum class operationType
     multiply,
     dotproduct,
     sigmoid,
-    log
+    log,
+    sum
 };
 
 // Node types

@@ -338,3 +338,49 @@ void Log<T>::gradient()
     T grad = G.array() / log.array();
     this->setGrad(grad);
 }
+
+// --- Sum ---
+
+template <typename T>
+Sum<T>::Sum(BaseNode &a, int axis) : UnaryOperation<T>(&a), _axis(axis)
+{
+    this->_opType = operationType::sum;
+}
+
+template <typename T>
+Sum<T>::Sum(BaseNode *a, int axis) : BinaryOperation<T>(a), _axis(axis)
+{
+    this->_opType = operationType::sum;
+}
+
+template <typename T>
+void Sum<T>::compute()
+{
+    std::cout << "Compute Sum operation ..." << std::endl;
+    if (_axis == 0)
+    {
+        // if axis = 0 then sum colwise
+        this->setValue(((BaseNode *)this)->getInputs()[0]->getValue<T>().colwise().sum());
+    }
+    else if (_axis == 1)
+    {
+        // if axis = 1 then sum rowwise
+        this->setValue(((BaseNode *)this)->getInputs()[0]->getValue<T>().rowwise().sum());
+    }
+}
+
+template <typename T>
+void Sum<T>::gradient()
+{
+    std::cout << "Compute sum operation gradient..." << std::endl;
+    // get output gradient from consumer
+    T G = ((BaseNode *)this)->getOutGradient<T>();
+    // get inputs of this node
+    std::vector<BaseNode *> inputs = this->getInputs();
+    T A = inputs[0]->getValue<T>();
+    // Input gradient is matrix ones of size A multiplied by output gradient
+    T g;
+    g.setOnes(A.rows(), A.cols());
+    g *= G;
+    this->setGrad(g);
+}
