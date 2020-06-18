@@ -33,10 +33,10 @@ T BaseNode::getOutGradient()
     std::vector<BaseNode *> consumers = this->getConsumers();
     // Initialize node's gradient
     T grad;
-    grad.setZero();
     // check if node has a consumer
     if (consumers.size() > 0)
     {
+        grad.setZero();
         // Go through all consumers to get total derivative
         for (auto cons : consumers)
         {
@@ -58,7 +58,8 @@ T BaseNode::getOutGradient()
     else
     {
         std::cout << "No consumer" << std::endl;
-        return T();
+        grad.setOnes(1,1);
+        return grad;
     }
 }
 
