@@ -4,6 +4,7 @@
 #include "graph.h"
 #include "session.h"
 #include "operation.h"
+#include "gradientDescentOptimizer.h"
 
 using namespace Eigen;
 
