@@ -80,7 +80,7 @@ void Add<T, T1, T2>::gradient()
     std::cout << "Compute Add operation geradient ..." << std::endl;
 
     // get output gradient from consumer
-    T grad = ((BaseNode *)this)->getOutGradient<T>(0);
+    T grad = ((BaseNode *)this)->getOutGradient<T>();
 
     // get inputs of this node
     std::vector<BaseNode *> inputs = this->getInputs();
@@ -143,7 +143,7 @@ template <typename T>
 void Negative<T>::gradient()
 {
     std::cout << "Compute negative operation geradient ..." << std::endl;
-    this->setGrad(-(((BaseNode *)this)->getOutGradient<T>(0)));
+    this->setGrad(-(((BaseNode *)this)->getOutGradient<T>()));
 }
 
 // --- Multiply Operation ---
@@ -177,7 +177,7 @@ void Multiply<T, T1, T2>::gradient()
 {
     std::cout << "Compute multiplication operation gradient..." << std::endl;
     // get output gradient from consumer
-    T G = ((BaseNode *)this)->getOutGradient<T>(0);
+    T G = ((BaseNode *)this)->getOutGradient<T>();
     // get inputs of this node
     std::vector<BaseNode *> inputs = this->getInputs();
     T1 A = inputs[0]->getValue<T1>();
@@ -219,7 +219,7 @@ void MatMultiply<T, T1, T2>::gradient()
 {
     std::cout << "Compute matrix multiplication operation gradient..." << std::endl;
     // get output gradient from consumer
-    T G = ((BaseNode *)this)->getOutGradient<T>(0);
+    T G = ((BaseNode *)this)->getOutGradient<T>();
     // get inputs of this node
     std::vector<BaseNode *> inputs = this->getInputs();
     T1 A = inputs[0]->getValue<T1>();
@@ -227,7 +227,7 @@ void MatMultiply<T, T1, T2>::gradient()
     // calculate and set gradient for first input "A"
     T C = G * B.transpose();
     this->setGrad(C);
-    // calculate and set gradient for first input "B"
+    // calculate and set gradient for second input "B"
     T D = A.transpose() * G;
     this->setGrad(D);
 }
@@ -258,7 +258,7 @@ void Dot<T, T1, T2>::gradient()
 {
     std::cout << "Compute dot product operation gradient..." << std::endl;
     // get output gradient from consumer
-    T G = ((BaseNode *)this)->getOutGradient<T>(0);
+    T G = ((BaseNode *)this)->getOutGradient<T>();
     // get inputs of this node
     std::vector<BaseNode *> inputs = this->getInputs();
     T1 A = inputs[0]->getValue<T1>();
@@ -297,7 +297,7 @@ void Sigmoid<T>::gradient()
 {
     std::cout << "Compute sigmoid gradient..." << std::endl;
     // get output gradient from consumer
-    T G = ((BaseNode *)this)->getOutGradient<T>(0);
+    T G = ((BaseNode *)this)->getOutGradient<T>();
     // get sigmoid value
     T sig = ((BaseNode *)this)->getValue<T>();
     // compute gradient
@@ -331,7 +331,7 @@ void Log<T>::gradient()
 {
     std::cout << "Compute log gradient..." << std::endl;
     // get output gradient from consumer
-    T G = ((BaseNode *)this)->getOutGradient<T>(0);
+    T G = ((BaseNode *)this)->getOutGradient<T>();
     // get log value
     T log = ((BaseNode *)this)->getValue<T>();
     // compute gradient; elementwise division
@@ -374,7 +374,7 @@ void Sum<T>::gradient()
 {
     std::cout << "Compute sum operation gradient..." << std::endl;
     // get output gradient from consumer
-    T G = ((BaseNode *)this)->getOutGradient<T>(0);
+    T G = ((BaseNode *)this)->getOutGradient<T>();
     // get inputs of this node
     std::vector<BaseNode *> inputs = this->getInputs();
     T A = inputs[0]->getValue<T>();

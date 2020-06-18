@@ -34,21 +34,26 @@ T BaseNode::getOutGradient()
     // Initialize node's gradient
     T grad;
     grad.setZero();
-    // Go through all consumers to get total derivative
-    for (auto cons : consumers)
+    // check if node has a consumer
+    if (consumers.size() > 0)
     {
-        // check which input node of the consumer is this; cnosidering we only have one consumer
-        int nodeIndex;
-        std::vector<BaseNode *> consumerInputs = cons->getInputs();
-        for (int i = 0; i < consumerInputs.size(); i++)
+        // Go through all consumers to get total derivative
+        for (auto cons : consumers)
         {
-            if (this == consumerInputs[i])
+            // check which input node of the consumer is this; cnosidering we only have one consumer
+            int nodeIndex;
+            std::vector<BaseNode *> consumerInputs = cons->getInputs();
+            for (int i = 0; i < consumerInputs.size(); i++)
             {
-                int nodeIndex = i;
+                if (this == consumerInputs[i])
+                {
+                    int nodeIndex = i;
+                }
             }
+            // get the output gradient for this node
+            grad += cons->getGradient<T>(nodeIndex);
         }
-        // get the output gradient for this node
-        return grad += cons->getGradient<T>(nodeIndex);
+        return grad;
     }
     else
     {
