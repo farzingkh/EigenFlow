@@ -45,9 +45,9 @@ public:
     template <typename T>
     T getGradient(int i);
     
-    // get output gradient from node's ith consumer 
+    // get total gradient from node's consumer 
     template <typename T>
-    T getOutGradient(int i); 
+    T getOutGradient(); 
 
     virtual void compute() = 0;
     virtual void gradient() = 0;
