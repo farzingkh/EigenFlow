@@ -37,14 +37,17 @@ public:
     void addConsumers(BaseNode *n);
     void setName(std::string n);
 
+    // get output value of this node
     template <typename T>
     T getValue();
 
+    // get ith input gradient of this node
     template <typename T>
     T getGradient(int i);
     
+    // get output gradient from node's ith consumer 
     template <typename T>
-    T getOutGradient(); // get output gradient from node's consumer
+    T getOutGradient(int i); 
 
     virtual void compute() = 0;
     virtual void gradient() = 0;

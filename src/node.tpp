@@ -28,7 +28,7 @@ T BaseNode::getGradient(int i)
 }
 
 template <typename T>
-T BaseNode::getOutGradient()
+T BaseNode::getOutGradient(int i)
 {
     std::vector<BaseNode *> consumer = this->getConsumers();
     //check if node has a consumer
@@ -36,7 +36,7 @@ T BaseNode::getOutGradient()
     {
         // check which input node of the consumer is this; cnosidering we only have one consumer
         int nodeIndex;
-        std::vector<BaseNode *> consumerInputs = consumer[0]->getInputs();
+        std::vector<BaseNode *> consumerInputs = consumer[i]->getInputs();
         for (int i = 0; i < 2; i++)
         {
             if (this == consumerInputs[i])
@@ -45,7 +45,7 @@ T BaseNode::getOutGradient()
             }
         }
         // get the output gradient for this node
-        return consumer[0]->getGradient<T>(nodeIndex);
+        return consumer[i]->getGradient<T>(nodeIndex);
     }
     else
     {
