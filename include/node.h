@@ -82,7 +82,7 @@ public:
     T getGradient(int i);
 
     void setValue(T &&t);
-    void setGrad(T &t);
+    void setGrad(T t);
 
 private:
     std::unique_ptr<T> _output = nullptr;

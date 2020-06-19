@@ -58,7 +58,7 @@ T BaseNode::getOutGradient()
     else
     {
         std::cout << "No consumer" << std::endl;
-        grad.setOnes(1,1);
+        grad.setOnes(1, 1);
         return grad;
     }
 }
@@ -116,7 +116,7 @@ void Node<T>::setValue(T &&t)
 }
 
 template <typename T>
-void Node<T>::setGrad(T &t)
+void Node<T>::setGrad(T t)
 {
     _gradientAvailable = true;
     // create unique pointer of grad and append to _grad
@@ -153,7 +153,10 @@ template <typename T>
 void Variable<T>::compute() { return; }
 
 template <typename T>
-void Variable<T>::gradient() { return; }
+void Variable<T>::gradient()
+{
+    this->setGrad(((BaseNode*)this)->getOutGradient<T>());
+}
 
 // --- Placeholder ---
 
@@ -168,4 +171,7 @@ template <typename T>
 void Placeholder<T>::compute() { return; }
 
 template <typename T>
-void Placeholder<T>::gradient() { return; }
+void Placeholder<T>::gradient()
+{
+    this->setGrad(((BaseNode*)this)->getOutGradient<T>());
+}
