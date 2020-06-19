@@ -1,12 +1,16 @@
 #include <iostream>
 #include <memory>
 #include <math.h>
+// --- Operation ---
+template <typename T>
+Operation<T>::Operation(){
+    this->_nType = nodeType::operation;
+}
 
 // --- UnaryOperation ---
 template <typename T>
 UnaryOperation<T>::UnaryOperation(BaseNode *rhs)
 {
-    this->_nType = nodeType::operation;
     this->addInputs(rhs);
     rhs->addConsumers(this);
 }
@@ -15,7 +19,6 @@ UnaryOperation<T>::UnaryOperation(BaseNode *rhs)
 template <typename T>
 BinaryOperation<T>::BinaryOperation(BaseNode *lhs, BaseNode *rhs)
 {
-    this->_nType = nodeType::operation;
     this->addInputs(lhs);
     this->addInputs(rhs);
     lhs->addConsumers(this);

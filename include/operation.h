@@ -6,6 +6,7 @@ template <typename T>
 class Operation : public Node<T>
 {
 public:
+    Operation();
     virtual void compute() = 0;
     virtual void gradient() = 0;
 };
