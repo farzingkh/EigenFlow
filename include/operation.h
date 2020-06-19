@@ -3,21 +3,25 @@
 
 // Class for operations with data value of type T
 template <typename T>
-class UnaryOperation : public Node<T>
+class Operation : public Node<T>
 {
 public:
-    UnaryOperation(BaseNode *rhs);
     virtual void compute() = 0;
     virtual void gradient() = 0;
 };
 
 template <typename T>
-class BinaryOperation : public Node<T>
+class UnaryOperation : public Operation<T>
+{
+public:
+    UnaryOperation(BaseNode *rhs);
+};
+
+template <typename T>
+class BinaryOperation : public Operation<T>
 {
 public:
     BinaryOperation(BaseNode *lhs, BaseNode *rhs);
-    virtual void compute() = 0;
-    virtual void gradient() = 0;
 };
 
 // Operations
