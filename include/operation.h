@@ -51,6 +51,7 @@ public:
     void gradient();
 };
 
+// Elementwise multiplication
 template <typename T, typename T1, typename T2>
 class Multiply : public BinaryOperation<T>
 {
@@ -62,6 +63,7 @@ public:
     void gradient();
 };
 
+// Matrix multiply
 template <typename T, typename T1, typename T2>
 class MatMultiply : public BinaryOperation<T>
 {
@@ -73,6 +75,7 @@ public:
     void gradient();
 };
 
+// Vector dot product
 template <typename T, typename T1, typename T2>
 class Dot : public BinaryOperation<T>
 {
@@ -84,6 +87,7 @@ public:
     void gradient();
 };
 
+// Elementwise sigmoid function
 template <typename T>
 class Sigmoid : public UnaryOperation<T>
 {
@@ -119,6 +123,7 @@ public:
     void gradient();
 
 private:
+    //  axis 0 is columnwise
     int _axis = 0;
 };
 
@@ -127,12 +132,11 @@ template <typename T>
 class Minimizer : public Operation<T>
 {
 public:
-    Minimizer(std::vector<BaseNode *>& nodeList);
+    Minimizer(std::vector<BaseNode *> &nodeList);
     void compute();
 
 private:
     std::vector<BaseNode *> nodesList_ = {};
-
 };
 #include "../src/operation.tpp"
 
