@@ -14,16 +14,4 @@ private:
     int learningRate_;
 };
 
-template <typename T>
-class Minimizer : public Operation<T>
-{
-public:
-    Minimizer(std::vector<BaseNode *>& nodeList);
-    void compute();
-
-private:
-    std::vector<BaseNode *> nodesList_ = {};
-
-};
-
 #endif /* GRADIENT_DESCENT */

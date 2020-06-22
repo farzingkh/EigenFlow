@@ -387,3 +387,19 @@ void Sum<T>::gradient()
     g *= G;
     this->setGrad(g);
 }
+
+/// --- Minimizaer Operation ----
+template <typename T>
+Minimizer<T>::Minimizer(std::vector<BaseNode *> &nodeList) : nodesList_(nodeList) {}
+
+template <typename T>
+void minimizer<T>::compute()
+{
+    for (auto n : nodesList_)
+    {
+        if (n->getNodeType() == nodeType::variable)
+        {
+            static_cast<Variable<T> *>(n)->updateGradient();
+        }
+    }
+}
