@@ -24,10 +24,10 @@ Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> Session::Run(BaseNode *n, std::
 }
 
 // Return post order list of nodes
-
 void Session::getNodesList(BaseNode *n)
 {
-    if (n->getNodeType() == nodeType::operation) // only operations have input nodes
+    // only operations have input nodes
+    if (n->getNodeType() == nodeType::operation) 
     {
         auto list = n->getInputs();
         for (auto &m : list)
