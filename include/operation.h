@@ -95,6 +95,7 @@ public:
     void gradient();
 };
 
+// Elementwise Log operation
 template <typename T>
 class Log : public UnaryOperation<T>
 {
@@ -106,6 +107,7 @@ public:
     void gradient();
 };
 
+// Reduce sum operation
 template <typename T>
 class Sum : public UnaryOperation<T>
 {

@@ -389,9 +389,11 @@ void Sum<T>::gradient()
 }
 
 /// --- Minimizaer Operation ----
+
 template <typename T>
 Minimizer<T>::Minimizer(std::vector<BaseNode *> &nodeList) : nodesList_(nodeList) {}
 
+// Compute update sthe variable gradients
 template <typename T>
 void minimizer<T>::compute()
 {
