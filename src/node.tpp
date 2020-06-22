@@ -166,7 +166,7 @@ void Variable<T>::updateGradient(int lr)
     T grad = ((BaseNode *)this)->getGradient<T>(0);
     T output = ((BaseNode *)this)->getValue<T>();
     // update variable values based on learning rate and gradient
-    output += grad * lr;
+    output -= grad * lr;
     this->setValue(output);
 }
 
