@@ -133,7 +133,7 @@ class Minimizer : public Operation<T>
 {
 public:
     Minimizer(std::vector<BaseNode *> &nodeList);
-    void compute();
+    void compute(int lr);
 
 private:
     std::vector<BaseNode *> nodesList_ = {};

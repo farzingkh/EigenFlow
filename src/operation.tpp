@@ -1,6 +1,7 @@
 #include <iostream>
 #include <memory>
 #include <math.h>
+
 // --- Operation ---
 template <typename T>
 Operation<T>::Operation(){
@@ -393,15 +394,15 @@ void Sum<T>::gradient()
 template <typename T>
 Minimizer<T>::Minimizer(std::vector<BaseNode *> &nodeList) : nodesList_(nodeList) {}
 
-// Compute update sthe variable gradients
+// Compute updates the variable gradients based on learning rate
 template <typename T>
-void minimizer<T>::compute()
+void Minimizer<T>::compute(int lr)
 {
     for (auto n : nodesList_)
     {
         if (n->getNodeType() == nodeType::variable)
         {
-            static_cast<Variable<T> *>(n)->updateGradient();
+            static_cast<Variable<T> *>(n)->updateGradient(lr);
         }
     }
 }
