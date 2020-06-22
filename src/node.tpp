@@ -57,6 +57,7 @@ T BaseNode::getOutGradient()
     }
     else
     {
+        //return 1 if there is no consumre
         std::cout << "No consumer" << std::endl;
         grad.setOnes(1, 1);
         return grad;
@@ -155,7 +156,18 @@ void Variable<T>::compute() { return; }
 template <typename T>
 void Variable<T>::gradient()
 {
-    this->setGrad(((BaseNode*)this)->getOutGradient<T>());
+    this->setGrad(((BaseNode *)this)->getOutGradient<T>());
+}
+
+template <typename T>
+void Variable<T>::updateGradient(int lr)
+{
+    //variable has only one input gradient
+    T grad = ((BaseNode *)this)->getGradient<T>(0);
+    T output = ((BaseNode *)this)->getValue<T>();
+    // update variable values based on learning rate and gradient
+    output += grad * lr;
+    this->setValue(output);
 }
 
 // --- Placeholder ---
@@ -173,5 +185,5 @@ void Placeholder<T>::compute() { return; }
 template <typename T>
 void Placeholder<T>::gradient()
 {
-    this->setGrad(((BaseNode*)this)->getOutGradient<T>());
+    this->setGrad(((BaseNode *)this)->getOutGradient<T>());
 }

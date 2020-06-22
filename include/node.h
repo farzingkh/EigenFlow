@@ -103,6 +103,7 @@ public:
 
     void compute();
     void gradient();
+    void updateGradient(int lr);
 };
 
 // A class for placeholders for values of type T
