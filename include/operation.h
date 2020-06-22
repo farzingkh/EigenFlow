@@ -123,11 +123,12 @@ public:
     void gradient();
 
 private:
-    //  axis 0 is columnwise
+    //  axis 0 is columnwise, axis 1 is rowwise
     int _axis = 0;
 };
 
 // Minimization Operation
+// Doesn't have any inputs or consumers
 template <typename T>
 class Minimizer : public Operation<T>
 {
@@ -136,7 +137,8 @@ public:
     void compute(int lr);
 
 private:
-    std::vector<BaseNode *> nodesList_ = {};
+    // cashed varieble nodes list
+    std::vector<BaseNode *> nodesList_ = {}; 
 };
 #include "../src/operation.tpp"
 
