@@ -7,12 +7,23 @@ class GradientDescentOptimizer
 {
 public:
     GradientDescentOptimizer(int lr);
-    void computeGradients(BaseNode *n);
-    BaseNode *minimize(BaseNode *n);
+    void computeGradients(BaseNode *loss);
+    BaseNode *minimize(BaseNode *loss);
 
 private:
     int learningRate_;
-    std::deque<BaseNode *> nodeQueue_;
+};
+
+template <typename T>
+class Minimizer : public Operation<T>
+{
+public:
+    Minimizer(std::vector<BaseNode *>& nodeList);
+    void compute();
+
+private:
+    std::vector<BaseNode *> nodesList_ = {};
+
 };
 
 #endif /* GRADIENT_DESCENT */
