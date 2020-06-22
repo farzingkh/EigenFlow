@@ -23,15 +23,21 @@ void GradientDescentOptimizer::computeGradients(BaseNode *loss)
             {
                 // if node not visited add to queue
                 nodeQueue.push_back(n);
+                // if variable add to variable list
+                if (n->getNodeType() == nodeType::variable)
+                {
+                    variableNodesList_.push_front(n);
+                }
             }
         }
     }
 }
 
+template <typename T>
 BaseNode *GradientDescentOptimizer::minimize(BaseNode *loss)
 {
-    std::vector<BaseNode *> nodeList;
-
-    return BaseNode();
+    // compute gradients and cash variable nodes list
+    computeGradients(loss);
+    // Instantiate a minimzer object and return it
+    return  Minimizer<T>(variableNodesList_);
 }
-
