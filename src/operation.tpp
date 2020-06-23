@@ -392,17 +392,20 @@ void Sum<T>::gradient()
 /// --- Minimizaer Operation ----
 
 template <typename T>
-Minimizer<T>::Minimizer(std::vector<BaseNode *> &nodeList) : nodesList_(nodeList) {}
+Minimizer<T>::Minimizer(std::vector<BaseNode *> &nodeList, float lr) : nodesList_(nodeList), learningRate_(lr) {}
 
 // Compute updates the variable gradients based on learning rate
 template <typename T>
-void Minimizer<T>::compute(int lr)
+void Minimizer<T>::compute()
 {
     for (auto n : nodesList_)
     {
         if (n->getNodeType() == nodeType::variable)
         {
-            static_cast<Variable<T> *>(n)->updateGradient(lr);
+            static_cast<Variable<T> *>(n)->updateGradient(learningRate_);
         }
     }
 }
+
+template <typename T>
+void Minimizer<T>::gradient() { return; }

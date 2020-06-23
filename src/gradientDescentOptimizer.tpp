@@ -8,7 +8,8 @@ void GradientDescentOptimizer::computeGradients(BaseNode *loss)
     nodeQueue.push_front(loss);
     while (!nodeQueue.empty())
     {
-        BaseNode *node = nodeQueue.pop_front();
+        BaseNode *node = nodeQueue.front();
+        nodeQueue.pop_front();
         // calculate gradients
         node->gradient();
         // set node as visited
@@ -25,7 +26,7 @@ void GradientDescentOptimizer::computeGradients(BaseNode *loss)
                 // if variable add to variable list
                 if (n->getNodeType() == nodeType::variable)
                 {
-                    variableNodesList_.push_front(n);
+                    variableNodesList_.push_back(n);
                 }
             }
         }
@@ -33,7 +34,7 @@ void GradientDescentOptimizer::computeGradients(BaseNode *loss)
 }
 
 template <typename T>
-BaseNode *GradientDescentOptimizer::minimize(BaseNode *loss)
+Minimizer<T> GradientDescentOptimizer::minimize(BaseNode *loss)
 {
     // compute gradients and cash variable nodes list
     computeGradients(loss);
