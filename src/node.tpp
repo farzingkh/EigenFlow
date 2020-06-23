@@ -36,7 +36,6 @@ T BaseNode::getOutGradient()
     // check if node has a consumer
     if (consumers.size() > 0)
     {
-        grad.setZero();
         // Go through all consumers to get total derivative
         for (auto cons : consumers)
         {
@@ -50,8 +49,10 @@ T BaseNode::getOutGradient()
                     int nodeIndex = i;
                 }
             }
-            // get the output gradient for this node
-            grad += cons->getGradient<T>(nodeIndex);
+            // get the output gradient for this node and add to toal gradient
+            T g = cons->getGradient<T>(nodeIndex);
+            grad.setZero(g.rows(),g.cols());
+            grad += g;
         }
         return grad;
     }
@@ -98,7 +99,7 @@ T Node<T>::getGradient(int i)
     //std::cout << "Variable get value..." << std::endl;
     if (_gradientAvailable)
     {
-        std::cout << "Gradient get: " << *_output << std::endl;
+        std::cout << "Gradient get: " << *(_grad[i]) << std::endl;
         return *(_grad[i]);
     }
     else
