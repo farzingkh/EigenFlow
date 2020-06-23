@@ -4,7 +4,8 @@
 
 // --- Operation ---
 template <typename T>
-Operation<T>::Operation(){
+Operation<T>::Operation()
+{
     this->_nType = nodeType::operation;
 }
 
@@ -392,17 +393,19 @@ void Sum<T>::gradient()
 /// --- Minimizaer Operation ----
 
 template <typename T>
-Minimizer<T>::Minimizer(std::vector<BaseNode *> &nodeList, float lr) : nodesList_(nodeList), learningRate_(lr) {}
+Minimizer<T>::Minimizer(GradientDescentOptimizer* grd, BaseNode* loss) : grdOpt_(grd), loss_(loss) {}
 
 // Compute updates the variable gradients based on learning rate
 template <typename T>
 void Minimizer<T>::compute()
 {
-    for (auto n : nodesList_)
+    grdOpt_->computeGradients(loss_);
+
+    for (auto n : grdOpt_->variableNodesList_)
     {
         if (n->getNodeType() == nodeType::variable)
         {
-            static_cast<Variable<T> *>(n)->updateGradient(learningRate_);
+            static_cast<Variable<T> *>(n)->updateGradient(grdOpt_->learningRate_);
         }
     }
 }

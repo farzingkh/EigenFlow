@@ -1,6 +1,8 @@
 #ifndef OPERATION_H
 #define OPERATION_H
 
+#include "../include/gradientDescentOptimizer.h"
+
 // Class for operations with data value of type T
 template <typename T>
 class Operation : public Node<T>
@@ -128,19 +130,19 @@ private:
 };
 
 // Minimization Operation
-// Doesn't have any inputs or consumers
+// Node doesn't have any inputs or consumers
 template <typename T>
 class Minimizer : public Operation<T>
 {
 public:
-    Minimizer(std::vector<BaseNode *> &nodeList, float lr);
+    Minimizer(GradientDescentOptimizer* grd, BaseNode* loss);
     void compute();
     void gradient();
 
 private:
     // cashed varieble nodes list
-    std::vector<BaseNode *> nodesList_ = {};
-    float learningRate_;
+    GradientDescentOptimizer* grdOpt_;
+    BaseNode* loss_;
 };
 #include "../src/operation.tpp"
 

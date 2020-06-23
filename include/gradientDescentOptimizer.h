@@ -16,8 +16,7 @@ public:
 
     template <typename T>
     Minimizer<T> minimize(BaseNode *loss);
-
-private:
+    
     float learningRate_;
     std::vector<BaseNode *> variableNodesList_;
 };

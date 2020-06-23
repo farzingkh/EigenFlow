@@ -36,8 +36,6 @@ void GradientDescentOptimizer::computeGradients(BaseNode *loss)
 template <typename T>
 Minimizer<T> GradientDescentOptimizer::minimize(BaseNode *loss)
 {
-    // compute gradients and cash variable nodes list
-    computeGradients(loss);
     // Instantiate a minimzer object and return it
-    return  Minimizer<T>(variableNodesList_, learningRate_);
+    return Minimizer<T>(this, loss);
 }
