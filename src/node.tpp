@@ -121,8 +121,8 @@ void Node<T>::setGrad(T t)
 {
     _gradientAvailable = true;
     // create unique pointer of grad and append to _grad
+    std::cout << "Gradient set: " << t << std::endl;
     _grad.push_back(std::move(std::unique_ptr<T>((new T(t)))));
-    std::cout << "Gradient set: " << *_output << std::endl;
 }
 
 // --- Variable ---
