@@ -19,7 +19,7 @@ void GradientDescentOptimizer::computeGradients(BaseNode *loss)
         for (auto n : nodes)
         {
             // check if the node is visited before
-            if (visitedNodes[node] != true)
+            if (visitedNodes[n] != true)
             {
                 // if node not visited add to queue
                 nodeQueue.push_back(n);
