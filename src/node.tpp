@@ -160,14 +160,14 @@ void Variable<T>::gradient()
 }
 
 template <typename T>
-void Variable<T>::updateGradient(int lr)
+void Variable<T>::updateGradient(float lr)
 {
     //variable has only one input gradient
     T grad = ((BaseNode *)this)->getGradient<T>(0);
     T output = ((BaseNode *)this)->getValue<T>();
     // update variable values based on learning rate and gradient
     output -= grad * lr;
-    this->setValue(output);
+    this->setValue(std::move(output));
 }
 
 // --- Placeholder ---

@@ -1,11 +1,10 @@
-#include "../nclude/gradientDescentOptimizer.h"
 
-GradientDescentOptimizer::GradientDescentOptimizer(int lr) : learningRate_(lr) {}
+GradientDescentOptimizer::GradientDescentOptimizer(float lr) : learningRate_(lr) {}
 
 void GradientDescentOptimizer::computeGradients(BaseNode *loss)
 {
     std::deque<BaseNode *> nodeQueue;
-    std::map<BaseNode *, bool visited> visitedNodes;
+    std::unordered_map<BaseNode *, bool> visitedNodes;
     nodeQueue.push_front(loss);
     while (!nodeQueue.empty())
     {
@@ -39,5 +38,5 @@ BaseNode *GradientDescentOptimizer::minimize(BaseNode *loss)
     // compute gradients and cash variable nodes list
     computeGradients(loss);
     // Instantiate a minimzer object and return it
-    return  Minimizer<T>(variableNodesList_);
+    return  Minimizer<T>(variableNodesList_, learningRate_);
 }

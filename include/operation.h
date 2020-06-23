@@ -133,12 +133,14 @@ template <typename T>
 class Minimizer : public Operation<T>
 {
 public:
-    Minimizer(std::vector<BaseNode *> &nodeList);
-    void compute(int lr);
+    Minimizer(std::vector<BaseNode *> &nodeList, float lr);
+    void compute();
+    void gradient();
 
 private:
     // cashed varieble nodes list
-    std::vector<BaseNode *> nodesList_ = {}; 
+    std::vector<BaseNode *> nodesList_ = {};
+    float learningRate_;
 };
 #include "../src/operation.tpp"
 
