@@ -83,7 +83,7 @@ T Node<T>::getValue()
     //std::cout << "Variable get value..." << std::endl;
     if (_dataAvailable)
     {
-        std::cout << "Output get: " << *_output << std::endl;
+        std::cout << "Output get: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
         return *_output;
     }
     else
@@ -99,12 +99,12 @@ T Node<T>::getGradient(int i)
     //std::cout << "Variable get value..." << std::endl;
     if (_gradientAvailable)
     {
-        std::cout << "Gradient get: " << *(_grad[i]) << std::endl;
+        std::cout << "Gradient get: " << *(_grad[i]) << ", size: " << (*(_grad[i])).rows() << "," << (*(_grad[i])).cols() <<std::endl;
         return *(_grad[i]);
     }
     else
     {
-        std::cout << "Data not available" << std::endl;
+        std::cout << "Gradient Data not available" << std::endl;
         return T();
     }
 }
@@ -114,7 +114,7 @@ void Node<T>::setValue(T &&t)
 {
     _dataAvailable = true;
     _output.reset(new T(t));
-    std::cout << "Output set: " << *_output << std::endl;
+    std::cout << "Output set: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
 }
 
 template <typename T>
@@ -122,7 +122,7 @@ void Node<T>::setGrad(T t)
 {
     _gradientAvailable = true;
     // create unique pointer of grad and append to _grad
-    std::cout << "Gradient set: " << t << std::endl;
+    std::cout << "Gradient set: " << t << ", size: " << t.rows() << "," << t.cols() << std::endl;
     _grad.push_back(std::move(std::unique_ptr<T>((new T(t)))));
 }
 
@@ -157,6 +157,7 @@ void Variable<T>::compute() { return; }
 template <typename T>
 void Variable<T>::gradient()
 {
+    std::cout << "Variable gradient ..." << std::endl;
     this->setGrad(((BaseNode *)this)->getOutGradient<T>());
 }
 
