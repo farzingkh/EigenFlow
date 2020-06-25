@@ -51,7 +51,7 @@ T BaseNode::getOutGradient()
             }
             // get the output gradient for this node and add to toal gradient
             T g = cons->getGradient<T>(nodeIndex);
-            grad.setZero(g.rows(),g.cols());
+            grad.setZero(g.rows(), g.cols());
             grad += g;
         }
         return grad;
@@ -99,7 +99,7 @@ T Node<T>::getGradient(int i)
     //std::cout << "Variable get value..." << std::endl;
     if (_gradientAvailable)
     {
-        std::cout << "Gradient get: " << *(_grad[i]) << ", size: " << (*(_grad[i])).rows() << "," << (*(_grad[i])).cols() <<std::endl;
+        std::cout << "Gradient get: " << *(_grad[i]) << ", size: " << (*(_grad[i])).rows() << "," << (*(_grad[i])).cols() << std::endl;
         return *(_grad[i]);
     }
     else
@@ -120,10 +120,14 @@ void Node<T>::setValue(T &&t)
 template <typename T>
 void Node<T>::setGrad(T t)
 {
-    _gradientAvailable = true;
     // create unique pointer of grad and append to _grad
     std::cout << "Gradient set: " << t << ", size: " << t.rows() << "," << t.cols() << std::endl;
     _grad.push_back(std::move(std::unique_ptr<T>((new T(t)))));
+    // check if gradient of all consumers are set
+    if (_grad.size() == this->getConsumers().size())
+    {
+        _gradientAvailable = true;
+    }
 }
 
 // --- Variable ---
