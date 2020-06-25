@@ -128,7 +128,8 @@ void Node<T>::setGrad(T t)
         std::cout << "Gradient and output have different dimensions!" << std::endl;
     }
     // check if gradient of all consumers are set
-    if (_grad.size() == this->getConsumers().size())
+    // use >= as a node might not have a consumer 
+    if (_grad.size() >= this->getConsumers().size())
     {
         _gradientAvailable = true;
     }
