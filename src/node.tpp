@@ -104,7 +104,7 @@ T Node<T>::getGradient(int i)
     }
     else
     {
-        std::cout << "Gradient Data not available" << std::endl;
+        std::cout << "Gradient Data not available!" << std::endl;
         return T();
     }
 }
@@ -123,6 +123,10 @@ void Node<T>::setGrad(T t)
     // create unique pointer of grad and append to _grad
     std::cout << "Gradient set: " << t << ", size: " << t.rows() << "," << t.cols() << std::endl;
     _grad.push_back(std::move(std::unique_ptr<T>((new T(t)))));
+    // gradient and value must have same dimensions
+    if (t.cols() != (*_output).cols() or t.rows() != (*_output).rows()){
+        std::cout << "Gradient and output have different dimensions!" << std::endl;
+    }
     // check if gradient of all consumers are set
     if (_grad.size() == this->getConsumers().size())
     {
