@@ -16,7 +16,7 @@ void BaseNode::addConsumers(BaseNode *n)
 }
 
 template <typename T>
-T BaseNode::getValue()
+std::shared_ptr<T> BaseNode::getValue()
 {
     return dynamic_cast<Node<T> *>(this)->getValue();
 }
@@ -78,18 +78,18 @@ operationType BaseNode::getOperationType() { return _opType; }
 // --- Node  ---
 
 template <typename T>
-T Node<T>::getValue()
+std::shared_ptr<T> Node<T>::getValue()
 {
     //std::cout << "Variable get value..." << std::endl;
     if (_dataAvailable)
     {
         std::cout << "Output get: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
-        return *_output;
+        return _output;
     }
     else
     {
         std::cout << "Data not available" << std::endl;
-        return T();
+        return std::shared_ptr<T>(nullptr);
     }
 }
 
@@ -113,7 +113,15 @@ template <typename T>
 void Node<T>::setValue(T &&t)
 {
     _dataAvailable = true;
-    _output.reset(new T(t));
+    _output = std::shared_ptr<T>(new T(t));
+    std::cout << "Output set: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
+}
+
+template <typename T>
+void Node<T>::setValue(std::shared_ptr<T> t)
+{
+    _dataAvailable = true;
+    _output = t;
     std::cout << "Output set: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
 }
 
@@ -124,11 +132,12 @@ void Node<T>::setGrad(T t)
     std::cout << "Gradient set: " << t << ", size: " << t.rows() << "," << t.cols() << std::endl;
     _grad.push_back(std::move(std::unique_ptr<T>((new T(t)))));
     // gradient and value must have same dimensions
-    if (t.cols() != (*_output).cols() or t.rows() != (*_output).rows()){
+    if (t.cols() != (*_output).cols() or t.rows() != (*_output).rows())
+    {
         std::cout << "Gradient and output have different dimensions!" << std::endl;
     }
     // check if gradient of all consumers are set
-    // use >= as a node might not have a consumer 
+    // use >= as a node might not have a consumer
     if (_grad.size() >= this->getConsumers().size())
     {
         _gradientAvailable = true;
@@ -175,10 +184,9 @@ void Variable<T>::updateGradient(float lr)
 {
     //variable has only one input gradient
     T grad = ((BaseNode *)this)->getGradient<T>(0);
-    T output = ((BaseNode *)this)->getValue<T>();
+    std::shared_ptr<T> output = ((BaseNode *)this)->getValue<T>();
     // update variable values based on learning rate and gradient
-    output -= grad * lr;
-    this->setValue(std::move(output));
+    *output -= grad * lr;
 }
 
 // --- Placeholder ---

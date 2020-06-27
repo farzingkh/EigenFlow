@@ -5,6 +5,7 @@
 #include <memory>
 #include <Eigen/Dense>
 #include <Eigen/Core>
+#include <thread>
 
 // A matrix of ints with a dynamic size, Use it when the size is not known
 typedef Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> matXXi;
@@ -39,7 +40,7 @@ public:
 
     // get output value of this node
     template <typename T>
-    T getValue();
+    std::shared_ptr<T> getValue();
 
     // get ith input gradient of this node
     template <typename T>
@@ -78,14 +79,16 @@ template <typename T>
 class Node : public BaseNode
 {
 public:
-    T getValue();
+    std::shared_ptr<T> getValue();
     T getGradient(int i);
 
     void setValue(T &&t);
+    void setValue(std::shared_ptr<T> t);
     void setGrad(T t);
 
 private:
-    std::unique_ptr<T> _output = nullptr;
+    // ouput might be shared 
+    std::shared_ptr<T> _output = nullptr;
     std::vector<std::unique_ptr<T>> _grad;
 
     bool _dataAvailable = false;

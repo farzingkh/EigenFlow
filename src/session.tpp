@@ -20,7 +20,7 @@ Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> Session::Run(BaseNode *n, std::
             m->compute();
         }
     }
-    return n->getValue<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>>();
+    return *(n->getValue<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>>());
 }
 
 // Return post order list of nodes
