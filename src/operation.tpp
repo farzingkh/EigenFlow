@@ -400,6 +400,11 @@ template <typename T>
 Minimizer<T>::Minimizer(Minimizer<T> &&other)
 {
     std::cout << " Minimizer move contructor..." << std::endl;
+    // lock other side 
+    std::unique_lock<std::mutex> rhs_baselk(other.BaseMtx_, std::defer_lock);
+    std::unique_lock<std::mutex> rhs_nodelk(other.NodeMtx_, std::defer_lock);
+    std::lock(rhs_baselk, rhs_nodelk);
+    // move members
     grdOpt_ = other.grdOpt_;
     loss_ = other.loss_;
     other.grdOpt_ = nullptr;
@@ -412,6 +417,13 @@ Minimizer<T> &Minimizer<T>::operator=(Minimizer<T> &&other)
     std::cout << " Minimizer move assignment contructor..." << std::endl;
     if (this != &other)
     {
+        // lock both base and node class of both sides 
+        std::unique_lock<std::mutex> lhs_nodelk(this->NodeMtx_, std::defer_lock);
+        std::unique_lock<std::mutex> rhs_nodelk(&other->NodeMtx_, std::defer_lock);
+        std::unique_lock<std::mutex> lhs_baselk(this->BaseMtx_, std::defer_lock);
+        std::unique_lock<std::mutex> rhs_baselk(&other->BaseMtx_, std::defer_lock);
+        std::lock(lhs_baselk, rhs_baselk, lhs_nodelk, rhs_nodelk);
+        // move members
         grdOpt_ = other.grdOpt_;
         loss_ = other.loss_;
         other.grdOpt_ = nullptr;
