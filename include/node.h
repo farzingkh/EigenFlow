@@ -6,6 +6,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Core>
 #include <thread>
+#include <mutex>
 
 // A matrix of ints with a dynamic size, Use it when the size is not known
 typedef Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> matXXi;
@@ -92,6 +93,9 @@ private:
 
     bool _dataAvailable = false;
     bool _gradientAvailable = false;
+
+    std::mutex mtx_;
+    std::condition_variable cond_;
 };
 
 // A class for variables of type T
