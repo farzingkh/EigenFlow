@@ -5,19 +5,19 @@
 // --- BaseNode ---
 void BaseNode::setName(std::string n)
 {
-    std::lock_guard<std::mutex> lck(BaseMtx_, std::adopt_lock);
+    std::lock_guard<std::mutex> lck(BaseMtx_);
     _name = n;
 }
 
 void BaseNode::addInputs(BaseNode *n)
 {
-    std::lock_guard<std::mutex> lck(BaseMtx_, std::adopt_lock);
+    std::lock_guard<std::mutex> lck(BaseMtx_);
     _inputs.push_back(n);
 }
 
 void BaseNode::addConsumers(BaseNode *n)
 {
-    std::lock_guard<std::mutex> lck(BaseMtx_, std::adopt_lock);
+    std::lock_guard<std::mutex> lck(BaseMtx_);
     _consumers.push_back(n);
 }
 
@@ -73,31 +73,31 @@ T BaseNode::getOutGradient()
 
 std::string BaseNode::getName()
 {
-    std::lock_guard<std::mutex> lck(BaseMtx_, std::adopt_lock);
+    std::lock_guard<std::mutex> lck(BaseMtx_);
     return _name;
 }
 
 std::vector<BaseNode *> &BaseNode::getInputs()
 {
-    std::lock_guard<std::mutex> lck(BaseMtx_, std::adopt_lock);
+    std::lock_guard<std::mutex> lck(BaseMtx_);
     return _inputs;
 }
 
 std::vector<BaseNode *> &BaseNode::getConsumers()
 {
-    std::lock_guard<std::mutex> lck(BaseMtx_, std::adopt_lock);
+    std::lock_guard<std::mutex> lck(BaseMtx_);
     return _consumers;
 }
 
 nodeType BaseNode::getNodeType()
 {
-    std::lock_guard<std::mutex> lck(BaseMtx_, std::adopt_lock);
+    std::lock_guard<std::mutex> lck(BaseMtx_);
     return _nType;
 }
 
 operationType BaseNode::getOperationType()
 {
-    std::lock_guard<std::mutex> lck(BaseMtx_, std::adopt_lock);
+    std::lock_guard<std::mutex> lck(BaseMtx_);
     return _opType;
 }
 
@@ -108,7 +108,7 @@ std::shared_ptr<T> Node<T>::getValue()
 {
     //std::cout << "Variable get value..." << std::endl;
     // lock to avoid data race
-    std::unique_lock<std::mutex> lock(NodeMtx_, std::adopt_lock);
+    std::unique_lock<std::mutex> lock(NodeMtx_);
     if (_dataAvailable)
     {
         std::cout << "Output get: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
@@ -125,7 +125,7 @@ template <typename T>
 T Node<T>::getGradient(int i)
 {
     // lock to avoid data race
-    std::unique_lock<std::mutex> lock(NodeMtx_, std::adopt_lock);
+    std::unique_lock<std::mutex> lock(NodeMtx_);
     // use condition variable to wait until gradient is available
     cond_.wait(lock, [this]() { return _gradientAvailable; });
     std::cout << "Gradient get: " << *(_grad[i]) << ", size: " << (*(_grad[i])).rows() << "," << (*(_grad[i])).cols() << std::endl;
@@ -135,7 +135,7 @@ T Node<T>::getGradient(int i)
 template <typename T>
 void Node<T>::setValue(T &&t)
 {
-    std::unique_lock<std::mutex> lock(NodeMtx_, std::adopt_lock);
+    std::unique_lock<std::mutex> lock(NodeMtx_);
     _dataAvailable = true;
     _output = std::shared_ptr<T>(new T(t));
     std::cout << "Output set: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
@@ -145,7 +145,7 @@ template <typename T>
 void Node<T>::setGrad(T t)
 {
     // lock to avoid data races
-    std::unique_lock<std::mutex> lock(NodeMtx_, std::adopt_lock);
+    std::unique_lock<std::mutex> lock(NodeMtx_);
     // create unique pointer of grad and append to _grad
     std::cout << "Gradient set: " << t << ", size: " << t.rows() << "," << t.cols() << std::endl;
     _grad.push_back(std::move(std::unique_ptr<T>((new T(t)))));
@@ -176,13 +176,26 @@ template <typename T>
 Variable<T>::Variable(Variable<T> &v)
 {
     std::cout << "Variable copy contructor ..." << std::endl;
+    // lock other side 
+    std::unique_lock<std::mutex> rhs_baselk(v.BaseMtx_, std::defer_lock);
+    std::unique_lock<std::mutex> rhs_nodelk(v.NodeMtx_, std::defer_lock);
+    std::lock(rhs_baselk, rhs_nodelk);
+    // copy
     this->_nType = nodeType::variable;
+    // set value locks the node, no need to create a lock
     this->setValue((&v)->getValue());
 }
 template <typename T>
 Variable<T>::Variable(Variable<T> &&v)
 {
     std::cout << "Variable move contructor ..." << std::endl;
+    // lock
+    std::unique_lock<std::mutex> rhs_baselk(v.BaseMtx_, std::defer_lock);
+    std::unique_lock<std::mutex> rhs_nodelk(v.NodeMtx_, std::defer_lock);
+    // lock this to change output value
+    std::unique_lock<std::mutex> lhs_nodelk(this->NodeMtx_, std::defer_lock);
+    std::lock(rhs_baselk, rhs_nodelk, lhs_nodelk);
+    // move
     this->_nType = nodeType::variable;
     this->_output = std::move(v->_output);
 }
