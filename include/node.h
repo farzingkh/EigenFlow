@@ -83,7 +83,6 @@ public:
     T getGradient(int i);
 
     void setValue(T &&t);
-    void setValue(std::shared_ptr<T> t);
     void setGrad(T t);
 
 private:

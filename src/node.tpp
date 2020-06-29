@@ -118,14 +118,6 @@ void Node<T>::setValue(T &&t)
 }
 
 template <typename T>
-void Node<T>::setValue(std::shared_ptr<T> t)
-{
-    _dataAvailable = true;
-    _output = t;
-    std::cout << "Output set: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
-}
-
-template <typename T>
 void Node<T>::setGrad(T t)
 {
     // create unique pointer of grad and append to _grad
