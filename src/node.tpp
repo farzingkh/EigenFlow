@@ -3,15 +3,21 @@
 #include <iostream>
 
 // --- BaseNode ---
-void BaseNode::setName(std::string n) { _name = n; }
+void BaseNode::setName(std::string n)
+{
+    std::lock_guard<std::mutex> lck(BaseMtx_, std::adopt_lock);
+    _name = n;
+}
 
 void BaseNode::addInputs(BaseNode *n)
 {
+    std::lock_guard<std::mutex> lck(BaseMtx_, std::adopt_lock);
     _inputs.push_back(n);
 }
 
 void BaseNode::addConsumers(BaseNode *n)
 {
+    std::lock_guard<std::mutex> lck(BaseMtx_, std::adopt_lock);
     _consumers.push_back(n);
 }
 
@@ -65,15 +71,35 @@ T BaseNode::getOutGradient()
     }
 }
 
-std::string BaseNode::getName() { return _name; }
+std::string BaseNode::getName()
+{
+    std::lock_guard<std::mutex> lck(BaseMtx_, std::adopt_lock);
+    return _name;
+}
 
-std::vector<BaseNode *> &BaseNode::getInputs() { return _inputs; }
+std::vector<BaseNode *> &BaseNode::getInputs()
+{
+    std::lock_guard<std::mutex> lck(BaseMtx_, std::adopt_lock);
+    return _inputs;
+}
 
-std::vector<BaseNode *> &BaseNode::getConsumers() { return _consumers; }
+std::vector<BaseNode *> &BaseNode::getConsumers()
+{
+    std::lock_guard<std::mutex> lck(BaseMtx_, std::adopt_lock);
+    return _consumers;
+}
 
-nodeType BaseNode::getNodeType() { return _nType; }
+nodeType BaseNode::getNodeType()
+{
+    std::lock_guard<std::mutex> lck(BaseMtx_, std::adopt_lock);
+    return _nType;
+}
 
-operationType BaseNode::getOperationType() { return _opType; }
+operationType BaseNode::getOperationType()
+{
+    std::lock_guard<std::mutex> lck(BaseMtx_, std::adopt_lock);
+    return _opType;
+}
 
 // --- Node  ---
 
@@ -81,6 +107,8 @@ template <typename T>
 std::shared_ptr<T> Node<T>::getValue()
 {
     //std::cout << "Variable get value..." << std::endl;
+    // lock to avoid data race
+    std::unique_lock<std::mutex> lock(NodeMtx_, std::adopt_lock);
     if (_dataAvailable)
     {
         std::cout << "Output get: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
@@ -96,22 +124,18 @@ std::shared_ptr<T> Node<T>::getValue()
 template <typename T>
 T Node<T>::getGradient(int i)
 {
-    //std::cout << "Variable get value..." << std::endl;
-    if (_gradientAvailable)
-    {
-        std::cout << "Gradient get: " << *(_grad[i]) << ", size: " << (*(_grad[i])).rows() << "," << (*(_grad[i])).cols() << std::endl;
-        return *(_grad[i]);
-    }
-    else
-    {
-        std::cout << "Gradient Data not available!" << std::endl;
-        return T();
-    }
+    // lock to avoid data race
+    std::unique_lock<std::mutex> lock(NodeMtx_, std::adopt_lock);
+    // use condition variable to wait until gradient is available
+    cond_.wait(lock, [this]() { return _gradientAvailable; });
+    std::cout << "Gradient get: " << *(_grad[i]) << ", size: " << (*(_grad[i])).rows() << "," << (*(_grad[i])).cols() << std::endl;
+    return *(_grad[i]);
 }
 
 template <typename T>
 void Node<T>::setValue(T &&t)
 {
+    std::unique_lock<std::mutex> lock(NodeMtx_, std::adopt_lock);
     _dataAvailable = true;
     _output = std::shared_ptr<T>(new T(t));
     std::cout << "Output set: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
@@ -120,6 +144,8 @@ void Node<T>::setValue(T &&t)
 template <typename T>
 void Node<T>::setGrad(T t)
 {
+    // lock to avoid data races
+    std::unique_lock<std::mutex> lock(NodeMtx_, std::adopt_lock);
     // create unique pointer of grad and append to _grad
     std::cout << "Gradient set: " << t << ", size: " << t.rows() << "," << t.cols() << std::endl;
     _grad.push_back(std::move(std::unique_ptr<T>((new T(t)))));
@@ -162,7 +188,10 @@ Variable<T>::Variable(Variable<T> &&v)
 }
 
 template <typename T>
-void Variable<T>::compute() { return; }
+void Variable<T>::compute()
+{
+    return;
+}
 
 template <typename T>
 void Variable<T>::gradient()
@@ -178,7 +207,8 @@ void Variable<T>::updateGradient(float lr)
     T grad = ((BaseNode *)this)->getGradient<T>(0);
     std::shared_ptr<T> output = ((BaseNode *)this)->getValue<T>();
     // update variable values based on learning rate and gradient
-    *output -= grad * lr;
+    T og = *output - (grad * lr);
+    this->setGrad(og);
 }
 
 // --- Placeholder ---
@@ -191,7 +221,10 @@ Placeholder<T>::Placeholder(std::string n)
 }
 
 template <typename T>
-void Placeholder<T>::compute() { return; }
+void Placeholder<T>::compute()
+{
+    return;
+}
 
 template <typename T>
 void Placeholder<T>::gradient()

@@ -46,11 +46,12 @@ public:
     // get ith input gradient of this node
     template <typename T>
     T getGradient(int i);
-    
-    // get total gradient from node's consumer 
-    template <typename T>
-    T getOutGradient(); 
 
+    // get total gradient from node's consumer
+    template <typename T>
+    T getOutGradient();
+
+    // make this abstract base class
     virtual void compute() = 0;
     virtual void gradient() = 0;
 
@@ -64,6 +65,7 @@ protected:
     std::string _name = " ";
     nodeType _nType;       // node type
     operationType _opType; // type if node is operation
+    std::mutex BaseMtx_;
 
 private:
     std::vector<BaseNode *> _consumers = {}; // parent nodes
@@ -86,16 +88,17 @@ public:
     void setValue(T &&t);
     void setGrad(T t);
 
+protected:
+    std::mutex NodeMtx_;
+    std::condition_variable cond_;
+    
 private:
-    // ouput might be shared 
+    // ouput might be shared
     std::shared_ptr<T> _output = nullptr;
     std::vector<std::unique_ptr<T>> _grad;
 
     bool _dataAvailable = false;
     bool _gradientAvailable = false;
-
-    std::mutex mtx_;
-    std::condition_variable cond_;
 };
 
 // A class for variables of type T
