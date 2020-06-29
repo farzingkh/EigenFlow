@@ -135,14 +135,17 @@ template <typename T>
 class Minimizer : public Operation<T>
 {
 public:
-    Minimizer(GradientDescentOptimizer* grd, BaseNode* loss);
+    Minimizer(GradientDescentOptimizer *grd, BaseNode *loss);
+    Minimizer(Minimizer<T> &&other);
+    Minimizer<T> &operator=(Minimizer<T> &&other);
+
     void compute();
     void gradient();
 
 private:
     // cashed varieble nodes list
-    GradientDescentOptimizer* grdOpt_;
-    BaseNode* loss_;
+    GradientDescentOptimizer *grdOpt_;
+    BaseNode *loss_;
 };
 #include "../src/operation.tpp"
 

@@ -396,6 +396,30 @@ void Sum<T>::gradient()
 template <typename T>
 Minimizer<T>::Minimizer(GradientDescentOptimizer *grd, BaseNode *loss) : grdOpt_(grd), loss_(loss) {}
 
+template <typename T>
+Minimizer<T>::Minimizer(Minimizer<T> &&other)
+{
+    std::cout << " Minimizer move contructor..." << std::endl;
+    grdOpt_ = other.grdOpt_;
+    loss_ = other.loss_;
+    other.grdOpt_ = nullptr;
+    other.loss_ = nullptr;
+}
+
+template <typename T>
+Minimizer<T> &Minimizer<T>::operator=(Minimizer<T> &&other)
+{
+    std::cout << " Minimizer move assignment contructor..." << std::endl;
+    if (this != &other)
+    {
+        grdOpt_ = other.grdOpt_;
+        loss_ = other.loss_;
+        other.grdOpt_ = nullptr;
+        other.loss_ = nullptr;
+    }
+    return *this;
+}
+
 // Compute updates the variable gradients based on learning rate
 template <typename T>
 void Minimizer<T>::compute()
