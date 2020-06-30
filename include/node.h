@@ -43,13 +43,13 @@ public:
     template <typename T>
     std::shared_ptr<T> getValue();
 
-    // get ith input gradient of this node
+    // get total gradient from node's consumer
     template <typename T>
-    T getGradient(int i);
+    T getGradient();
 
     // get total gradient from node's consumer
     template <typename T>
-    T getOutGradient();
+    void setGrad(T t);
 
     // make this abstract base class
     virtual void compute() = 0;
@@ -83,7 +83,7 @@ class Node : public BaseNode
 {
 public:
     std::shared_ptr<T> getValue();
-    T getGradient(int i);
+    T getGradient();
 
     void setValue(T &&t);
     void setGrad(T t);
@@ -91,7 +91,7 @@ public:
 protected:
     std::mutex NodeMtx_;
     std::condition_variable cond_;
-    
+
 private:
     // ouput might be shared
     std::shared_ptr<T> _output = nullptr;
