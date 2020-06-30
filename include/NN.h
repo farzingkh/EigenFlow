@@ -44,7 +44,7 @@ public:
     Sum<Matrix<T, Dynamic, Dynamic>> *sum(BaseNode *a);
 
     template <typename T>
-    Matrix<T, Dynamic, Dynamic> run(BaseNode *n, std::unordered_map<std::string, Matrix<T, Dynamic, Dynamic> *> feed);
+    void run(BaseNode *n, std::unordered_map<std::string, Matrix<T, Dynamic, Dynamic> *> feed);
 
 private:
     Graph _graph;

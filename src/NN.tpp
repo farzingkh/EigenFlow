@@ -9,9 +9,9 @@ NN::NN()
 };
 
 template <typename T>
-Matrix<T, Dynamic, Dynamic> NN::run(BaseNode *n, std::unordered_map<std::string, Matrix<T, Dynamic, Dynamic> *> feed)
+void NN::run(BaseNode *n, std::unordered_map<std::string, Matrix<T, Dynamic, Dynamic> *> feed)
 {
-    return _session.Run<T>(n, feed);
+    _session.Run<T>(n, feed);
 }
 
 template <typename T>
