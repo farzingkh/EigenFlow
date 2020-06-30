@@ -102,7 +102,7 @@ T Node<T>::getGradient()
     {
         // wait until gradient data is available
         cond_.wait(lock1, [this]() { return this->_gradientAvailable; });
-        grad.setZero(_grad[0]->cols(), _grad[0]->rows());
+        grad.setZero(_grad[0]->rows(), _grad[0]->cols());
         // Go through all consumers to get total derivative
         for (auto &&g : _grad)
         {
@@ -203,14 +203,14 @@ void Variable<T>::gradient()
 }
 
 template <typename T>
-void Variable<T>::updateGradient(float lr)
+void Variable<T>::updateValue(float lr)
 {
+    std::cout << "Variable update value ..." << std::endl;
     //variable has only one input gradient
     T grad = this->getGradient();
     std::shared_ptr<T> output = this->getValue();
     // update variable values based on learning rate and gradient
-    *output -= (grad * lr);
-    this->setGrad(*output);
+    this->setValue(*output - (grad * lr));
 }
 
 // --- Placeholder ---
