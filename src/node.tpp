@@ -93,7 +93,8 @@ template <typename T>
 T Node<T>::getGradient()
 {
     // lock to avoid data race
-    std::unique_lock<std::mutex> lock1(NodeMtx_, std::adopt_lock);    // get consumers
+    std::unique_lock<std::mutex> lock1(NodeMtx_, std::adopt_lock);   
+     // get consumers
     std::vector<BaseNode *> consumers = this->getConsumers();
     // Initialize node's gradient
     T grad;
@@ -134,19 +135,23 @@ void Node<T>::setGrad(T t)
 {
     // lock to avoid data race
     std::unique_lock<std::mutex> lock1(NodeMtx_, std::adopt_lock);
+
     // create unique pointer of grad and append to _grad
     std::cout << "Gradient set: " << t << ", size: " << t.rows() << "," << t.cols() << std::endl;
     _grad.push_back(std::move(std::unique_ptr<T>((new T(t)))));
+
     // gradient and value must have same dimensions
     if (t.cols() != (*_output).cols() or t.rows() != (*_output).rows())
     {
         std::cout << "Gradient and output have different dimensions!" << std::endl;
     }
-    // check if gradient of all inputs are set
+    
+    // check if gradient of all consumers are set
     // use >= as a node might not have a consumer
     if (_grad.size() >= this->getConsumers().size())
     {
         _gradientAvailable = true;
+        // notify all threads waiting for this data
         cond_.notify_all();
     }
 }
