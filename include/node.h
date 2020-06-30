@@ -112,7 +112,7 @@ public:
 
     void compute();
     void gradient();
-    void updateGradient(float lr);
+    void updateValue(float lr);
 };
 
 // A class for placeholders for values of type T
