@@ -10,7 +10,7 @@ public:
     // Runs calculation of the node and returns the output value for the node;
     // Takes input data for placeholders with an unordered map using placeholder's name
     template <typename T>
-    Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> Run(BaseNode *n, std::unordered_map<std::string, Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> *> feed);
+    void Run(BaseNode *n, std::unordered_map<std::string, Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> *> feed);
 
 private:
     // Perform post-order traversal
