@@ -448,7 +448,7 @@ void Minimizer<T>::compute()
     {
         if (n->getNodeType() == nodeType::variable)
         {
-            static_cast<Variable<T> *>(n)->updateGradient(grdOpt_->learningRate_);
+            static_cast<Variable<T> *>(n)->updateValue(grdOpt_->learningRate_);
         }
     }
 }
