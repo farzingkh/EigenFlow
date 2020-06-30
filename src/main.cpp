@@ -7,6 +7,7 @@ int main()
     typedef Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic> matxxf;
 
     NN nn = NN();
+    int const STEPS = 3;
 
     // number of training samples
     int m = 1;
@@ -33,16 +34,16 @@ int main()
     Y << 1;
 
     // activation unit sigmoid(w^T*x+b) (nh*m)
-    auto G = nn.sigmoid<float>(nn.add<float>(nn.matmultiply<float>(nn.variable<float>(std::move(W)), nn.placeholder<float>("X")), nn.variable<float>(std::move(b))));
+    BaseNode *G = nn.sigmoid<float>(nn.add<float>(nn.matmultiply<float>(nn.variable<float>(std::move(W)), nn.placeholder<float>("X")), nn.variable<float>(std::move(b))));
 
     // create loss function -(y*log(a)+(1-y)*log(1-y))
-    BaseNode *L = nn.negative<float>(nn.multiply<float>(nn.variable<float>(Y), nn.log<float>(G)));
+    //BaseNode* L = nn.negative<float>(nn.multiply<float>(nn.variable<float>(Y), nn.log<float>(G)));
 
     // intermidiate loss function
-    // BaseNode *L = nn.negative<float>(nn.add<float>(nn.multiply<float>(nn.variable<float>(Y), nn.log<float>(G)), nn.multiply<float>(nn.add<float>(nn.variable<float>(one), nn.negative<float>(nn.variable<float>(Y))), nn.log<float>(nn.add<float>(nn.variable<float>(one), nn.negative<float>(G))))));
+    BaseNode *L = nn.negative<float>(nn.add<float>(nn.multiply<float>(nn.variable<float>(Y), nn.log<float>(G)), nn.multiply<float>(nn.add<float>(nn.variable<float>(one), nn.negative<float>(nn.variable<float>(Y))), nn.log<float>(nn.add<float>(nn.variable<float>(one), nn.negative<float>(G))))));
 
     // Create gradient descent optimization
-    auto opt = GradientDescentOptimizer(0.1).minimize<matxxf>(L);
+    auto opt = GradientDescentOptimizer(0.01).minimize<matxxf>(L);
 
     // Create a map to feed data to the placeholders (i.e. X = X)
     std::unordered_map<std::string, matxxf *>
@@ -53,16 +54,13 @@ int main()
     //matxxf g = nn.run<float>(G, feed);
     nn.run<float>(L, feed);
 
-    //std::cout << "Computational Operation Output:" << std::endl;
-    //std::cout << g << std::endl;
+    for (int i = 1; i < STEPS; i++)
+    {
+        nn.run<float>(&opt, feed);
+        nn.run<float>(L, feed);
+        std::cout << "Computational Operation Output for loss:" << std::endl;
+        std::cout << *(L->getValue<matxxf>()) << std::endl;
+    }
 
-    std::cout << "Computational Operation Output for loss:" << std::endl;
-    std::cout << L->getValue<matxxf>() << std::endl;
-
-    nn.run<float>(&opt, feed);
-   // matxxf l2 = nn.run<float>(L, feed);
-
-    //std::cout << "Computational Operation Output for loss:" << std::endl;
-    //std::cout << l2 << std::endl;
     // create minimization operation
 }
