@@ -116,7 +116,7 @@ T Node<T>::getGradient()
     {
         //return 1s if there is no consumre
         std::cout << "No consumer" << std::endl;
-        grad.setOnes(1, 1);
+        grad.setOnes((*_output).rows(), (*_output).cols());
         return grad;
     }
 }
