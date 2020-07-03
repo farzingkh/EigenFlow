@@ -15,10 +15,34 @@ void BaseNode::addInputs(BaseNode *n)
     _inputs.push_back(n);
 }
 
+void BaseNode::eraseInput(BaseNode *n)
+{
+    std::lock_guard<std::mutex> lck(BaseMtx_);
+    for (int i = 0; i < _inputs.size(); i++)
+    {
+        if (_inputs[i] == n)
+        {
+            _inputs.erase(_inputs.begin() + i);
+        }
+    }
+}
+
 void BaseNode::addConsumers(BaseNode *n)
 {
     std::lock_guard<std::mutex> lck(BaseMtx_);
     _consumers.push_back(n);
+}
+
+void BaseNode::eraseConsumer(BaseNode *n)
+{
+    std::lock_guard<std::mutex> lck(BaseMtx_);
+    for (int i = 0; i < _consumers.size(); i++)
+    {
+        if (_consumers[i] == n)
+        {
+            _consumers.erase(_consumers.begin() + i);
+        }
+    }
 }
 
 template <typename T>
@@ -219,7 +243,6 @@ template <typename T>
 void Variable<T>::gradient()
 {
     std::cout << "Variable gradient ..." << std::endl;
-    
 }
 
 template <typename T>

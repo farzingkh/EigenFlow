@@ -36,7 +36,9 @@ class BaseNode
 {
 public:
     void addInputs(BaseNode *n);
+    void eraseInput(BaseNode *n);
     void addConsumers(BaseNode *n);
+    void eraseConsumer(BaseNode *n);
     void setName(std::string n);
 
     // get output value of this node
