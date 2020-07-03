@@ -1,4 +1,5 @@
 #include <iostream>
+#include <assert.h>
 
 using namespace Eigen;
 
@@ -94,4 +95,46 @@ Sum<Matrix<T, Dynamic, Dynamic>> *NN::sum(BaseNode *a)
     auto c = std::shared_ptr<Sum<Matrix<T, Dynamic, Dynamic>>>(new Sum<Matrix<T, Dynamic, Dynamic>>(a));
     _graph.addNodeOne<Sum, Matrix<T, Dynamic, Dynamic>>(c);
     return c.get();
+}
+
+// Check node gradient numerically
+template <typename T>
+void NN::checkGradient(BaseNode *n, BaseNode *loss, std::unordered_map<std::string, Matrix<T, Dynamic, Dynamic> *> feed)
+{
+    // define epsilon
+    const float E = 1.0e-14;
+    std::vector<BaseNode *> nodes = _session.getNodesList();
+    // create variable nodes
+    Variable<Matrix<T, Dynamic, Dynamic>> newNodeP;
+    Variable<Matrix<T, Dynamic, Dynamic>> newNodeN;
+    // add and deduct epsilon from nodes value
+    &newNodeP->setValue(n->getValue<T>() + E);
+    &newNodeN->setValue(n->getValue<T>() - E);
+    // swap the node with the new variable node
+    swapNodes(newNodeP, n);
+    // get the value of loss for epsilon change in node's value
+    _session.Run(loss, feed);
+    auto outP = loss->getValue<T>();
+    // swap the node with other node
+    swapNodes(newNodeN, newNodeP);
+    _session.Run(loss, feed);
+    auto outN = loss->getValue<T>();
+    // swap the node back
+    swapNodes(n, newNodeP);
+    // find numerical gradient and check the node gradient
+    auto grad = (outP - outN) / (2 * E);
+    assert(abs(grad - n->getGradient<T>()) < 1.0e-9);
+}
+
+// swap nodes in and out of computational graph
+template <typename T>
+void NN::swapNodes(BaseNode *n, BaseNode *other)
+{
+    std::vector<BaseNode *> consumers = other->getConsumers();
+    for (auto cns : consumers)
+    {
+        cns->eraseInput(other);
+        n->addConsumers(cns);
+        cns->addInputs(n);
+    }
 }
