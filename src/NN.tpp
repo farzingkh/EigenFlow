@@ -101,43 +101,66 @@ Sum<Matrix<T, Dynamic, Dynamic>> *NN::sum(BaseNode *a)
 template <typename T>
 void NN::checkGradient(BaseNode *n, BaseNode *loss, std::unordered_map<std::string, Matrix<T, Dynamic, Dynamic> *> feed)
 {
-    // define epsilon
-    const float E = 1.0e-14;
-    std::vector<BaseNode *> nodes = _session.getNodesList();
-    // create variable nodes
-    Variable<Matrix<T, Dynamic, Dynamic>> newNodeP;
-    Variable<Matrix<T, Dynamic, Dynamic>> newNodeN;
-    // add and deduct epsilon from nodes value
-    &newNodeP->setValue(n->getValue<T>() + E);
-    &newNodeN->setValue(n->getValue<T>() - E);
-    // swap the node with the new variable node
-    swapNodes(newNodeP, n);
-    // get the value of loss for epsilon change in node's value
-    _session.Run(loss, feed);
-    auto outP = loss->getValue<T>();
-    // swap the node with other new node
-    swapNodes(newNodeN, newNodeP);
-    _session.Run(loss, feed);
-    auto outN = loss->getValue<T>();
-    // swap the node back
-    swapNodes(n, newNodeP);
-    // find numerical gradient and check the node gradient
-    auto grad = (outP - outN) / (2 * E);
-    assert(abs(grad - n->getGradient<T>()) < 1.0e-9);
+    typedef Matrix<T, Dynamic, Dynamic> matxxT;
+    // define epsilon and threshold
+    long double E = 1.0e-14;
+    long double err = 1.0e-9;
+    matxxT grad;
+    auto value1 = ((*(n->getValue<Matrix<T, Dynamic, Dynamic>>())).array() + E).cast<long double>();
+    auto value2 = ((*(n->getValue<Matrix<T, Dynamic, Dynamic>>())).array() - E).cast<long double>();
+    // check if n is loss node
+    if (n == loss)
+    {
+        std::cout << value1 << std::endl;
+        std::cout << value2 << std::endl;
+        // get numerical gradient directly
+        grad = (value1 - value2) / (2 * E);
+    }
+    else
+    {
+        // otherwise create variable nodes and run the session on nodes
+        Variable<matxxT> newNodeP(value1);
+        Variable<matxxT> newNodeN(value2);
+        // swap the node with the new variable node
+        swapNodes(&newNodeP, n);
+        // compute value of loss
+        _session.Run(loss, feed);
+        matxxT outP = *(loss->getValue<matxxT>());
+        // swap the node with other new node
+        swapNodes(&newNodeN, &newNodeP);
+        _session.Run(loss, feed);
+        matxxT outN = *(loss->getValue<matxxT>());
+        // swap the node back in
+        //swapNodes(n, &newNodeP);
+        //_session.Run(loss, feed);
+        // find numerical gradient and check the node gradient
+        grad = (outP - outN) / (2 * E);
+    }
+
+    for (int i = 0; i < grad.size(); i++)
+        if (std::abs(grad(i) - (n->getGradient<matxxT>())(i)) > err)
+        {
+
+            std::cout << "Gradient calculation is wrong!" << std::endl;
+            std::cout << "Numerical gradient is: " << grad(i) << std::endl;
+            std::cout << "Node gradient is: " << (n->getGradient<matxxT>())(i) << std::endl;
+        }
 }
 
 // swap nodes in and out of computational graph
-template <typename T>
 void NN::swapNodes(BaseNode *n, BaseNode *other)
 {
     std::vector<BaseNode *> consumers = other->getConsumers();
+    // only end node has no consumers
     for (auto cns : consumers)
     {
-        // remove other node
+        // remove other node from its consumers' input
         cns->eraseInput(other);
+        // remove consumers of other node
         other->eraseConsumer(cns);
-        // add to new node
+        // add this node to consumer's input
         cns->addInputs(n);
+        // add consumers to new node
         n->addConsumers(cns);
     }
 }

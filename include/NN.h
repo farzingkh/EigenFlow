@@ -49,8 +49,7 @@ public:
     // helper function to check gradient calculations
     template <typename T>
     void checkGradient(BaseNode *n, BaseNode *loss, std::unordered_map<std::string, Matrix<T, Dynamic, Dynamic> *> feed);
-
-    template <typename T> 
+ 
     void swapNodes(BaseNode* a, BaseNode* b);
 
 private:
