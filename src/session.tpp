@@ -3,7 +3,7 @@ template <typename T>
 void Session::Run(BaseNode *n, std::unordered_map<std::string, Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> *> feed)
 {
     // obtain inputs for node n in post-order, to resolve inputs befor computation of an operation
-    getNodesList(n);
+    updateNodesList(n);
 
     for (auto m : _nodesList)
     {
@@ -22,17 +22,23 @@ void Session::Run(BaseNode *n, std::unordered_map<std::string, Eigen::Matrix<T, 
     }
 }
 
-// Return post order list of nodes
-void Session::getNodesList(BaseNode *n)
+// get post order list of nodes
+void Session::updateNodesList(BaseNode *n)
 {
     // only operations have input nodes
-    if (n->getNodeType() == nodeType::operation) 
+    if (n->getNodeType() == nodeType::operation)
     {
         auto list = n->getInputs();
         for (auto &m : list)
         {
-            getNodesList(m);
+            updateNodesList(m);
         }
     }
     _nodesList.push_back(n);
+}
+
+// Return  nodes list
+std::vector<BaseNode *> Session::getNodesList()
+{
+    return _nodesList;
 }

@@ -11,10 +11,11 @@ public:
     // Takes input data for placeholders with an unordered map using placeholder's name
     template <typename T>
     void Run(BaseNode *n, std::unordered_map<std::string, Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> *> feed);
+    std::vector<BaseNode *> getNodesList();
 
 private:
     // Perform post-order traversal
-    void getNodesList(BaseNode *n);
+    void updateNodesList(BaseNode *n);
     std::vector<BaseNode *> _nodesList = {};
 };
 
