@@ -99,8 +99,8 @@ void Add<T, T1, T2>::gradient()
         // Input gradient is matrix ones of size B multiplied by output gradient
         T g;
         g.setOnes(B->rows(), B->cols());
-        grad *= g;
-        inputs[0]->setGrad<T>(grad);
+        T gr = g.transpose() * grad;
+        inputs[0]->setGrad<T>(gr);
     }
     else
     {
@@ -113,8 +113,8 @@ void Add<T, T1, T2>::gradient()
         // Input gradient is matrix ones of size A multiplied by output gradient
         T g;
         g.setOnes(A->rows(), A->cols());
-        grad *= g;
-        inputs[1]->setGrad<T>(grad);
+        T gr = g.transpose() * grad;
+        inputs[1]->setGrad<T>(gr);
     }
     else
     {
