@@ -115,7 +115,7 @@ void NN::checkGradient(BaseNode *n, BaseNode *loss, std::unordered_map<std::stri
     // get the value of loss for epsilon change in node's value
     _session.Run(loss, feed);
     auto outP = loss->getValue<T>();
-    // swap the node with other node
+    // swap the node with other new node
     swapNodes(newNodeN, newNodeP);
     _session.Run(loss, feed);
     auto outN = loss->getValue<T>();
@@ -133,8 +133,11 @@ void NN::swapNodes(BaseNode *n, BaseNode *other)
     std::vector<BaseNode *> consumers = other->getConsumers();
     for (auto cns : consumers)
     {
+        // remove other node
         cns->eraseInput(other);
-        n->addConsumers(cns);
+        other->eraseConsumer(cns);
+        // add to new node
         cns->addInputs(n);
+        n->addConsumers(cns);
     }
 }
