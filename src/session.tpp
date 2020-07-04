@@ -2,6 +2,8 @@
 template <typename T>
 void Session::Run(BaseNode *n, std::unordered_map<std::string, Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> *> feed)
 {
+    // empty node list
+    _nodesList.clear();
     // obtain inputs for node n in post-order, to resolve inputs befor computation of an operation
     updateNodesList(n);
 
