@@ -22,6 +22,8 @@ void Session::Run(BaseNode *n, std::unordered_map<std::string, Eigen::Matrix<T, 
             m->compute();
         }
     }
+    // empty node list
+    _nodesList.clear();
 }
 
 // get post order list of nodes
