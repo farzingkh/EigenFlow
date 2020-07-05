@@ -442,6 +442,7 @@ Minimizer<T> &Minimizer<T>::operator=(Minimizer<T> &&other)
 template <typename T>
 void Minimizer<T>::compute()
 {
+    std::cout << "Compute Minimization operation ..." << std::endl;
     grdOpt_->computeGradients(loss_);
 
     for (auto n : grdOpt_->variableNodesList_)
