@@ -12,6 +12,14 @@ void BaseNode::setName(std::string n)
 void BaseNode::addInputs(BaseNode *n)
 {
     std::lock_guard<std::mutex> lck(BaseMtx_);
+    for (int i = 0; i < _inputs.size(); i++)
+    {
+        if (_inputs[i] == nullptr)
+        {
+            _inputs[i] = n;
+            return;
+        }
+    }
     _inputs.push_back(n);
 }
 
@@ -22,7 +30,7 @@ void BaseNode::eraseInput(BaseNode *n)
     {
         if (_inputs[i] == n)
         {
-            _inputs.erase(_inputs.begin() + i);
+            _inputs[i] = nullptr;
         }
     }
 }
@@ -30,17 +38,27 @@ void BaseNode::eraseInput(BaseNode *n)
 void BaseNode::addConsumers(BaseNode *n)
 {
     std::lock_guard<std::mutex> lck(BaseMtx_);
+    // remove consumer but keep the place
+    for (int i = 0; i < _consumers.size(); i++)
+    {
+        if (_consumers[i] == nullptr)
+        {
+            _consumers[i] = n;
+            return;
+        }
+    }
     _consumers.push_back(n);
 }
 
 void BaseNode::eraseConsumer(BaseNode *n)
 {
     std::lock_guard<std::mutex> lck(BaseMtx_);
+    // remove consumer but keep the place
     for (int i = 0; i < _consumers.size(); i++)
     {
         if (_consumers[i] == n)
         {
-            _consumers.erase(_consumers.begin() + i);
+            _consumers[i] = nullptr;
         }
     }
 }
@@ -159,30 +177,27 @@ void Node<T>::setGrad(T t)
 {
     // lock to avoid data race
     std::unique_lock<std::mutex> lock1(NodeMtx_, std::adopt_lock);
-
-    // create unique pointer of grad and append to _grad
     std::cout << "Gradient set: " << t << ", size: " << t.rows() << "," << t.cols() << std::endl;
-
-    // check if it's next epoch
-    if (_gradientAvailable)
-    {
-        std::cout << "consumer size:" << this->getConsumers().size() << std::endl;
-        std::cout << "Gradient size:" << _grad.size() << std::endl;
-        // reset gradients
-        _gradientAvailable = false;
-        _grad.clear();
-        // add new gradient
-        _grad.push_back(std::move(std::unique_ptr<T>((new T(t)))));
-    }
-    else
-    {
-        _grad.push_back(std::move(std::unique_ptr<T>((new T(t)))));
-    }
-
     // gradient and value must have same dimensions
     if (t.cols() != (*_output).cols() or t.rows() != (*_output).rows())
     {
         std::cout << "Gradient and output have different dimensions!" << std::endl;
+    }
+    // check if it's next epoch
+    if (_gradientAvailable)
+    {
+        //std::cout << "consumer size:" << this->getConsumers().size() << std::endl;
+        //std::cout << "Gradient size:" << _grad.size() << std::endl;
+        // reset gradients
+        _gradientAvailable = false;
+        _grad.clear();
+        // create unique pointer of grad and append to _grad
+        _grad.push_back(std::move(std::unique_ptr<T>((new T(t)))));
+    }
+    else
+    {
+        // don't reset the gradients
+        _grad.push_back(std::move(std::unique_ptr<T>((new T(t)))));
     }
 
     // check if gradient of all consumers are set
