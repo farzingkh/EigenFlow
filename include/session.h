@@ -12,10 +12,10 @@ public:
     template <typename T>
     void Run(BaseNode *n, std::unordered_map<std::string, Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> *> feed);
     std::vector<BaseNode *> getNodesList();
+    void updateNodesList(BaseNode *n);
 
 private:
     // Perform post-order traversal
-    void updateNodesList(BaseNode *n);
     std::vector<BaseNode *> _nodesList = {};
 };
 
