@@ -74,7 +74,7 @@ void Add<T, T1, T2>::compute()
     }
     else
     {
-        // element-wise addition without broadcasting
+        // they are same size so element-wise addition without broadcasting
         this->setValue((*A) + (*B));
     }
 }
@@ -84,7 +84,7 @@ void Add<T, T1, T2>::gradient()
 {
     std::cout << "Compute Add operation geradient ..." << std::endl;
 
-    // get output gradient 
+    // get output gradient
     T grad = this->getGradient();
 
     // get inputs of this node
@@ -94,31 +94,51 @@ void Add<T, T1, T2>::gradient()
 
     // Check for broadcasting
     // If Gradient is larger than A, then A was broadcasted
+    // Broadcasted variable is as though it has that many consumers
+    // So the gradient is the total gradient (the sum of gradients in the  broadcsted direction)
     if (grad.cols() > A->cols() or grad.rows() > A->rows())
     {
-        // Input gradient is matrix ones of size B multiplied by output gradient
         T g;
-        g.setOnes(B->rows(), B->cols());
-        T gr = g.transpose() * grad;
-        inputs[0]->setGrad<T>(gr);
+        g.setOnes(A->rows(), A->cols());
+        if (A->rows() == 1)
+        {
+            // broadcasted in columns direction
+            T gr = g * grad;
+            inputs[0]->setGrad<T>(gr);
+        }
+        else if (A->cols() == 1)
+        {
+            // broadcasted in rows direction
+            T gr = grad * g;
+            inputs[0]->setGrad<T>(gr);
+        }
     }
     else
     {
-        // Input gradient is the same as output gradient
+        // No broadcasting; Input gradient is the same as output gradient
         inputs[0]->setGrad<T>(grad);
     }
     // If Gradient is larger than B, then B was broadcasted
     if (grad.cols() > B->cols() or grad.rows() > B->rows())
     {
-        // Input gradient is matrix ones of size A multiplied by output gradient
         T g;
-        g.setOnes(A->rows(), A->cols());
-        T gr = g.transpose() * grad;
-        inputs[1]->setGrad<T>(gr);
+        g.setOnes(B->rows(), B->cols());
+        if (B->rows() == 1)
+        {
+            // broadcasted in columns direction
+            T gr = g * grad;
+            inputs[0]->setGrad<T>(gr);
+        }
+        else if (B->cols() == 1)
+        {
+            // broadcasted in rows direction
+            T gr = grad * g;
+            inputs[0]->setGrad<T>(gr);
+        }
     }
     else
     {
-        // Input gradient is the same as output gradient
+        // No broadcasting; Input gradient is the same as output gradient
         inputs[1]->setGrad<T>(grad);
     }
 }
