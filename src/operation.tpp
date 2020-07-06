@@ -211,9 +211,9 @@ void Multiply<T, T1, T2>::gradient()
     std::shared_ptr<T1> A = inputs[0]->getValue<T1>();
     std::shared_ptr<T2> B = inputs[1]->getValue<T2>();
     // calculate and set gradient for first input "A"
-    inputs[0]->setGrad<T>(G.array() * A->array());
+    inputs[0]->setGrad<T>(G.array() * B->array());
     // calculate and set gradient for first input "B"
-    inputs[1]->setGrad<T>(G.array() * B->array());
+    inputs[1]->setGrad<T>(G.array() * A->array());
 }
 
 // --- MatMultiply Operation ---
