@@ -95,12 +95,20 @@ void Add<T, T1, T2>::gradient()
     // Check for broadcasting
     // If Gradient is larger than A, then A was broadcasted
     // Broadcasted variable is as though it has that many consumers
-    // So the gradient is the total gradient (the sum of gradients in the  broadcsted direction)
+    // So the gradient is the total gradient (the sum of gradients in the  broadcasted direction)
     if (grad.cols() > A->cols() or grad.rows() > A->rows())
     {
         T g;
         g.setOnes(A->rows(), A->cols());
-        if (A->rows() == 1)
+        if (A->rows() == 1 & A->cols() == 1)
+        {
+            // if A is scalar
+            auto a = grad.sum();
+            T gr(1,1);
+            gr << a;
+            inputs[0]->setGrad<T>(gr);
+        }
+        else if (A->rows() == 1)
         {
             // broadcasted in columns direction
             T gr = g * grad;
@@ -123,17 +131,26 @@ void Add<T, T1, T2>::gradient()
     {
         T g;
         g.setOnes(B->rows(), B->cols());
-        if (B->rows() == 1)
+        if (B->rows() == 1 & B->cols() == 1)
+        {
+            // if B is scalar
+
+            auto a = grad.sum();
+            T gr(1,1);
+            gr << a;
+            inputs[1]->setGrad<T>(gr);
+        }
+        else if (B->rows() == 1)
         {
             // broadcasted in columns direction
             T gr = g * grad;
-            inputs[0]->setGrad<T>(gr);
+            inputs[1]->setGrad<T>(gr);
         }
         else if (B->cols() == 1)
         {
             // broadcasted in rows direction
             T gr = grad * g;
-            inputs[0]->setGrad<T>(gr);
+            inputs[1]->setGrad<T>(gr);
         }
     }
     else
