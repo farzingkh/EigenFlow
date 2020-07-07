@@ -381,8 +381,8 @@ void Log<T>::gradient()
     T G = this->getGradient();
     // get inputs of this node
     std::vector<BaseNode *> &inputs = this->getInputs();
-    // get log value
-    std::shared_ptr<T> log = ((BaseNode *)this)->getValue<T>();
+    // get log input value
+    std::shared_ptr<T> log = inputs[0]->getValue<T>();
     // compute gradient; elementwise division
     T grad = G.array() / log->array();
     inputs[0]->setGrad<T>(grad);
