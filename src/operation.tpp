@@ -72,6 +72,12 @@ void Add<T, T1, T2>::compute()
             this->setValue(B->colwise() + A->col(0));
         }
     }
+    else if (A->cols() == 1 & A->rows() == 1) {
+        this->setValue((*A)(0) + B->array());
+    }
+    else if (B->cols() == 1 & B->rows() == 1) {
+        this->setValue((*B)(0) + A->array());
+    }
     else
     {
         // they are same size so element-wise addition without broadcasting
