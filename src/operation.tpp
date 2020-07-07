@@ -104,7 +104,7 @@ void Add<T, T1, T2>::gradient()
         {
             // if A is scalar
             auto a = grad.sum();
-            T gr(1,1);
+            T gr(1, 1);
             gr << a;
             inputs[0]->setGrad<T>(gr);
         }
@@ -136,7 +136,7 @@ void Add<T, T1, T2>::gradient()
             // if B is scalar
 
             auto a = grad.sum();
-            T gr(1,1);
+            T gr(1, 1);
             gr << a;
             inputs[1]->setGrad<T>(gr);
         }
@@ -424,14 +424,24 @@ void Sum<T>::gradient()
     std::cout << "Compute sum operation gradient..." << std::endl;
     // get output gradient from consumer
     T G = this->getGradient();
+    T g;
     // get inputs of this node
     std::vector<BaseNode *> &inputs = this->getInputs();
     std::shared_ptr<T> A = inputs[0]->getValue<T>();
-    // Input gradient is matrix ones of size A multiplied by output gradient
-    T g;
-    g.setOnes(A->rows(), A->cols());
-    g *= G;
-    inputs[0]->setGrad<T>(g);
+    if (G.rows() == 1)
+    {
+        g = G.replicate(A->rows(), 1);
+        inputs[0]->setGrad<T>(g);
+    }
+    else if (G.cols() == 1)
+    {
+        g = G.replicate(1, A->cols());
+        inputs[0]->setGrad<T>(g);
+    }
+    else
+    {
+        inputs[0]->setGrad<T>(G);
+    }
 }
 
 /// --- Minimizaer Operation ----
