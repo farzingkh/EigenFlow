@@ -397,7 +397,7 @@ Sum<T>::Sum(BaseNode &a, int axis) : UnaryOperation<T>(&a), _axis(axis)
 }
 
 template <typename T>
-Sum<T>::Sum(BaseNode *a, int axis) : BinaryOperation<T>(a), _axis(axis)
+Sum<T>::Sum(BaseNode *a, int axis) : UnaryOperation<T>(a), _axis(axis)
 {
     this->_opType = operationType::sum;
 }

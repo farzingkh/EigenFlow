@@ -41,7 +41,7 @@ public:
     Log<Matrix<T, Dynamic, Dynamic>> *log(BaseNode *a);
 
     template <typename T>
-    Sum<Matrix<T, Dynamic, Dynamic>> *sum(BaseNode *a);
+    Sum<Matrix<T, Dynamic, Dynamic>> *sum(BaseNode *a, int axis);
 
     template <typename T>
     void run(BaseNode *n, std::unordered_map<std::string, Matrix<T, Dynamic, Dynamic> *> feed);
@@ -50,10 +50,11 @@ public:
     template <typename T>
     void checkAllGradient(BaseNode *loss, std::unordered_map<std::string, Matrix<T, Dynamic, Dynamic> *> feed);
 
+protected:
     template <typename T>
     void checkGradient(BaseNode *n, BaseNode *loss, std::unordered_map<std::string, Matrix<T, Dynamic, Dynamic> *> feed);
- 
-    void swapNodes(BaseNode* a, BaseNode* b);
+
+    void swapNodes(BaseNode *a, BaseNode *b);
 
 private:
     Graph _graph;
