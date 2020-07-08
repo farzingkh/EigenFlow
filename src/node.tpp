@@ -66,19 +66,19 @@ void BaseNode::eraseConsumer(BaseNode *n)
 template <typename T>
 std::shared_ptr<T> BaseNode::getValue()
 {
-    return dynamic_cast<Node<T> *>(this)->getValue();
+    return static_cast<Node<T> *>(this)->getValue();
 }
 
 template <typename T>
 T BaseNode::getGradient()
 {
-    return dynamic_cast<Node<T> *>(this)->getGradient();
+    return static_cast<Node<T> *>(this)->getGradient();
 }
 
 template <typename T>
 void BaseNode::setGrad(T t)
 {
-    dynamic_cast<Node<T> *>(this)->setGrad(t);
+    static_cast<Node<T> *>(this)->setGrad(t);
 }
 
 std::string BaseNode::getName()
@@ -116,9 +116,11 @@ operationType BaseNode::getOperationType()
 template <typename T>
 std::shared_ptr<T> Node<T>::getValue()
 {
+
     //std::cout << "Variable get value..." << std::endl;
     // lock to avoid data race
-    std::unique_lock<std::mutex> lock(NodeMtx_);
+    std::unique_lock<std::mutex> lk2(NodeMtx_);
+    //
     if (_dataAvailable)
     {
         std::cout << "Output get: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
@@ -135,7 +137,7 @@ template <typename T>
 T Node<T>::getGradient()
 {
     // lock to avoid data race
-    std::unique_lock<std::mutex> lock1(NodeMtx_, std::adopt_lock);
+    std::unique_lock<std::mutex> lk2(NodeMtx_);
     // get consumers
     std::vector<BaseNode *> consumers = this->getConsumers();
     // Initialize node's gradient
@@ -144,7 +146,7 @@ T Node<T>::getGradient()
     if (consumers.size() > 0)
     {
         // wait until gradient data is available
-        cond_.wait(lock1, [this]() { return this->_gradientAvailable; });
+        cond_.wait(lk2, [this]() { return this->_gradientAvailable; });
         grad.setZero(_grad[0]->rows(), _grad[0]->cols());
         // Go through all consumers to get total derivative
         for (auto &&g : _grad)
@@ -166,9 +168,10 @@ T Node<T>::getGradient()
 template <typename T>
 void Node<T>::setValue(T &&t)
 {
-    std::unique_lock<std::mutex> lock(NodeMtx_);
+    // lock to avoid data race
+    std::unique_lock<std::mutex> lk2(NodeMtx_);
     _dataAvailable = true;
-    _output = std::shared_ptr<T>(new T(t));
+    _output.reset(new T(t));
     std::cout << "Output set: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
 }
 
@@ -176,7 +179,7 @@ template <typename T>
 void Node<T>::setGrad(T t)
 {
     // lock to avoid data race
-    std::unique_lock<std::mutex> lock1(NodeMtx_, std::adopt_lock);
+    std::unique_lock<std::mutex> lk2(NodeMtx_);
     std::cout << "Gradient set: " << t << ", size: " << t.rows() << "," << t.cols() << std::endl;
     // gradient and value must have same dimensions
     if (t.cols() != (*_output).cols() or t.rows() != (*_output).rows())
