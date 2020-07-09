@@ -2,11 +2,9 @@
 #define NODE_H
 
 #include <vector>
-#include <memory>
 #include <Eigen/Dense>
 #include <Eigen/Core>
-#include <thread>
-#include <mutex>
+#include "../include/lockingPtr.h"
 
 // A matrix of ints with a dynamic size, Use it when the size is not known
 typedef Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> matXXi;
@@ -43,7 +41,7 @@ public:
 
     // get output value of this node
     template <typename T>
-    std::shared_ptr<T> getValue();
+    Locking_ptr<T> getValue();
 
     // get total gradient from node's consumer
     template <typename T>
@@ -59,8 +57,8 @@ public:
 
     nodeType getNodeType();
     operationType getOperationType();
-    std::vector<BaseNode *> &getConsumers();
-    std::vector<BaseNode *> &getInputs();
+    std::vector<std::atomic<BaseNode> *> getConsumers();
+    std::vector<std::atomic<BaseNode> *> getInputs();
     std::string getName();
 
 protected:
@@ -70,8 +68,8 @@ protected:
     std::mutex BaseMtx_;
 
 private:
-    std::vector<BaseNode *> _consumers = {}; // parent nodes
-    std::vector<BaseNode *> _inputs = {};    // child nodes
+    std::vector<std::atomic<BaseNode> *> _consumers = {}; // parent nodes
+    std::vector<std::atomic<BaseNode> *> _inputs = {};    // child nodes
 };
 
 /* Class for nodes of the computational graph; 
@@ -84,7 +82,7 @@ template <typename T>
 class Node : public BaseNode
 {
 public:
-    std::shared_ptr<T> getValue();
+    Locking_ptr<T> getValue();
     T getGradient();
 
     void setValue(T &&t);
@@ -92,11 +90,12 @@ public:
 
 protected:
     std::mutex NodeMtx_;
+    std::mutex DataMtx_;
     std::condition_variable cond_;
 
 private:
     // ouput might be shared
-    std::shared_ptr<T> _output = nullptr;
+    Locking_ptr<T> _output = Locking_ptr<T>(nullptr, &DataMtx_);
     std::vector<std::unique_ptr<T>> _grad;
 
     bool _dataAvailable = false;

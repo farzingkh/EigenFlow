@@ -1,5 +1,4 @@
 #include "../include/operation.h"
-#include <memory>
 #include <iostream>
 
 // --- BaseNode ---
@@ -64,21 +63,30 @@ void BaseNode::eraseConsumer(BaseNode *n)
 }
 
 template <typename T>
-std::shared_ptr<T> BaseNode::getValue()
+Locking_ptr<T> BaseNode::getValue()
 {
-    return static_cast<Node<T> *>(this)->getValue();
+    std::unique_lock<std::mutex> lck(BaseMtx_);
+    auto node = static_cast<Node<T> *>(this);
+    lck.unlock();
+    return node->getValue();
 }
 
 template <typename T>
 T BaseNode::getGradient()
 {
-    return static_cast<Node<T> *>(this)->getGradient();
+    std::unique_lock<std::mutex> lck(BaseMtx_);
+    auto node = static_cast<Node<T> *>(this);
+    lck.unlock();
+    return node->getGradient();
 }
 
 template <typename T>
 void BaseNode::setGrad(T t)
 {
-    static_cast<Node<T> *>(this)->setGrad(t);
+    std::unique_lock<std::mutex> lck(BaseMtx_);
+    auto node = static_cast<Node<T> *>(this);
+    lck.unlock();
+    node->setGrad(t);
 }
 
 std::string BaseNode::getName()
@@ -87,14 +95,16 @@ std::string BaseNode::getName()
     return _name;
 }
 
-std::vector<BaseNode *> &BaseNode::getInputs()
+std::vector<std::atomic<BaseNode> *> BaseNode::getInputs()
 {
+    // return a copy to avoid data races
     std::lock_guard<std::mutex> lck(BaseMtx_);
     return _inputs;
 }
 
-std::vector<BaseNode *> &BaseNode::getConsumers()
+std::vector<std::atomic<BaseNode> *> BaseNode::getConsumers()
 {
+    // return a copy to avoid data races
     std::lock_guard<std::mutex> lck(BaseMtx_);
     return _consumers;
 }
@@ -114,7 +124,7 @@ operationType BaseNode::getOperationType()
 // --- Node  ---
 
 template <typename T>
-std::shared_ptr<T> Node<T>::getValue()
+Locking_ptr<T> Node<T>::getValue()
 {
 
     //std::cout << "Variable get value..." << std::endl;
@@ -129,7 +139,7 @@ std::shared_ptr<T> Node<T>::getValue()
     else
     {
         std::cout << "Data not available" << std::endl;
-        return std::shared_ptr<T>(nullptr);
+        return Locking_ptr<T>(nullptr, &DataMtx_);
     }
 }
 
@@ -269,7 +279,7 @@ void Variable<T>::updateValue(float lr)
     std::cout << "Variable update value ..." << std::endl;
     //variable has only one input gradient
     T grad = this->getGradient();
-    std::shared_ptr<T> output = this->getValue();
+    Locking_ptr<T> output = this->getValue();
     // update variable values based on learning rate and gradient
     this->setValue(*output - (grad * lr));
 }
