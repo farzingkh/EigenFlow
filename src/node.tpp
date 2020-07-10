@@ -200,7 +200,7 @@ void Node<T>::setGrad(T t)
         std::cout << "Gradient and output have different dimensions!" << std::endl;
     }
     // check if it's next epoch
-    if (_gradientAvailable)
+    if (__gradientAvailable = true)
     {
         //std::cout << "consumer size:" << this->getConsumers().size() << std::endl;
         //std::cout << "Gradient size:" << _grad.size() << std::endl;
@@ -226,6 +226,16 @@ void Node<T>::setGrad(T t)
         // notify all threads waiting for this data
         cond_.notify_all();
     }
+}
+
+template <typename T>
+void Node<T>::clearGrads()
+{
+    // lock to avoid data race
+    std::unique_lock<std::mutex> lk2(NodeMtx_);
+    // reset gradients
+    _gradientAvailable = false;
+    _grad.clear();
 }
 
 // --- Variable ---

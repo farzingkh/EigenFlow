@@ -47,7 +47,7 @@ public:
     template <typename T>
     T getGradient();
 
-    // get total gradient from node's consumer
+    // set gradient from consumer
     template <typename T>
     void setGrad(T t);
 
@@ -90,6 +90,7 @@ public:
 
     void setValue(T &&t);
     void setGrad(T t);
+    void clearGrads();
 
 protected:
     std::mutex NodeMtx_;
