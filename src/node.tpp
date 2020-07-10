@@ -25,8 +25,10 @@ void BaseNode::addInputs(BaseNode *n)
 void BaseNode::eraseInput(BaseNode *n)
 {
     std::lock_guard<std::mutex> lck(BaseMtx_);
+    // remove the input node but keep the place
     for (int i = 0; i < _inputs.size(); i++)
     {
+        // remove the node and use nullptr as a placeholder
         if (_inputs[i] == n)
         {
             _inputs[i] = nullptr;
@@ -40,13 +42,17 @@ void BaseNode::addConsumers(BaseNode *n)
     // remove consumer but keep the place
     for (int i = 0; i < _consumers.size(); i++)
     {
+        // check if there is deleted consumer
         if (_consumers[i] == nullptr)
         {
+            // replace the deleted consumer in place
             _consumers[i] = n;
             return;
         }
     }
+    // add consumer and increment the size
     _consumers.push_back(n);
+    consumerSize_++;
 }
 
 void BaseNode::eraseConsumer(BaseNode *n)
@@ -55,6 +61,7 @@ void BaseNode::eraseConsumer(BaseNode *n)
     // remove consumer but keep the place
     for (int i = 0; i < _consumers.size(); i++)
     {
+        // remove the node and use nullptr as a placeholder
         if (_consumers[i] == n)
         {
             _consumers[i] = nullptr;
@@ -67,7 +74,6 @@ Locking_ptr<T> BaseNode::getValue()
 {
     std::unique_lock<std::mutex> lck(BaseMtx_);
     auto node = static_cast<Node<T> *>(this);
-    lck.unlock();
     return node->getValue();
 }
 
@@ -76,7 +82,6 @@ T BaseNode::getGradient()
 {
     std::unique_lock<std::mutex> lck(BaseMtx_);
     auto node = static_cast<Node<T> *>(this);
-    lck.unlock();
     return node->getGradient();
 }
 
@@ -85,7 +90,6 @@ void BaseNode::setGrad(T t)
 {
     std::unique_lock<std::mutex> lck(BaseMtx_);
     auto node = static_cast<Node<T> *>(this);
-    lck.unlock();
     node->setGrad(t);
 }
 
@@ -95,14 +99,14 @@ std::string BaseNode::getName()
     return _name;
 }
 
-std::vector<std::atomic<BaseNode> *> BaseNode::getInputs()
+std::vector<BaseNode *> BaseNode::getInputs()
 {
     // return a copy to avoid data races
     std::lock_guard<std::mutex> lck(BaseMtx_);
     return _inputs;
 }
 
-std::vector<std::atomic<BaseNode> *> BaseNode::getConsumers()
+std::vector<BaseNode *> BaseNode::getConsumers()
 {
     // return a copy to avoid data races
     std::lock_guard<std::mutex> lck(BaseMtx_);
@@ -148,17 +152,16 @@ T Node<T>::getGradient()
 {
     // lock to avoid data race
     std::unique_lock<std::mutex> lk2(NodeMtx_);
-    // get consumers
-    std::vector<BaseNode *> consumers = this->getConsumers();
     // Initialize node's gradient
     T grad;
-    // check if node has a consumer
-    if (consumers.size() > 0)
+    // check if node has a consumer; consumerSize_ is atomic
+    int cnsSize = this->consumerSize_.load();
+    if (cnsSize > 0)
     {
         // wait until gradient data is available
         cond_.wait(lk2, [this]() { return this->_gradientAvailable; });
         grad.setZero(_grad[0]->rows(), _grad[0]->cols());
-        // Go through all consumers to get total derivative
+        //  get total derivative
         for (auto &&g : _grad)
         {
             grad += *g;
@@ -213,9 +216,11 @@ void Node<T>::setGrad(T t)
         _grad.push_back(std::move(std::unique_ptr<T>((new T(t)))));
     }
 
+    // get the number of consumer of the node; consumerSize_ is atomic
+    int cnsSize = this->consumerSize_.load();
     // check if gradient of all consumers are set
     // use >= as a node might not have a consumer
-    if (_grad.size() >= this->getConsumers().size())
+    if (_grad.size() >= cnsSize)
     {
         _gradientAvailable = true;
         // notify all threads waiting for this data

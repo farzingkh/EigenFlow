@@ -57,9 +57,12 @@ public:
 
     nodeType getNodeType();
     operationType getOperationType();
-    std::vector<std::atomic<BaseNode> *> getConsumers();
-    std::vector<std::atomic<BaseNode> *> getInputs();
+    std::vector<BaseNode *> getConsumers();
+    std::vector<BaseNode *> getInputs();
     std::string getName();
+
+    // keep the size of consumers as an atomic data
+    std::atomic_int consumerSize_{0};
 
 protected:
     std::string _name = " ";
@@ -68,8 +71,8 @@ protected:
     std::mutex BaseMtx_;
 
 private:
-    std::vector<std::atomic<BaseNode> *> _consumers = {}; // parent nodes
-    std::vector<std::atomic<BaseNode> *> _inputs = {};    // child nodes
+    std::vector<BaseNode *> _consumers = {}; // parent nodes
+    std::vector<BaseNode *> _inputs = {};    // child nodes
 };
 
 /* Class for nodes of the computational graph; 
