@@ -51,12 +51,10 @@ public:
     // set gradient from consumer
     template <typename T>
     void setGrad(T t);
-
-    // clear node gradients
-    template <typename T>
-    void clearGrads();
+    
 
     // make this abstract base class
+    virtual void clearGrads() = 0;
     virtual void compute() = 0;
     virtual void gradient() = 0;
 

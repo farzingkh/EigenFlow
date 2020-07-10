@@ -93,14 +93,6 @@ void BaseNode::setGrad(T t)
     node->setGrad(t);
 }
 
-template <typename T>
-void BaseNode::clearGrads()
-{
-    std::unique_lock<std::mutex> lck(BaseMtx_);
-    auto node = static_cast<Node<T> *>(this);
-    return node->clearGrads();
-}
-
 std::string BaseNode::getName()
 {
     std::lock_guard<std::mutex> lck(BaseMtx_);
