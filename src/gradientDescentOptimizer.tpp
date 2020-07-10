@@ -4,6 +4,8 @@ GradientDescentOptimizer::GradientDescentOptimizer(float lr) : learningRate_(lr)
 
 void GradientDescentOptimizer::computeGradients(BaseNode *loss)
 {
+    // clear nodes list and queue
+    NodesList_.clear();
     // get node queue in level order traversal like BFS
     getNodeQueue(loss);
     std::vector<std::future<void>> ftrs;
@@ -12,7 +14,7 @@ void GradientDescentOptimizer::computeGradients(BaseNode *loss)
     {
         auto node = nodeQueue_.front();
         nodeQueue_.pop_front();
-        ftrs.emplace_back(std::async(std::launch::async, [node] {  node->gradient(); }));
+        ftrs.emplace_back(std::async(std::launch::deferred, [node] {  node->gradient(); }));
     }
     // wait for results
     for_each(ftrs.begin(), ftrs.end(), [](std::future<void> &ftr) { ftr.wait(); });
@@ -37,9 +39,10 @@ void GradientDescentOptimizer::getNodeQueue(BaseNode *loss)
     {
         BaseNode *node = nodeQueue.front();
         nodeQueue_.push_back(node);
+        // cash in node list
         NodesList_.push_back(node);
-        nodeQueue.pop_front();
         visitedNodes[node] = true;
+        nodeQueue.pop_front();
         auto nodes = node->getInputs();
         // go through all inputs of the node
         for (auto n : nodes)
@@ -49,8 +52,6 @@ void GradientDescentOptimizer::getNodeQueue(BaseNode *loss)
             {
                 // if node not visited add to queue
                 nodeQueue.push_back(n);
-                //  add to node list
-                NodesList_.push_back(n);
             }
         }
     }
