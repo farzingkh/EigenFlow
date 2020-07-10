@@ -12,7 +12,7 @@ void GradientDescentOptimizer::computeGradients(BaseNode *loss)
     {
         auto node = nodeQueue_.front();
         nodeQueue_.pop_front();
-        ftrs.emplace_back(std::async(std::launch::deferred, [node] {  node->gradient(); }));
+        ftrs.emplace_back(std::async(std::launch::async, [node] {  node->gradient(); }));
     }
     // wait for results
     for_each(ftrs.begin(), ftrs.end(), [](std::future<void> &ftr) { ftr.wait(); });
@@ -37,6 +37,7 @@ void GradientDescentOptimizer::getNodeQueue(BaseNode *loss)
     {
         BaseNode *node = nodeQueue.front();
         nodeQueue_.push_back(node);
+        NodesList_.push_back(node);
         nodeQueue.pop_front();
         visitedNodes[node] = true;
         auto nodes = node->getInputs();
@@ -48,11 +49,8 @@ void GradientDescentOptimizer::getNodeQueue(BaseNode *loss)
             {
                 // if node not visited add to queue
                 nodeQueue.push_back(n);
-                // if variable add to variable list
-                if (n->getNodeType() == nodeType::variable)
-                {
-                    variableNodesList_.push_back(n);
-                }
+                //  add to node list
+                NodesList_.push_back(n);
             }
         }
     }

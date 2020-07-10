@@ -20,7 +20,7 @@ public:
     Minimizer<T> minimize(BaseNode *loss);
 
     float learningRate_;
-    std::vector<BaseNode *> variableNodesList_;
+    std::vector<BaseNode *> NodesList_;
 
 private:
     std::deque<BaseNode *> nodeQueue_;
