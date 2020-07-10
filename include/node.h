@@ -12,6 +12,7 @@ typedef Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> matXXi;
 // enum for operation types
 enum class operationType
 {
+    NA,
     addition,
     negative,
     multiply,
@@ -41,7 +42,7 @@ public:
 
     // get output value of this node
     template <typename T>
-    Locking_ptr<T> getValue();
+    std::shared_ptr<T> getValue();
 
     // get total gradient from node's consumer
     template <typename T>
@@ -50,6 +51,10 @@ public:
     // set gradient from consumer
     template <typename T>
     void setGrad(T t);
+
+    // clear node gradients
+    template <typename T>
+    void clearGrads();
 
     // make this abstract base class
     virtual void compute() = 0;
@@ -85,7 +90,7 @@ template <typename T>
 class Node : public BaseNode
 {
 public:
-    Locking_ptr<T> getValue();
+    std::shared_ptr<T> getValue();
     T getGradient();
 
     void setValue(T &&t);
@@ -99,7 +104,7 @@ protected:
 
 private:
     // ouput might be shared
-    Locking_ptr<T> _output = Locking_ptr<T>(nullptr, &DataMtx_);
+    std::shared_ptr<T> _output{nullptr};
     std::vector<std::unique_ptr<T>> _grad;
 
     bool _dataAvailable = false;

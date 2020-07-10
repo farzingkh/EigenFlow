@@ -70,7 +70,7 @@ void BaseNode::eraseConsumer(BaseNode *n)
 }
 
 template <typename T>
-Locking_ptr<T> BaseNode::getValue()
+std::shared_ptr<T> BaseNode::getValue()
 {
     std::unique_lock<std::mutex> lck(BaseMtx_);
     auto node = static_cast<Node<T> *>(this);
@@ -91,6 +91,14 @@ void BaseNode::setGrad(T t)
     std::unique_lock<std::mutex> lck(BaseMtx_);
     auto node = static_cast<Node<T> *>(this);
     node->setGrad(t);
+}
+
+template <typename T>
+void BaseNode::clearGrads()
+{
+    std::unique_lock<std::mutex> lck(BaseMtx_);
+    auto node = static_cast<Node<T> *>(this);
+    return node->clearGrads();
 }
 
 std::string BaseNode::getName()
@@ -128,7 +136,7 @@ operationType BaseNode::getOperationType()
 // --- Node  ---
 
 template <typename T>
-Locking_ptr<T> Node<T>::getValue()
+std::shared_ptr<T> Node<T>::getValue()
 {
 
     //std::cout << "Variable get value..." << std::endl;
@@ -143,7 +151,7 @@ Locking_ptr<T> Node<T>::getValue()
     else
     {
         std::cout << "Data not available" << std::endl;
-        return Locking_ptr<T>(nullptr, &DataMtx_);
+        return std::shared_ptr<T>(nullptr);
     }
 }
 
@@ -199,29 +207,13 @@ void Node<T>::setGrad(T t)
     {
         std::cout << "Gradient and output have different dimensions!" << std::endl;
     }
-    // check if it's next epoch
-    if (__gradientAvailable = true)
-    {
-        //std::cout << "consumer size:" << this->getConsumers().size() << std::endl;
-        //std::cout << "Gradient size:" << _grad.size() << std::endl;
-        // reset gradients
-        _gradientAvailable = false;
-        _grad.clear();
-        // create unique pointer of grad and append to _grad
-        _grad.push_back(std::move(std::unique_ptr<T>((new T(t)))));
-    }
-    else
-    {
-        // don't reset the gradients
-        _grad.push_back(std::move(std::unique_ptr<T>((new T(t)))));
-    }
-
+    _grad.push_back(std::move(std::unique_ptr<T>((new T(t)))));
     // get the number of consumer of the node; consumerSize_ is atomic
     int cnsSize = this->consumerSize_.load();
-    // check if gradient of all consumers are set
-    // use >= as a node might not have a consumer
+    // check if gradient of all consumers are set; use >= as a node might not have a consumer
     if (_grad.size() >= cnsSize)
     {
+        // set flag to true
         _gradientAvailable = true;
         // notify all threads waiting for this data
         cond_.notify_all();
@@ -245,6 +237,7 @@ Variable<T>::Variable(T &&a)
 {
     std::cout << "Variable contructor ..." << std::endl;
     this->_nType = nodeType::variable;
+    this->_opType = operationType::NA;
     this->setValue(std::move(a));
 }
 
@@ -252,13 +245,10 @@ template <typename T>
 Variable<T>::Variable(Variable<T> &v)
 {
     std::cout << "Variable copy contructor ..." << std::endl;
-    // lock other side
-    std::unique_lock<std::mutex> rhs_baselk(v.BaseMtx_, std::defer_lock);
-    std::unique_lock<std::mutex> rhs_nodelk(v.NodeMtx_, std::defer_lock);
-    std::lock(rhs_baselk, rhs_nodelk);
     // copy
     this->_nType = nodeType::variable;
-    // set value locks the node, no need to create a lock
+    this->_opType = operationType::NA;
+    // set value and get value locks the node, no need to create a lock
     this->setValue((&v)->getValue());
 }
 template <typename T>
@@ -273,6 +263,7 @@ Variable<T>::Variable(Variable<T> &&v)
     std::lock(rhs_baselk, rhs_nodelk, lhs_nodelk);
     // move
     this->_nType = nodeType::variable;
+    this->_opType = operationType::NA;
     this->_output = std::move(v->_output);
 }
 
@@ -294,7 +285,7 @@ void Variable<T>::updateValue(float lr)
     std::cout << "Variable update value ..." << std::endl;
     //variable has only one input gradient
     T grad = this->getGradient();
-    Locking_ptr<T> output = this->getValue();
+    std::shared_ptr<T> output = this->getValue();
     // update variable values based on learning rate and gradient
     this->setValue(*output - (grad * lr));
 }
