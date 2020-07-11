@@ -8,28 +8,28 @@ int main()
 
     // Initialize
     NN nn = NN();
-    int const STEPS = 50;
+    int const STEPS = 10000;
 
     // number of training samples
     int m = 1;
-    
+
     /* Use nn.spaceholders for constant variables, any nn.variables will be updated during optimization but placeholder values are kept constant */
 
     // matrix of scalar 1
     Eigen::Matrix<long double, 1, 1> One;
     One << 1;
     matxxf n = One;
-    BaseNode* one = nn.placeholder<long double>("one");
+    BaseNode *one = nn.placeholder<long double>("one");
 
     // Bias (m*1)
     Eigen::Matrix<long double, 1, 1> B;
     B << 0.1;
-    BaseNode* b = nn.variable<long double>(std::move(B));
+    BaseNode *b = nn.variable<long double>(std::move(B));
 
     // Wieghts (nh*nx)
     Eigen::Matrix<long double, 1, 2> W;
     W << 0.1, 0.2;
-    BaseNode* w = nn.variable<long double>(std::move(W));
+    BaseNode *w = nn.variable<long double>(std::move(W));
 
     // Training Data (nx*m)
     Eigen::Matrix<long double, 2, 1> X;
@@ -40,7 +40,7 @@ int main()
     Eigen::Matrix<long double, 1, 1> Y;
     Y << 1;
     matxxf yy = Y;
-    BaseNode* y = nn.placeholder<long double>("Y");
+    BaseNode *y = nn.placeholder<long double>("Y");
 
     // activation unit sigmoid(w^T*x+b) (nh*m)
     BaseNode *a = nn.sigmoid<long double>(nn.add<long double>(nn.matmultiply<long double>(w, nn.placeholder<long double>("X")), b));
@@ -52,7 +52,7 @@ int main()
     // Create gradient descent optimization
     auto opt = GradientDescentOptimizer(0.01).minimize<matxxf>(L);
 
-    // Create a map to feed data to the placeholders (i.e. X = X)
+    // Create a map to feed data to the placeholders (i.e. "X" = X)
     std::unordered_map<std::string, matxxf *>
         feed = {};
     feed["X"] = &x;
@@ -67,11 +67,14 @@ int main()
     {
         nn.run<long double>(&opt, feed);
         nn.run<long double>(L, feed);
-        std::cout << "Computational Operation Output for loss:" << std::endl;
-        L->getValue<matxxf>();
-        w->getValue<matxxf>(); 
-        b->getValue<matxxf>();
-
+        if (i % 1000 == 0)
+        {
+            std::cout << "Step " << i << std::endl;
+            std::cout << "Activation: " << *(a->getValue<matxxf>()) << std::endl;
+            std::cout << "loss: " << *(L->getValue<matxxf>()) << std::endl;
+            std::cout << "Weights: " << *(w->getValue<matxxf>()) << std::endl;
+            std::cout << "Bias: " << *(b->getValue<matxxf>()) << std::endl;
+        }
     }
 
     /* Check gradients -- Make sure to set learning rate to zero befor checking!! -- */
