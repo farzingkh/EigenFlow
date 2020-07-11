@@ -27,7 +27,7 @@ void GradientDescentOptimizer::computeGradients(BaseNode *loss)
     // wait for results
     for_each(ftrs.begin(), ftrs.end(), [](std::future<void> &ftr) { ftr.wait(); });
 
-    std::cout << "gradients computed! " << std::endl;
+    //std::cout << "gradients computed! " << std::endl;
 }
 
 template <typename T>

@@ -137,7 +137,7 @@ std::shared_ptr<T> Node<T>::getValue()
     //
     if (_dataAvailable)
     {
-        std::cout << "Output get: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
+        //std::cout << "Output get: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
         return _output;
     }
     else
@@ -166,13 +166,13 @@ T Node<T>::getGradient()
         {
             grad += *g;
         }
-        std::cout << "Total gradient get: " << grad << ", size: " << grad.rows() << "," << grad.cols() << std::endl;
+        //std::cout << "Total gradient get: " << grad << ", size: " << grad.rows() << "," << grad.cols() << std::endl;
         return grad;
     }
     else
     {
         //return 1s if there is no consumre
-        std::cout << "No consumer" << std::endl;
+        //std::cout << "No consumer" << std::endl;
         grad.setOnes((*_output).rows(), (*_output).cols());
         return grad;
     }
@@ -185,7 +185,7 @@ void Node<T>::setValue(T &&t)
     std::unique_lock<std::mutex> lk2(NodeMtx_);
     _dataAvailable = true;
     _output.reset(new T(t));
-    std::cout << "Output set: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
+    //std::cout << "Output set: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
 }
 
 template <typename T>
@@ -193,7 +193,7 @@ void Node<T>::setGrad(T t)
 {
     // lock to avoid data race
     std::unique_lock<std::mutex> lk2(NodeMtx_);
-    std::cout << "Gradient set: " << t << ", size: " << t.rows() << "," << t.cols() << std::endl;
+    //std::cout << "Gradient set: " << t << ", size: " << t.rows() << "," << t.cols() << std::endl;
     // gradient and value must have same dimensions
     if (t.cols() != (*_output).cols() or t.rows() != (*_output).rows())
     {
@@ -268,18 +268,18 @@ void Variable<T>::compute()
 template <typename T>
 void Variable<T>::gradient()
 {
-    std::cout << "Variable gradient ..." << std::endl;
+    //std::cout << "Variable gradient ..." << std::endl;
 }
 
 template <typename T>
 void Variable<T>::updateValue(float lr)
 {
-    std::cout << "Variable update value ..." << std::endl;
+    //std::cout << "Variable update value ..." << std::endl;
     //variable has only one input gradient
     T grad = this->getGradient();
     std::shared_ptr<T> output = this->getValue();
     // update variable values based on learning rate and gradient
-    this->setValue(*output - (grad * lr));
+    this->setValue(output->array() - (grad.array() * lr));
 }
 
 // --- Placeholder ---

@@ -44,7 +44,7 @@ Add<T, T1, T2>::Add(BaseNode *a, BaseNode *b) : BinaryOperation<T>(a, b)
 template <typename T, typename T1, typename T2>
 void Add<T, T1, T2>::compute()
 {
-    std::cout << "Compute add operation ..." << std::endl;
+    //std::cout << "Compute add operation ..." << std::endl;
     std::vector<BaseNode *> inputs = this->getInputs();
     std::shared_ptr<T1> A = inputs[0]->getValue<T1>();
     std::shared_ptr<T2> B = inputs[1]->getValue<T2>();
@@ -88,7 +88,7 @@ void Add<T, T1, T2>::compute()
 template <typename T, typename T1, typename T2>
 void Add<T, T1, T2>::gradient()
 {
-    std::cout << "Compute Add operation geradient ..." << std::endl;
+    //std::cout << "Compute Add operation geradient ..." << std::endl;
 
     // get output gradient
     T grad = this->getGradient();
@@ -183,7 +183,7 @@ Negative<T>::Negative(BaseNode *a) : UnaryOperation<T>(a)
 template <typename T>
 void Negative<T>::compute()
 {
-    std::cout << "Compute negative operation ..." << std::endl;
+    //std::cout << "Compute negative operation ..." << std::endl;
     T v = -(*(static_cast<BaseNode *>(this))->getInputs()[0]->getValue<T>());
     this->setValue(std::move(v));
 }
@@ -193,7 +193,7 @@ void Negative<T>::gradient()
 {
     // get inputs of this node
     std::vector<BaseNode *> inputs = this->getInputs();
-    std::cout << "Compute negative operation geradient ..." << std::endl;
+    //std::cout << "Compute negative operation geradient ..." << std::endl;
     inputs[0]->setGrad<T>(-(this->getGradient()));
 }
 
@@ -214,7 +214,7 @@ Multiply<T, T1, T2>::Multiply(BaseNode *a, BaseNode *b) : BinaryOperation<T>(a, 
 template <typename T, typename T1, typename T2>
 void Multiply<T, T1, T2>::compute()
 {
-    std::cout << "Compute multiplication operation..." << std::endl;
+    //std::cout << "Compute multiplication operation..." << std::endl;
     std::vector<BaseNode *> inputs = this->getInputs();
     // multiplication of scalar and matrix
     std::shared_ptr<T1> A = inputs[0]->getValue<T1>();
@@ -226,7 +226,7 @@ void Multiply<T, T1, T2>::compute()
 template <typename T, typename T1, typename T2>
 void Multiply<T, T1, T2>::gradient()
 {
-    std::cout << "Compute multiplication operation gradient..." << std::endl;
+    //std::cout << "Compute multiplication operation gradient..." << std::endl;
     // get output gradient from consumer
     T G = this->getGradient();
     // get inputs of this node
@@ -256,7 +256,7 @@ MatMultiply<T, T1, T2>::MatMultiply(BaseNode *a, BaseNode *b) : BinaryOperation<
 template <typename T, typename T1, typename T2>
 void MatMultiply<T, T1, T2>::compute()
 {
-    std::cout << "Compute matrix multiplication operation..." << std::endl;
+    //std::cout << "Compute matrix multiplication operation..." << std::endl;
     std::vector<BaseNode *> inputs = this->getInputs();
     // multiplication of scalar and matrix
     std::shared_ptr<T1> A = inputs[0]->getValue<T1>();
@@ -268,7 +268,7 @@ void MatMultiply<T, T1, T2>::compute()
 template <typename T, typename T1, typename T2>
 void MatMultiply<T, T1, T2>::gradient()
 {
-    std::cout << "Compute matrix multiplication operation gradient..." << std::endl;
+    //std::cout << "Compute matrix multiplication operation gradient..." << std::endl;
     // get output gradient from consumer
     T G = this->getGradient();
     // get inputs of this node
@@ -300,14 +300,14 @@ Dot<T, T1, T2>::Dot(BaseNode *a, BaseNode *b) : BinaryOperation<T>(a, b)
 template <typename T, typename T1, typename T2>
 void Dot<T, T1, T2>::compute()
 {
-    std::cout << "Compute dot product operation ..." << std::endl;
+    //std::cout << "Compute dot product operation ..." << std::endl;
     this->setValue((static_cast<BaseNode *>(this))->getInputs()[0]->getValue<T1>().dot((static_cast<BaseNode *>(this))->getInputs()[1]->getValue<T2>()));
 }
 
 template <typename T, typename T1, typename T2>
 void Dot<T, T1, T2>::gradient()
 {
-    std::cout << "Compute dot product operation gradient..." << std::endl;
+    //std::cout << "Compute dot product operation gradient..." << std::endl;
     // get output gradient from consumer
     T G = this->getGradient();
     // get inputs of this node
@@ -339,14 +339,14 @@ Sigmoid<T>::Sigmoid(BaseNode *a) : UnaryOperation<T>(a)
 template <typename T>
 void Sigmoid<T>::compute()
 {
-    std::cout << "Compute sigmoid operation ..." << std::endl;
+    //std::cout << "Compute sigmoid operation ..." << std::endl;
     this->setValue(1 / (1 + exp(-((static_cast<BaseNode *>(this))->getInputs()[0]->getValue<T>()->array()))));
 }
 
 template <typename T>
 void Sigmoid<T>::gradient()
 {
-    std::cout << "Compute sigmoid gradient..." << std::endl;
+    //std::cout << "Compute sigmoid gradient..." << std::endl;
     // get inputs of this node
     std::vector<BaseNode *> inputs = this->getInputs();
     // get output gradient from consumer
@@ -376,14 +376,14 @@ Log<T>::Log(BaseNode *a) : UnaryOperation<T>(a)
 template <typename T>
 void Log<T>::compute()
 {
-    std::cout << "Compute log operation ..." << std::endl;
+    //std::cout << "Compute log operation ..." << std::endl;
     this->setValue(log((static_cast<BaseNode *>(this))->getInputs()[0]->getValue<T>()->array()));
 }
 
 template <typename T>
 void Log<T>::gradient()
 {
-    std::cout << "Compute log gradient..." << std::endl;
+    //std::cout << "Compute log gradient..." << std::endl;
     // get output gradient from consumer
     T G = this->getGradient();
     // get inputs of this node
@@ -414,7 +414,7 @@ Sum<T>::Sum(BaseNode *a, int axis) : UnaryOperation<T>(a), _axis(axis)
 template <typename T>
 void Sum<T>::compute()
 {
-    std::cout << "Compute Sum operation ..." << std::endl;
+    //std::cout << "Compute Sum operation ..." << std::endl;
     if (_axis == 0)
     {
         // if axis = 0 then sum colwise
@@ -430,7 +430,7 @@ void Sum<T>::compute()
 template <typename T>
 void Sum<T>::gradient()
 {
-    std::cout << "Compute sum operation gradient..." << std::endl;
+    //std::cout << "Compute sum operation gradient..." << std::endl;
     // get output gradient from consumer
     T G = this->getGradient();
     T g;
@@ -461,7 +461,7 @@ Minimizer<T>::Minimizer(GradientDescentOptimizer *grd, BaseNode *loss) : grdOpt_
 template <typename T>
 Minimizer<T>::Minimizer(Minimizer<T> &&other)
 {
-    std::cout << " Minimizer move contructor..." << std::endl;
+    //std::cout << " Minimizer move contructor..." << std::endl;
     // lock other side
     std::unique_lock<std::mutex> rhs_baselk(other.BaseMtx_, std::defer_lock);
     std::unique_lock<std::mutex> rhs_nodelk(other.NodeMtx_, std::defer_lock);
@@ -476,7 +476,7 @@ Minimizer<T>::Minimizer(Minimizer<T> &&other)
 template <typename T>
 Minimizer<T> &Minimizer<T>::operator=(Minimizer<T> &&other)
 {
-    std::cout << " Minimizer move assignment contructor..." << std::endl;
+    //std::cout << " Minimizer move assignment contructor..." << std::endl;
     if (this != &other)
     {
         // lock both base and node class of both sides
@@ -498,7 +498,7 @@ Minimizer<T> &Minimizer<T>::operator=(Minimizer<T> &&other)
 template <typename T>
 void Minimizer<T>::compute()
 {
-    std::cout << "Compute Minimization operation ..." << std::endl;
+    //std::cout << "Compute Minimization operation ..." << std::endl;
     grdOpt_->computeGradients(loss_);
 
     for (auto n : grdOpt_->NodesList_)
