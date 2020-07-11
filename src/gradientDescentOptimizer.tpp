@@ -4,17 +4,25 @@ GradientDescentOptimizer::GradientDescentOptimizer(float lr) : learningRate_(lr)
 
 void GradientDescentOptimizer::computeGradients(BaseNode *loss)
 {
+    std::vector<BaseNode*> nodes;
     // clear nodes list and queue
     NodesList_.clear();
     // get node queue in level order traversal like BFS
     getNodeQueue(loss);
+    // store ftrs to wait for them later
     std::vector<std::future<void>> ftrs;
-    // calculate gradients
+    // clear gradients from previous epoch
     while (!nodeQueue_.empty())
     {
         auto node = nodeQueue_.front();
+        nodes.push_back(node);
+        node->clearGrads();
         nodeQueue_.pop_front();
-        ftrs.emplace_back(std::async(std::launch::deferred, [node] {  node->gradient(); }));
+    }
+    // calculate gradients
+    for(auto &node : nodes)
+    {
+        ftrs.emplace_back(std::async(std::launch::async, [node] {  node->gradient(); }));
     }
     // wait for results
     for_each(ftrs.begin(), ftrs.end(), [](std::future<void> &ftr) { ftr.wait(); });

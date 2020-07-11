@@ -506,11 +506,7 @@ void Minimizer<T>::compute()
         if (n->getNodeType() == nodeType::variable)
         {
             static_cast<Variable<T> *>(n)->updateValue(grdOpt_->learningRate_);
-            // clear grads for next epoch
-            n->clearGrads<T>();
         }
-        // reset grads for next epoch
-        n->clearGrads<T>();
     }
 }
 
