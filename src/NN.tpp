@@ -145,8 +145,6 @@ void NN::checkGradient(BaseNode *n, BaseNode *loss, std::unordered_map<std::stri
         std::cout << "Loss-:" << outN << std::endl;
         // swap the node back in and compute the graph
         swapNodes(n, &newNodeN);
-        _session.Run(loss, feed);
-        //std::cout << "Loss: " << *(loss->getValue<matxxT>()) << std::endl;
         // find numerical gradient and check the node gradient
         grad = (outP - outN) / (2 * E);
     }
