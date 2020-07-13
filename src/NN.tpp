@@ -15,6 +15,22 @@ void NN::run(BaseNode *n, std::unordered_map<std::string, Matrix<T, Dynamic, Dyn
     _session.Run<T>(n, feed);
 }
 
+template <typename T, template <typename> class U>
+U<Matrix<T, Dynamic, Dynamic>> *NN::UnaryOperation(BaseNode *a)
+{
+    auto v = std::shared_ptr<U<Matrix<T, Dynamic, Dynamic>>>(new U<Matrix<T, Dynamic, Dynamic>>(a));
+    _graph.addNodeOne<U, Matrix<T, Dynamic, Dynamic>>(v);
+    return v.get();
+}
+
+template <typename T, template <typename, typename, typename> class U>
+U<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>> *NN::NN::BinaryOperation(BaseNode *a, BaseNode *b)
+{
+    auto c = std::shared_ptr<U<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>>(new U<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>(a, b));
+    _graph.addNodeTwo<U, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>(c);
+    return c.get();
+}
+
 template <typename T>
 Variable<Matrix<T, Dynamic, Dynamic>> *NN::variable(Matrix<T, Dynamic, Dynamic> &&t)
 {
@@ -36,65 +52,50 @@ Placeholder<Matrix<T, Dynamic, Dynamic>> *NN::placeholder(std::string n)
 template <typename T>
 Add<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>> *NN::add(BaseNode *a, BaseNode *b)
 {
-    auto c = std::shared_ptr<Add<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>>(new Add<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>(a, b));
-    _graph.addNodeTwo<Add, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>(c);
-    return c.get();
+
+    return BinaryOperation<T, Add>(a, b);
 }
 
 template <typename T>
 Negative<Matrix<T, Dynamic, Dynamic>> *NN::negative(BaseNode *a)
 {
-    auto c = std::shared_ptr<Negative<Matrix<T, Dynamic, Dynamic>>>(new Negative<Matrix<T, Dynamic, Dynamic>>(a));
-    _graph.addNodeOne<Negative, Matrix<T, Dynamic, Dynamic>>(c);
-    return c.get();
+    return UnaryOperation<T, Negative>(a);
 }
 
 template <typename T>
 Multiply<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>> *NN::multiply(BaseNode *a, BaseNode *b)
 {
-    auto c = std::shared_ptr<Multiply<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>>(new Multiply<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>(a, b));
-    _graph.addNodeTwo<Multiply, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>(c);
-    return c.get();
+    return BinaryOperation<T, Multiply>(a, b);
 }
 
 template <typename T>
 MatMultiply<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>> *NN::matmultiply(BaseNode *a, BaseNode *b)
 {
-    auto c = std::shared_ptr<MatMultiply<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>>(new MatMultiply<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>(a, b));
-    _graph.addNodeTwo<MatMultiply, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>(c);
-    return c.get();
+    return BinaryOperation<T, MatMultiply>(a, b);
 }
 
 template <typename T>
 Dot<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>> *NN::dot(BaseNode *a, BaseNode *b)
 {
-    auto c = std::shared_ptr<Dot<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>>(new Dot<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>(a, b));
-    _graph.addNodeTwo<Dot, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>(c);
-    return c.get();
+    return UnaryOperation<T, Dot>(a);
 }
 
 template <typename T>
 Sigmoid<Matrix<T, Dynamic, Dynamic>> *NN::sigmoid(BaseNode *a)
 {
-    auto c = std::shared_ptr<Sigmoid<Matrix<T, Dynamic, Dynamic>>>(new Sigmoid<Matrix<T, Dynamic, Dynamic>>(a));
-    _graph.addNodeOne<Sigmoid, Matrix<T, Dynamic, Dynamic>>(c);
-    return c.get();
+    return UnaryOperation<T, Sigmoid>(a);
 }
 
 template <typename T>
 Log<Matrix<T, Dynamic, Dynamic>> *NN::log(BaseNode *a)
 {
-    auto c = std::shared_ptr<Log<Matrix<T, Dynamic, Dynamic>>>(new Log<Matrix<T, Dynamic, Dynamic>>(a));
-    _graph.addNodeOne<Log, Matrix<T, Dynamic, Dynamic>>(c);
-    return c.get();
+    return UnaryOperation<T, Log>(a);
 }
 
 template <typename T>
 Sum<Matrix<T, Dynamic, Dynamic>> *NN::sum(BaseNode *a, int axis)
 {
-    auto c = std::shared_ptr<Sum<Matrix<T, Dynamic, Dynamic>>>(new Sum<Matrix<T, Dynamic, Dynamic>>(a, axis));
-    _graph.addNodeOne<Sum, Matrix<T, Dynamic, Dynamic>>(c);
-    return c.get();
+    return UnaryOperation<T, Sum>(a);
 }
 
 template <typename T>
@@ -135,14 +136,14 @@ void NN::checkGradient(BaseNode *n, BaseNode *loss, std::unordered_map<std::stri
         // compute value of loss
         _session.Run(loss, feed);
         matxxT outP = *(loss->getValue<matxxT>());
-        std::cout << "Loss+:" << outP << std::endl;
+        //std::cout << "Loss+:" << outP << std::endl;
         swapNodes(n, &newNodeP);
         _session.Run(loss, feed);
         // swap the node with other new node
         swapNodes(&newNodeN, n);
         _session.Run(loss, feed);
         matxxT outN = *(loss->getValue<matxxT>());
-        std::cout << "Loss-:" << outN << std::endl;
+        //std::cout << "Loss-:" << outN << std::endl;
         // swap the node back in and compute the graph
         swapNodes(n, &newNodeN);
         // find numerical gradient and check the node gradient

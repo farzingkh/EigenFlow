@@ -50,13 +50,18 @@ public:
     template <typename T>
     void checkAllGradient(BaseNode *loss, std::unordered_map<std::string, Matrix<T, Dynamic, Dynamic> *> feed);
 
-protected:
+private:
+    template <typename T, template <typename> class U>
+    U<Matrix<T, Dynamic, Dynamic>> *UnaryOperation(BaseNode *a);
+
+    template <typename T, template <typename, typename, typename> class U>
+    U<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>> *BinaryOperation(BaseNode *a, BaseNode *b);
+
     template <typename T>
     void checkGradient(BaseNode *n, BaseNode *loss, std::unordered_map<std::string, Matrix<T, Dynamic, Dynamic> *> feed);
 
     void swapNodes(BaseNode *a, BaseNode *b);
 
-private:
     Graph _graph;
     Session _session;
 };
