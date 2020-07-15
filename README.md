@@ -18,7 +18,7 @@ This project was inspired by Deep Learning From Scratch: Theory and Implementati
     * All Oses: [download and extract Eigen's source code](http://eigen.tuxfamily.org/index.php?title=Main_Page#Download). 
     * The directory in which you placed Eigen's source code must be in the include path
     * Or use the -I option with GCC to achieve:
-     ''' g++ -I /path/to/eigen/ my_program.cpp -o my_program ''' 
+     ``` g++ -I /path/to/eigen/ my_program.cpp -o my_program ```
 
 ## Basic Build Instructions
 1. Clone this repo.
