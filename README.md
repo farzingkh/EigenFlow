@@ -137,4 +137,4 @@ Use nn.checkAllGradient() to see if the gradient calculations are correct. It co
 
 ## Expected Output
 
-![alt text](./image/out.gif)
+![alt text](./image/out2.gif)
