@@ -112,16 +112,24 @@ Classes are template, but they are separated into ".h" and ".tpp" files to incre
 Explanation of the example in main.cpp
 
 Create an alias for the dynamic eigen matrix type
-```typedef Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic> matxxf;```
+```cpp
+typedef Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic> matxxf;
+```
 
 Include the NN.h in your file:
-``` #include "../include/NN.h" ```
+```cpp
+ #include "../include/NN.h" 
+```
 
 Then initialize a neural network NN class:
-``` NN nn = NN(); ```
+```cpp
+NN nn = NN(); 
+```
 
 Define the number of steps for optimization
-``` int const STEPS = 10000; ```
+```cpp
+int const STEPS = 10000; 
+```
 
 Use nn.spaceholders for constants and nn.variables for learnable variables, see the main.cpp for example:
 
