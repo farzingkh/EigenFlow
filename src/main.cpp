@@ -78,5 +78,5 @@ int main()
     }
 
     /* Check gradients -- Make sure to set learning rate to zero befor checking!! -- */
-    // nn.checkAllGradient(L, feed);
+    nn.checkAllGradient(L, feed);
 }

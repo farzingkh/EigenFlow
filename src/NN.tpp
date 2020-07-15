@@ -18,23 +18,29 @@ void NN::run(BaseNode *n, std::unordered_map<std::string, Matrix<T, Dynamic, Dyn
 template <typename T, template <typename> class U>
 U<Matrix<T, Dynamic, Dynamic>> *NN::UnaryOperation(BaseNode *a)
 {
+    // Create a shared_ptr of new U class
     auto v = std::shared_ptr<U<Matrix<T, Dynamic, Dynamic>>>(new U<Matrix<T, Dynamic, Dynamic>>(a));
+    // Copy the shared_ptr into graph to make sure its life is extended as necessary
     _graph.addNodeOne<U, Matrix<T, Dynamic, Dynamic>>(v);
+    // return the raw pointer 
     return v.get();
 }
 
 template <typename T, template <typename, typename, typename> class U>
 U<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>> *NN::NN::BinaryOperation(BaseNode *a, BaseNode *b)
 {
+    // Create a shared_ptr of new U class
     auto c = std::shared_ptr<U<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>>(new U<Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>(a, b));
+    // Copy the shared_ptr into graph
     _graph.addNodeTwo<U, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>, Matrix<T, Dynamic, Dynamic>>(c);
+    // return the raw pointer
     return c.get();
 }
 
 template <typename T>
 Variable<Matrix<T, Dynamic, Dynamic>> *NN::variable(Matrix<T, Dynamic, Dynamic> &&t)
 {
-    std::cout << "nn variable constructor" << std::endl;
+    //std::cout << "nn variable constructor" << std::endl;
     auto v = std::shared_ptr<Variable<Matrix<T, Dynamic, Dynamic>>>(new Variable<Matrix<T, Dynamic, Dynamic>>(std::move(t)));
     _graph.addNodeOne<Variable, Matrix<T, Dynamic, Dynamic>>(v);
     return v.get();
@@ -43,7 +49,7 @@ Variable<Matrix<T, Dynamic, Dynamic>> *NN::variable(Matrix<T, Dynamic, Dynamic> 
 template <typename T>
 Placeholder<Matrix<T, Dynamic, Dynamic>> *NN::placeholder(std::string n)
 {
-    std::cout << "nn placeholder constructor" << std::endl;
+    //std::cout << "nn placeholder constructor" << std::endl;
     auto plc = std::shared_ptr<Placeholder<Matrix<T, Dynamic, Dynamic>>>(new Placeholder<Matrix<T, Dynamic, Dynamic>>(n));
     _graph.addNodeOne<Placeholder, Matrix<T, Dynamic, Dynamic>>(plc);
     return plc.get();
@@ -107,6 +113,7 @@ void NN::checkAllGradient(BaseNode *loss, std::unordered_map<std::string, Matrix
     {
         checkGradient(n, loss, feed);
     }
+    std::cout << "All gradients are correct!\n";
 }
 
 // Check node gradient numerically
