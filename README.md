@@ -43,6 +43,9 @@ Define the number of steps for optimization
 ``` int const STEPS = 10000; ```
 
 Use nn.spaceholders for constants and nn.variables for learnable variables, see the main.cpp for example:
+
+(Use ```long double``` if you want to check the gradient calculations numerically.)
+
 ```cpp 
 // matrix of scalar 1
 Eigen::Matrix<long double, 1, 1> One;
