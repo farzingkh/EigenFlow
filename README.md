@@ -26,7 +26,88 @@ This project was inspired by Deep Learning From Scratch: Theory and Implementati
 3. Compile: `cmake .. && make`
 4. Run it: `./nn`.
 
-## How to Use: 
+## File Structure
+
+Classes are template, but they are separated into ".h" and ".tpp" files to increase code readability. Relevant .tpp files are included at the end of each class declaration. 
+
+```bash
+.
+├── CMakeLists.txt
+├── LICENSE
+├── README.md
+├── data
+│   ├── dev
+│   └── test
+├── image
+│   ├── out1.gif
+│   └── out2.gif
+├── include
+│   ├── NN.h
+│   ├── gradientDescentOptimizer.h
+│   ├── graph.h
+│   ├── lockingPtr.h
+│   ├── node.h
+│   ├── operation.h
+│   ├── optimization.h
+│   └── session.h
+└── src
+    ├── NN.tpp
+    ├── gradientDescentOptimizer.tpp
+    ├── graph.tpp
+    ├── lockingPtr.tpp
+    ├── main.cpp
+    ├── node.tpp
+    ├── operation.tpp
+    └── session.tpp
+```
+
+
+
+## Class Structure
+
+* ```Node.h```
+  * ```BaseNode```: Abstract base class for each base node. Base class is implemented so that nodes of different types can be stored in a single container
+  in computational graph
+
+    * Data: 
+      * ```_consumers```: vector of ```BaseNode*``` to store nodes consumers in the graph
+      * ``` _inputs```: vector of ```BaseNode*``` to store nodes inputs in the graph
+      * ```_nType```:
+      * ```_opType```:
+      * ```BaseMtx_```:
+      * ```consumerSize_ ```:(atomic)
+      * ```_name```:
+
+    * Methods: 
+      * provides relevant mutators and accessors for base class data and inherited node class data (virtual template classes not possible) Possible design patterns include CRTP, multiple dispatchers, and maps with pointers to functions. Here the base class is abstract so upcasting is safe if the data type is known. 
+      * implements pure virtual methods for computation and gradient
+
+  * ```Node<T>```: Inherits BaseNode. Is a template abstract class; does not implement ```compute()``` and ```gradient()``` methods of the ```BaseNode```
+    * Data
+      * ```_output```: node value 
+      * ``` _grad```: gradient value 
+      * ```BaseMtx```: Mutex for locking threads
+      * ```DataMtx```: To lock pointers if ```locking_ptr``` wrapper class is used
+      * ```cond_```: Condition variable used for data availibility predicate
+      * ```_dataAvailable``` Flags for data availability
+      * ```_gradientAvailable``` Flag for gradient data availability
+
+    * Methods
+      * Relevant mutators and accessors, see the header file
+
+  * ```Variable<T>```: Inherits ```Node<T>``` class. Template class for variable nodes. Includes relevant constructor that take value.
+    * Data: Does not hoold any data
+    * Methods 
+      * gradient 
+      * value computation 
+      * method to update their value once the gradient of the node is obtained.
+
+  * ```Placeholder<T>```: Template class for constant variable nodes in the graph. Constructor takes the name of the placeholder.
+  
+
+
+
+## How to Use
 
 Explanation of the example in main.cpp
 
