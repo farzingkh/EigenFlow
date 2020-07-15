@@ -135,4 +135,6 @@ Use nn.checkAllGradient() to see if the gradient calculations are correct. It co
     nn.checkAllGradient(L, feed);
 ```
 
-## Expected Example Output
+## Expected Output
+
+![alt text](./image/out.gif)
