@@ -1,5 +1,10 @@
 # EigenFlow
-This project was inspired by Deep Learning From Scratch: Theory and Implementation [blog post](https://www.deepideas.net/deep-learning-from-scratch-theory-and-implementation/) by Daniel Sabinasz. This project implements an API to create computational graphs and neural nets using Eigen libraray in C++ from scratch. Currently it includes a gradient descent optimizer to minimize any user defined loss function. This project was created with educational purposes in mind and does not offer the most efficient way of implementing neural nets. It currently uses dynamicly sized matrices everywhere. However, for large matrices the overhead might be reasonable and still efficient according to Eigen library documentation.
+This project was inspired by Deep Learning From Scratch: Theory and Implementation [blog post](https://www.deepideas.net/deep-learning-from-scratch-theory-and-implementation/) by Daniel Sabinasz. This project implements an API to create computational graphs and neural nets using Eigen libraray in C++ from scratch. 
+
+Currently, it only includes a gradient descent optimizer to minimize any user defined loss function. It currently uses dynamicly sized matrices everywhere. However, for large matrices the overhead might be reasonable and still efficient according to Eigen library documentation.
+
+This project was created with educational purposes in mind and does not offer the most efficient way of implementing neural nets. It is best suited for people who are begineers in Machine Learning and Deep Learning. Implementation of different algorithms will help you increase your understanding. 
+
 
 ## Dependencies for Running 
 * cmake >= 2.8
@@ -117,7 +122,20 @@ General information for class structure of the API. For more detailed informatio
     * Inherits from ```Operation<T>```
     * Has relevant move/assignment constructors (copy/assignment c'tor is deleted)
     * Overrides ```Compute()``` that performs gradient update 
+* ```graph.h```
+  * Stores pointers to nodes of the computational graph and ensures their existence thrughout the computation
 
+* ```session.h```
+  * Provides methods to get the nodes in post-ordet traversal and relevant accesor
+  * Provides a ```Run``` method that takes a pointer to the node in the computational graph and runs relevant operations by calling ```compute()``` for each node. Also feeds the data to placeholders. 
+
+* ```gradientDescentOptimizer.h```
+  * Takes the learning rate and provides methods to perform backward propogation concurrently. 
+
+* ```NN.h```
+  *  Provides factory methods to create new unary and binary operations with dynamic memory allocation and store them using ```graph``` methods
+  * Provides methods to run the operations by using methods from ```session``` 
+  * Provides helper methods to check gradient calculations numerically for all the nodes
 
 ## How to Use
 
@@ -239,3 +257,13 @@ Use nn.checkAllGradient() to see if the gradient calculations are correct. It co
 ## Expected Output
 
 ![alt text](./image/out2.gif)
+
+## References and Useful Resources
+
+1 - To learn about the matrix calculus required for Neural Nets see [explaned.ai](https://explained.ai/matrix-calculus/index.html) by Terence Parr and Jeremy Howard
+
+2 - To learn more about Deep Learning read the book ["Deep Learning"](http://www.deeplearningbook.org/) by Ian Goodfellow and Yoshua Bengio and Aaron Courville
+
+3 - Deep Learning From Scratch: Theory and Implementation [blog post](https://www.deepideas.net/deep-learning-from-scratch-theory-and-implementation/) by Daniel Sabinasz
+
+4 - To learn more about [Eigen library](http://eigen.tuxfamily.org/dox/modules.html) see the documentation
