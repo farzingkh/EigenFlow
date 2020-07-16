@@ -144,6 +144,8 @@ public:
 
 private:
     // cashed varieble nodes list
+    Minimizer(Minimizer<T> &other) = delete;
+    Minimizer<T> &operator=(Minimizer<T> &other) = delete;
     GradientDescentOptimizer *grdOpt_;
     BaseNode *loss_;
 };
