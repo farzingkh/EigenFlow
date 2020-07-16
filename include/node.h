@@ -4,6 +4,7 @@
 #include <vector>
 #include <Eigen/Dense>
 #include <Eigen/Core>
+#include <memory>
 
 // A matrix of ints with a dynamic size, Use it when the size is not known
 typedef Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> matXXi;
