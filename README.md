@@ -67,46 +67,70 @@ Classes are template, but they are separated into ".h" and ".tpp" files to incre
 
 General information for class structure of the API. For more detailed information about the interface, see the header files.
 
-* ```Node.h```
+* ```node.h```
   * ```BaseNode```: 
     * Abstract base class for each node. Base class is implemented so that nodes of different types can be stored in a single container in computational graph
     * Stores pointers to inputs and consumer nodes and provides necessary accessors and mutators
     * Stores relevant informaiton about each node such as node's type and name
-    * Provides pure virtual functions for computing inherited nodes values and gradients. Possible design patterns are CRTP, multi dispatching, and a map of pointers to functions. Since it's an abstract class upcasting to derived ```Node<T>``` class is safe as long as ```T``` is known
-
-
+    * Provides pure virtual functions for computing inherited nodes values and gradients. Possible design patterns are CRTP, multi dispatching, and a map of pointers to functions. Since it's an abstract class upcasting to derived ```Node<T>``` class is safe as long as ```T``` is known and its the easiest to implement
   * ```Node<T>```: 
     * Inherits from ```BaseNode```. 
     * Stores output values and gradients with flags and conditional variables to check for data availability
-    * Is a template abstract class; does not implement ```compute(), gradient(), clearGrads()``` methods of the ```BaseNode```
-
+    * Is a template abstract class; does not implement ```compute()``` and ```gradient()``` methods of the ```BaseNode```
+    * Overrides ```clearGrads()``` of the base class
   * ```Variable<T>```: 
     * Inherits  from ```Node<T>``` 
     * Template class for variable nodes with relevant constructor that take value
     * Does not hold any data
-    * Implemets the virtual methods of the base class
-
+    * Implemets the virtual methods of the base clas
   * ```Placeholder<T>```: 
     * Inherits  from ```Node<T>``` 
     * Template class for constant variable nodes in the graph. 
     * Constructor takes the name of the placeholder.
     * Holds no value
   
-
+* ```operation.h```
+  * ```Operation<T>```:
+    * Inherits  from ```Node<T>```
+    * Abstract base clase for operation
+  * ```UnaryOperation<T>```:
+    * Inherits from ```Operation<T>```
+    * Factory constructor that accepts a single pointer to a node
+  * ```BinaryOperation<T>```:
+    * Inherits from ```Operation<T>```
+    * Factory constructor that accepts two pointers to nodes 
+  * ```Add<T,T1,T2>```: Performs addition and brodcasting when necessary
+  * ```MatMultiply<T,T1,T2>```: Performs matrix multiply
+  * ```Dot<T,T1,T2>```: Performs dot product
+  * ```Multiply<T,T1,T2>```: Performs element-wise product
+    * All inherit from ```BinaryOperation<T>```
+    * Have relevant constructors
+    * Override ```Compute()``` and ```gradient()```
+  * ```Negative<T>```: Performs element-wise negation
+  * ```Log<T>```: Performs element-wise log
+  * ```Sigmoid<T>```: Element-wise sigmoid operation
+  * ```Sum<T>```: Performs reduce sum on the given axis
+    * All inherit from ```UnaryOperation<T>```
+    * Have relevant constructors
+    * Override ```Compute()``` and ```gradient()``` 
+  * ```Minimizer<T>```:
+    * Inherits from ```Operation<T>```
+    * Has relevant move/assignment constructors (copy/assignment c'tor is deleted)
+    * Overrides ```Compute()``` that performs gradient update 
 
 
 ## How to Use
 
 Explanation of the example in main.cpp
 
-Create an alias for the dynamic eigen matrix type
-```cpp
-typedef Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic> matxxf;
-```
-
 Include the NN.h in your file:
 ```cpp
  #include "../include/NN.h" 
+```
+
+Create an alias for the dynamic eigen matrix type
+```cpp
+typedef Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic> matxxf;
 ```
 
 Then initialize a neural network NN class:
