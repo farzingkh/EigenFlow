@@ -4,7 +4,6 @@
 #include <vector>
 #include <Eigen/Dense>
 #include <Eigen/Core>
-#include "../include/lockingPtr.h"
 
 // A matrix of ints with a dynamic size, Use it when the size is not known
 typedef Eigen::Matrix<int, Eigen::Dynamic, Eigen::Dynamic> matXXi;
@@ -60,8 +59,8 @@ public:
 
     nodeType getNodeType();
     operationType getOperationType();
-    std::vector<BaseNode *> getConsumers();
-    std::vector<BaseNode *> getInputs();
+    std::vector<BaseNode *> &getConsumers();
+    std::vector<BaseNode *> &getInputs();
     std::string getName();
 
     // keep the size of consumers as an atomic data

@@ -99,14 +99,14 @@ std::string BaseNode::getName()
     return _name;
 }
 
-std::vector<BaseNode *> BaseNode::getInputs()
+std::vector<BaseNode *> &BaseNode::getInputs()
 {
     // return a copy to avoid data races
     std::lock_guard<std::mutex> lck(BaseMtx_);
     return _inputs;
 }
 
-std::vector<BaseNode *> BaseNode::getConsumers()
+std::vector<BaseNode *> &BaseNode::getConsumers()
 {
     // return a copy to avoid data races
     std::lock_guard<std::mutex> lck(BaseMtx_);
