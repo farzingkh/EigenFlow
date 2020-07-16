@@ -225,7 +225,7 @@ void Node<T>::clearGrads()
 // --- Variable ---
 
 template <typename T>
-Variable<T>::Variable(T &&a)
+Variable<T>::Variable(T &&a) 
 {
     std::cout << "Variable contructor ..." << std::endl;
     this->_nType = nodeType::variable;
@@ -234,7 +234,7 @@ Variable<T>::Variable(T &&a)
 }
 
 template <typename T>
-Variable<T>::Variable(Variable<T> &v)
+Variable<T>::Variable(Variable<T> const &v)
 {
     std::cout << "Variable copy contructor ..." << std::endl;
     // copy
@@ -243,6 +243,7 @@ Variable<T>::Variable(Variable<T> &v)
     // set value and get value locks the node, no need to create a lock
     this->setValue((&v)->getValue());
 }
+
 template <typename T>
 Variable<T>::Variable(Variable<T> &&v)
 {
@@ -257,6 +258,37 @@ Variable<T>::Variable(Variable<T> &&v)
     this->_nType = nodeType::variable;
     this->_opType = operationType::NA;
     this->_output = std::move(v->_output);
+    v->_nType = NA;
+    v->_opType = NA;
+}
+
+template <typename T>
+Variable<T>& Variable<T>::operator=(Variable<T> const &v)
+{
+    std::cout << "Variable copy assignment contructor ..." << std::endl;
+    // move
+    this->_nType = nodeType::variable;
+    this->_opType = operationType::NA;
+    // set value and get value locks the node, no need to create a lock
+    this->setValue((&v)->getValue());
+}
+
+template <typename T>
+Variable<T>& Variable<T>::operator=(Variable<T> &&v)
+{
+    std::cout << "Variable move assignment contructor ..." << std::endl;
+    // lock
+    std::unique_lock<std::mutex> rhs_baselk(v.BaseMtx_, std::defer_lock);
+    std::unique_lock<std::mutex> rhs_nodelk(v.NodeMtx_, std::defer_lock);
+    // lock this to change output value
+    std::unique_lock<std::mutex> lhs_nodelk(this->NodeMtx_, std::defer_lock);
+    std::lock(rhs_baselk, rhs_nodelk, lhs_nodelk);
+    // move
+    this->_nType = nodeType::variable;
+    this->_opType = operationType::NA;
+    this->_output = std::move(v->_output);
+    v->_nType = NA;
+    v->_opType = NA;
 }
 
 template <typename T>

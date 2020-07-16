@@ -24,6 +24,8 @@ enum class operationType
 // Node types
 enum nodeType
 {
+    NA,
+    minimizer,
     operation,
     variable,
     placeholder
@@ -114,8 +116,11 @@ class Variable : public Node<T>
 {
 public:
     Variable(T &&a);
-    Variable(Variable<T> &v);
+    Variable(Variable<T> const &v);
     Variable(Variable<T> &&v);
+    Variable<T> &operator=(Variable<T> const &v);
+    Variable<T> &operator=(Variable<T> &&v);
+    
 
     void compute();
     void gradient();
