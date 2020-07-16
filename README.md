@@ -3,7 +3,7 @@ This project was inspired by Deep Learning From Scratch: Theory and Implementati
 
 Currently, it only includes a gradient descent optimizer to minimize any user defined loss function. It currently uses dynamicly sized matrices everywhere. However, for large matrices the overhead might be reasonable and still efficient according to Eigen library documentation.
 
-This project was created with educational purposes in mind and does not offer the most efficient way of implementing neural nets. It is best suited for people who are begineers in Machine Learning and Deep Learning. Implementation of different algorithms will help you increase your understanding. 
+This project was created with educational purposes in mind and does not offer the most efficient way of implementing neural nets. It is best suited for people who are begineers in Machine Learning and Deep Learning. Re-implementation of different algorithms from scratch will help you increase your understanding. 
 
 
 ## Dependencies for Running 
