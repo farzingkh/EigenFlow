@@ -1,7 +1,10 @@
 cmake_minimum_required(VERSION 3.11.3)
+add_definitions(-std=c++11)
+set(CXX_FLAGS "-Wall -pthread")
+set(CMAKE_CXX_FLAGS, "${CXX_FLAGS}")
 
 # set(CMAKE_CXX_STANDARD 17)
-project(NeuralNets)
+project(EigenFlow)
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++11 -pthread")
 set(CMAKE_BUILD_TYPE Debug)
 
