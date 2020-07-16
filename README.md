@@ -65,44 +65,32 @@ Classes are template, but they are separated into ".h" and ".tpp" files to incre
 
 ## Class Structure
 
+General information for class structure of the API. For more detailed information about the interface, see the header files.
+
 * ```Node.h```
-  * ```BaseNode```: Abstract base class for each base node. Base class is implemented so that nodes of different types can be stored in a single container
-  in computational graph
+  * ```BaseNode```: 
+    * Abstract base class for each node. Base class is implemented so that nodes of different types can be stored in a single container in computational graph
+    * Stores pointers to inputs and consumer nodes and provides necessary accessors and mutators
+    * Stores relevant informaiton about each node such as node's type and name
+    * Provides pure virtual functions for computing inherited nodes values and gradients. Possible design patterns are CRTP, multi dispatching, and a map of pointers to functions. Since it's an abstract class upcasting to derived ```Node<T>``` class is safe as long as ```T``` is known
 
-    * Data: 
-      * ```_consumers```: vector of ```BaseNode*``` to store nodes consumers in the graph
-      * ``` _inputs```: vector of ```BaseNode*``` to store nodes inputs in the graph
-      * ```_nType```:
-      * ```_opType```:
-      * ```BaseMtx_```:
-      * ```consumerSize_ ```:(atomic)
-      * ```_name```:
 
-    * Methods: 
-      * provides relevant mutators and accessors for base class data and inherited node class data (virtual template classes not possible) Possible design patterns include CRTP, multiple dispatchers, and maps with pointers to functions. Here the base class is abstract so upcasting is safe if the data type is known. 
-      * implements pure virtual methods for computation and gradient
+  * ```Node<T>```: 
+    * Inherits from ```BaseNode```. 
+    * Stores output values and gradients with flags and conditional variables to check for data availability
+    * Is a template abstract class; does not implement ```compute(), gradient(), clearGrads()``` methods of the ```BaseNode```
 
-  * ```Node<T>```: Inherits BaseNode. Is a template abstract class; does not implement ```compute()``` and ```gradient()``` methods of the ```BaseNode```
-    * Data
-      * ```_output```: node value 
-      * ``` _grad```: gradient value 
-      * ```BaseMtx```: Mutex for locking threads
-      * ```DataMtx```: To lock pointers if ```locking_ptr``` wrapper class is used
-      * ```cond_```: Condition variable used for data availibility predicate
-      * ```_dataAvailable``` Flags for data availability
-      * ```_gradientAvailable``` Flag for gradient data availability
+  * ```Variable<T>```: 
+    * Inherits  from ```Node<T>``` 
+    * Template class for variable nodes with relevant constructor that take value
+    * Does not hold any data
+    * Implemets the virtual methods of the base class
 
-    * Methods
-      * Relevant mutators and accessors, see the header file
-
-  * ```Variable<T>```: Inherits ```Node<T>``` class. Template class for variable nodes. Includes relevant constructor that take value.
-    * Data: Does not hoold any data
-    * Methods 
-      * gradient 
-      * value computation 
-      * method to update their value once the gradient of the node is obtained.
-
-  * ```Placeholder<T>```: Template class for constant variable nodes in the graph. Constructor takes the name of the placeholder.
+  * ```Placeholder<T>```: 
+    * Inherits  from ```Node<T>``` 
+    * Template class for constant variable nodes in the graph. 
+    * Constructor takes the name of the placeholder.
+    * Holds no value
   
 
 
