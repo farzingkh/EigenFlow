@@ -272,8 +272,6 @@ Use nn.checkAllGradient() to see if the gradient calculations are correct. It co
 
 ## Capston Project Rubric
 
-### Loops, Functions, I/O 
-
 * For loops and while loops and different control structures:
   * The project demonstrates an understanding of C++ functions and control structures.
     * ```node.tpp```
@@ -313,8 +311,25 @@ Use nn.checkAllGradient() to see if the gradient calculations are correct. It co
   * The project makes use of references in function declarations.
     * mathematical operation constructors take value by ref or ptr
       * ```operation.h``` lines 37, 49, 61, 73, 85, 97, 109, 121,
-   * The project follows the Rule of 5.    
+  * The project follows the Rule of 5.  
+    * ```node.h``` lines 118, 119, 120, 121, 122  
     * ```operation.h``` in ```Minimizer``` class
 
-   * The project uses move semantics to move data, instead of copying it, where possible. 
+  * The project uses move semantics to move data, instead of copying it, where possible. 
     * ```node.h``` in ```Node``` class lines 93, 118, 116, 
+
+  * The project uses smart pointers instead of raw pointers.
+    * ```node.h``` lines 106, 107
+    * ```graph.h``` lines 18
+
+* Concurrency
+  * The project uses multithreading.
+    * ```gradientDescentOptimizer.tpp``` lines  25
+
+  * A promise and future is used in the project. 
+    * ```gradientDescentOptimizer.tpp``` lines  13, 25, 28
+
+  * A mutex or lock is used in the project.
+    * ```nide.tpp``` lines   7, 13, 27, 41, 60, 75, ...
+  * A condition variable is used in the project. 
+     * ```nide.tpp``` line 162
