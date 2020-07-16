@@ -267,3 +267,5 @@ Use nn.checkAllGradient() to see if the gradient calculations are correct. It co
 3 - Deep Learning From Scratch: Theory and Implementation [blog post](https://www.deepideas.net/deep-learning-from-scratch-theory-and-implementation/) by Daniel Sabinasz
 
 4 - To learn more about [Eigen library](http://eigen.tuxfamily.org/dox/modules.html) see the documentation
+
+5 - To learn the basics of C++ and get started see [Udacity Cpp ND](https://www.udacity.com/course/c-plus-plus-nanodegree--nd213)
