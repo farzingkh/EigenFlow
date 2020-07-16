@@ -269,3 +269,52 @@ Use nn.checkAllGradient() to see if the gradient calculations are correct. It co
 4 - To learn more about [Eigen library](http://eigen.tuxfamily.org/dox/modules.html) see the documentation
 
 5 - To learn the basics of C++ and get started see [Udacity Cpp ND](https://www.udacity.com/course/c-plus-plus-nanodegree--nd213)
+
+## Capston Project Rubric
+
+### Loops, Functions, I/O 
+
+* For loops and while loops and different control structures:
+  * The project demonstrates an understanding of C++ functions and control structures.
+    * ```node.tpp```
+    * ```operation.tpp``` in ```compute``` and ```gradient``` methods
+    * ```gradientDescentOptimizer.tpp``` in ```computeGradients``` and ```getNodeQueue```
+  
+* Object Oriented Programming
+  * The project uses Object Oriented Programming techniques.
+    * ```node.h```
+    * ```operation.h```
+    * ```NN.h```
+  * Classes use appropriate access specifiers for class members
+     * ```node.h```
+  * Class constructors utilize member initialization lists.
+      * line 459 in ```operation.tpp```  and all binary and unary operation constructors:
+        * lines: 33, 39, 172, 178, 203, 209, 245, 250, 289, 295, 328, 334, ...  
+  * Classes abstract implementation details from their interfaces. 
+      * ```node.h``` and ```node.tpp``
+      * ```operation.h``` and ```operation.tpp```
+      * ```session.h``` and ```session.tpp```
+      * ```gradientDescentOptimizer.h``` and ```gradientDescentOptimizer.tpp```
+      * ```NN.h``` and ```NN.tpp```
+
+  * Classes encapsulate behavior. 
+    * ```BaseNode``` class in ```node.h```  
+
+  * Classes follow an appropriate inheritance hierarchy.
+    * ```Variable``` and ````Placeholder``` and ```Operation``` inherit from ```Node``` that inherits from ```BaseNode```
+    * ```UnaryOperation``` and ```BinaryOperation``` inherits from ```Operation``` and any mathematical operation inherits from ```UnaryOperation``` or ```BinaryOperation``` 
+
+  * Derived class functions override virtual base class functions.
+    * ```compute``` and ```gradient``` and ``` updateValue``` 
+
+  * Templates generalize functions in the project.
+    * almost all classes are template
+
+  * The project makes use of references in function declarations.
+    * mathematical operation constructors take value by ref or ptr
+      * ```operation.h``` lines 37, 49, 61, 73, 85, 97, 109, 121,
+   * The project follows the Rule of 5.    
+    * ```operation.h``` in ```Minimizer``` class
+
+   * The project uses move semantics to move data, instead of copying it, where possible. 
+    * ```node.h``` in ```Node``` class lines 93, 118, 116, 
