@@ -9,7 +9,7 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 set(CMAKE_BUILD_TYPE Debug)
 
 find_package(Threads)
-find_package(OpenCV 4.1 REQUIRED)
+#find_package(OpenCV 4.1 REQUIRED)
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
 include_directories(${OpenCV_INCLUDE_DIRS} "${PROJECT_SOURCE_DIR}/../eigen-3.3.7/" "/include/")
