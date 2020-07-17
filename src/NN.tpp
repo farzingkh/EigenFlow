@@ -109,9 +109,9 @@ void NN::checkAllGradient(BaseNode *loss, std::unordered_map<std::string, Matrix
 {
     _session.updateNodesList(loss);
     auto nodes = _session.getNodesList();
-    for (auto n : nodes)
+    for (auto &n : nodes)
     {
-        checkGradient(n, loss, feed);
+        checkGradient(n.get(), loss, feed);
     }
     std::cout << "All gradients are correct!\n";
 }
@@ -165,7 +165,7 @@ void NN::checkGradient(BaseNode *n, BaseNode *loss, std::unordered_map<std::stri
 // swap nodes in and out of computational graph
 void NN::swapNodes(BaseNode *in, BaseNode *out)
 {
-    std::vector<BaseNode *> consumers = out->getConsumers();
+    std::vector<Locking_ptr<BaseNode>> consumers = out->getConsumers();
     // only end node (i.e. loss) has no consumers
     for (auto cns : consumers)
     {
@@ -174,8 +174,8 @@ void NN::swapNodes(BaseNode *in, BaseNode *out)
         // add this node to consumer's input
         cns->addInputs(in);
         // remove consumers of other node
-        out->eraseConsumer(cns);
+        out->eraseConsumer(cns.get());
         // add consumers to new node
-        in->addConsumers(cns);
+        in->addConsumers(cns.get());
     }
 }
