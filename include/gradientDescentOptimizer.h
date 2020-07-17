@@ -20,10 +20,10 @@ public:
     Minimizer<T> minimize(BaseNode *loss);
 
     float learningRate_;
-    std::vector<BaseNode *> NodesList_;
+    std::vector<Locking_ptr<BaseNode>> NodesList_;
 
 private:
-    std::deque<BaseNode *> nodeQueue_;
+    std::deque<Locking_ptr<BaseNode>> nodeQueue_;
 };
 
 #include "../src/gradientDescentOptimizer.tpp"

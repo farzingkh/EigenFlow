@@ -4,9 +4,10 @@ GradientDescentOptimizer::GradientDescentOptimizer(float lr) : learningRate_(lr)
 
 void GradientDescentOptimizer::computeGradients(BaseNode *loss)
 {
-    std::vector<BaseNode*> nodes;
+    std::vector<Locking_ptr<BaseNode>> nodes;
     // clear nodes list and queue
     NodesList_.clear();
+    nodeQueue_.clear();
     // get node queue in level order traversal like BFS
     getNodeQueue(loss);
     // store ftrs to wait for them later
@@ -40,23 +41,23 @@ Minimizer<T> GradientDescentOptimizer::minimize(BaseNode *loss)
 void GradientDescentOptimizer::getNodeQueue(BaseNode *loss)
 {
     // Do BFS 
-    std::deque<BaseNode *> nodeQueue;
+    std::deque<Locking_ptr<BaseNode>> nodeQueue;
     std::unordered_map<BaseNode *, bool> visitedNodes;
-    nodeQueue.push_front(loss);
+    nodeQueue.push_front(Locking_ptr<BaseNode>(loss));
     while (!nodeQueue.empty())
     {
-        BaseNode *node = nodeQueue.front();
+        Locking_ptr<BaseNode> node = nodeQueue.front();
         nodeQueue_.push_back(node);
         // cash in node list
         NodesList_.push_back(node);
-        visitedNodes[node] = true;
+        visitedNodes[node.get()] = true;
         nodeQueue.pop_front();
         auto nodes = node->getInputs();
         // go through all inputs of the node
-        for (auto n : nodes)
+        for (auto &n : nodes)
         {
             // check if the node is visited before
-            if (visitedNodes[n] != true)
+            if (visitedNodes[n.get()] != true)
             {
                 // if node not visited add to queue
                 nodeQueue.push_back(n);
