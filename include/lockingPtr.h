@@ -10,7 +10,7 @@ class Locking_ptr
 {
 public:
     Locking_ptr(T *ptr);
-    Locking_ptr(T *ptr, std::mutex* mtx);
+    Locking_ptr(T *ptr, std::recursive_mutex* mtx);
     Locking_ptr(Locking_ptr<T> const &other);
     Locking_ptr(Locking_ptr<T> &&other);
 
@@ -26,12 +26,38 @@ public:
     T *get() const;
 
 protected:
-    std::mutex *Mtx_;
+    std::recursive_mutex *Mtx_;
 
 private:
-    std::shared_ptr<T> ptr_;
+    T* ptr_;
 };
 
+template <typename T, template <typename> class U>
+class Locking_smart_ptr
+{
+public:
+    Locking_smart_ptr(T *ptr);
+    Locking_smart_ptr(T *ptr, std::recursive_mutex* mtx);
+    Locking_smart_ptr(Locking_smart_ptr<T,U> const &other);
+    Locking_smart_ptr(Locking_smart_ptr<T,U> &&other);
+
+    ~Locking_smart_ptr();
+
+    Locking_smart_ptr<T,U> &operator=(Locking_smart_ptr<T,U> &&other);
+    Locking_smart_ptr<T,U> &operator=(Locking_smart_ptr<T,U> const &other);
+    T *operator->() const;
+    T &operator*() const;
+    bool operator==(Locking_smart_ptr<T,U> const &rhs);
+
+    void reset(T *ptr);
+    T *get() const;
+
+protected:
+    std::recursive_mutex *Mtx_;
+
+private:
+    U<T> ptr_;
+};
 #include "../src/lockingPtr.tpp"
 
 #endif /* LOCKING_PTR */
