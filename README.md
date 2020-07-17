@@ -16,7 +16,7 @@ This project was created with educational purposes in mind and does not offer th
 * OpenCV >= 4.1 - Not currently used
   * The OpenCV 4.1.0 source code can be found [here](https://github.com/opencv/opencv/tree/4.1.0)
 * gcc/g++ >= 5.4
-  * Linux: gcc / g++ is installed by default on most Linux distros
+  * Linux: Install build -essentials ```sudo apt-get install build-essential``` 
   * Mac: same deal as make - [install Xcode command line tools](https://developer.apple.com/xcode/features/)
   * Windows: recommend using [MinGW](http://www.mingw.org/)
 * Eigen3 >= 3.3
