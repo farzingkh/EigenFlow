@@ -4,75 +4,75 @@
 // --- BaseNode ---
 void BaseNode::setName(std::string n)
 {
-    std::lock_guard<std::mutex> lck(BaseMtx_);
+    std::lock_guard<std::recursive_mutex> lck(BaseMtx_);
     _name = n;
 }
 
 void BaseNode::addInputs(BaseNode *n)
 {
-    std::lock_guard<std::mutex> lck(BaseMtx_);
+    std::lock_guard<std::recursive_mutex> lck(BaseMtx_);
     for (int i = 0; i < _inputs.size(); i++)
     {
-        if (_inputs[i] == nullptr)
+        if (_inputs[i].get() == nullptr)
         {
-            _inputs[i] = n;
+            _inputs[i].reset(n);
             return;
         }
     }
-    _inputs.push_back(n);
+    _inputs.push_back(Locking_ptr<BaseNode>(n));
 }
 
 void BaseNode::eraseInput(BaseNode *n)
 {
-    std::lock_guard<std::mutex> lck(BaseMtx_);
+    std::lock_guard<std::recursive_mutex> lck(BaseMtx_);
     // remove the input node but keep the place
     for (int i = 0; i < _inputs.size(); i++)
     {
         // remove the node and use nullptr as a placeholder
         if (_inputs[i] == n)
         {
-            _inputs[i] = nullptr;
+            _inputs[i].reset(nullptr);
         }
     }
 }
 
 void BaseNode::addConsumers(BaseNode *n)
 {
-    std::lock_guard<std::mutex> lck(BaseMtx_);
+    std::lock_guard<std::recursive_mutex> lck(BaseMtx_);
     // remove consumer but keep the place
     for (int i = 0; i < _consumers.size(); i++)
     {
         // check if there is deleted consumer
-        if (_consumers[i] == nullptr)
+        if (_consumers[i].get() == nullptr)
         {
             // replace the deleted consumer in place
-            _consumers[i] = n;
+            _consumers[i].reset(n);
             return;
         }
     }
     // add consumer and increment the size
-    _consumers.push_back(n);
+    _consumers.push_back(Locking_ptr<BaseNode>(n));
     consumerSize_++;
 }
 
 void BaseNode::eraseConsumer(BaseNode *n)
 {
-    std::lock_guard<std::mutex> lck(BaseMtx_);
+    std::lock_guard<std::recursive_mutex> lck(BaseMtx_);
     // remove consumer but keep the place
     for (int i = 0; i < _consumers.size(); i++)
     {
         // remove the node and use nullptr as a placeholder
         if (_consumers[i] == n)
         {
-            _consumers[i] = nullptr;
+            _consumers[i].reset(nullptr);
         }
     }
 }
 
 template <typename T>
-std::shared_ptr<T> BaseNode::getValue()
+Locking_smart_ptr<T, std::shared_ptr> BaseNode::getValue()
 {
-    std::unique_lock<std::mutex> lck(BaseMtx_);
+    std::unique_lock<std::recursive_mutex> lck(BaseMtx_);
     auto node = static_cast<Node<T> *>(this);
     return node->getValue();
 }
@@ -80,7 +80,7 @@ std::shared_ptr<T> BaseNode::getValue()
 template <typename T>
 T BaseNode::getGradient()
 {
-    std::unique_lock<std::mutex> lck(BaseMtx_);
+    std::unique_lock<std::recursive_mutex> lck(BaseMtx_);
     auto node = static_cast<Node<T> *>(this);
     return node->getGradient();
 }
@@ -88,52 +88,52 @@ T BaseNode::getGradient()
 template <typename T>
 void BaseNode::setGrad(T t)
 {
-    std::unique_lock<std::mutex> lck(BaseMtx_);
+    std::unique_lock<std::recursive_mutex> lck(BaseMtx_);
     auto node = static_cast<Node<T> *>(this);
     node->setGrad(t);
 }
 
 std::string BaseNode::getName()
 {
-    std::lock_guard<std::mutex> lck(BaseMtx_);
+    std::lock_guard<std::recursive_mutex> lck(BaseMtx_);
     return _name;
 }
 
-std::vector<BaseNode *> &BaseNode::getInputs()
+std::vector<Locking_ptr<BaseNode>> &BaseNode::getInputs()
 {
     // return a copy to avoid data races
-    std::lock_guard<std::mutex> lck(BaseMtx_);
+    std::lock_guard<std::recursive_mutex> lck(BaseMtx_);
     return _inputs;
 }
 
-std::vector<BaseNode *> &BaseNode::getConsumers()
+std::vector<Locking_ptr<BaseNode>> &BaseNode::getConsumers()
 {
     // return a copy to avoid data races
-    std::lock_guard<std::mutex> lck(BaseMtx_);
+    std::lock_guard<std::recursive_mutex> lck(BaseMtx_);
     return _consumers;
 }
 
 nodeType BaseNode::getNodeType()
 {
-    std::lock_guard<std::mutex> lck(BaseMtx_);
+    std::lock_guard<std::recursive_mutex> lck(BaseMtx_);
     return _nType;
 }
 
 operationType BaseNode::getOperationType()
 {
-    std::lock_guard<std::mutex> lck(BaseMtx_);
+    std::lock_guard<std::recursive_mutex> lck(BaseMtx_);
     return _opType;
 }
 
 // --- Node  ---
 
 template <typename T>
-std::shared_ptr<T> Node<T>::getValue()
+Locking_smart_ptr<T, std::shared_ptr> Node<T>::getValue()
 {
 
     //std::cout << "Variable get value..." << std::endl;
     // lock to avoid data race
-    std::unique_lock<std::mutex> lk2(NodeMtx_);
+    std::unique_lock<std::recursive_mutex> lk2(NodeMtx_);
     //
     if (_dataAvailable)
     {
@@ -143,7 +143,7 @@ std::shared_ptr<T> Node<T>::getValue()
     else
     {
         std::cout << "Data not available" << std::endl;
-        return std::shared_ptr<T>(nullptr);
+        return Locking_smart_ptr<T, std::shared_ptr>(nullptr, &NodeMtx_);
     }
 }
 
@@ -151,7 +151,7 @@ template <typename T>
 T Node<T>::getGradient()
 {
     // lock to avoid data race
-    std::unique_lock<std::mutex> lk2(NodeMtx_);
+    std::unique_lock<std::mutex> lk2(DataMtx_);
     // Initialize node's gradient
     T grad;
     // check if node has a consumer; consumerSize_ is atomic
@@ -182,7 +182,7 @@ template <typename T>
 void Node<T>::setValue(T &&t)
 {
     // lock to avoid data race
-    std::unique_lock<std::mutex> lk2(NodeMtx_);
+    std::unique_lock<std::recursive_mutex> lk2(NodeMtx_);
     _dataAvailable = true;
     _output.reset(new T(t));
     //std::cout << "Output set: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
@@ -192,7 +192,7 @@ template <typename T>
 void Node<T>::setGrad(T t)
 {
     // lock to avoid data race
-    std::unique_lock<std::mutex> lk2(NodeMtx_);
+    std::unique_lock<std::recursive_mutex> lk2(NodeMtx_);
     //std::cout << "Gradient set: " << t << ", size: " << t.rows() << "," << t.cols() << std::endl;
     // gradient and value must have same dimensions
     if (t.cols() != (*_output).cols() or t.rows() != (*_output).rows())
@@ -216,7 +216,7 @@ template <typename T>
 void Node<T>::clearGrads()
 {
     // lock to avoid data race
-    std::unique_lock<std::mutex> lk2(NodeMtx_);
+    std::unique_lock<std::recursive_mutex> lk2(NodeMtx_);
     // reset gradients
     _gradientAvailable = false;
     _grad.clear();
@@ -225,7 +225,7 @@ void Node<T>::clearGrads()
 // --- Variable ---
 
 template <typename T>
-Variable<T>::Variable(T &&a) 
+Variable<T>::Variable(T &&a)  
 {
     std::cout << "Variable contructor ..." << std::endl;
     this->_nType = nodeType::variable;
@@ -249,17 +249,16 @@ Variable<T>::Variable(Variable<T> &&v)
 {
     std::cout << "Variable move contructor ..." << std::endl;
     // lock
-    std::unique_lock<std::mutex> rhs_baselk(v.BaseMtx_, std::defer_lock);
-    std::unique_lock<std::mutex> rhs_nodelk(v.NodeMtx_, std::defer_lock);
+    std::unique_lock<std::recursive_mutex> rhs_baselk(v.BaseMtx_, std::defer_lock);
+    std::unique_lock<std::recursive_mutex> rhs_nodelk(v.NodeMtx_, std::defer_lock);
     // lock this to change output value
-    std::unique_lock<std::mutex> lhs_nodelk(this->NodeMtx_, std::defer_lock);
+    std::unique_lock<std::recursive_mutex> lhs_nodelk(this->NodeMtx_, std::defer_lock);
     std::lock(rhs_baselk, rhs_nodelk, lhs_nodelk);
     // move
     this->_nType = nodeType::variable;
     this->_opType = operationType::NA;
     this->_output = std::move(v->_output);
     v->_nType = NA;
-    v->_opType = NA;
 }
 
 template <typename T>
@@ -278,17 +277,15 @@ Variable<T>& Variable<T>::operator=(Variable<T> &&v)
 {
     std::cout << "Variable move assignment contructor ..." << std::endl;
     // lock
-    std::unique_lock<std::mutex> rhs_baselk(v.BaseMtx_, std::defer_lock);
-    std::unique_lock<std::mutex> rhs_nodelk(v.NodeMtx_, std::defer_lock);
+    std::unique_lock<std::recursive_mutex> rhs_baselk(v.BaseMtx_, std::defer_lock);
+    std::unique_lock<std::recursive_mutex> rhs_nodelk(v.NodeMtx_, std::defer_lock);
     // lock this to change output value
-    std::unique_lock<std::mutex> lhs_nodelk(this->NodeMtx_, std::defer_lock);
+    std::unique_lock<std::recursive_mutex> lhs_nodelk(this->NodeMtx_, std::defer_lock);
     std::lock(rhs_baselk, rhs_nodelk, lhs_nodelk);
     // move
     this->_nType = nodeType::variable;
     this->_opType = operationType::NA;
     this->_output = std::move(v->_output);
-    v->_nType = NA;
-    v->_opType = NA;
 }
 
 template <typename T>
@@ -309,7 +306,7 @@ void Variable<T>::updateValue(float lr)
     //std::cout << "Variable update value ..." << std::endl;
     //variable has only one input gradient
     T grad = this->getGradient();
-    std::shared_ptr<T> output = this->getValue();
+    Locking_smart_ptr<T, std::shared_ptr> output = this->getValue();
     // update variable values based on learning rate and gradient
     this->setValue(output->array() - (grad.array() * lr));
 }
