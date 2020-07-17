@@ -13,7 +13,7 @@ void Session::Run(BaseNode *n, std::unordered_map<std::string, Eigen::Matrix<T, 
         if (m->getNodeType() == nodeType::placeholder)
         {
             // set the output value
-            Placeholder<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>> *plc = static_cast<Placeholder<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>> *>(m);
+            Placeholder<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>> *plc = static_cast<Placeholder<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>> *>(m.get());
             plc->setValue(std::move(*feed[plc->getName()]));
         } // if it's a operation then compute the value
         else if (m->getNodeType() == nodeType::operation)
@@ -35,14 +35,14 @@ void Session::updateNodesList(BaseNode *n)
         auto list = n->getInputs();
         for (auto &m : list)
         {
-            updateNodesList(m);
+            updateNodesList(m.get());
         }
     }
-    _nodesList.push_back(n);
+    _nodesList.push_back(Locking_ptr<BaseNode>(n));
 }
 
 // Return  nodes list
-std::vector<BaseNode *> Session::getNodesList()
+std::vector<Locking_ptr<BaseNode>> Session::getNodesList()
 {
     return _nodesList;
 }
