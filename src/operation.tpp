@@ -82,7 +82,7 @@ void Add<T, T1, T2>::compute()
     else
     {
         // they are same size so element-wise addition without broadcasting
-        this->setValue((*A) + (*B));
+        this->setValue(A->array() + B->array());
     }
 }
 
@@ -462,9 +462,7 @@ Minimizer<T>::Minimizer(Minimizer<T> &&other)
 {
     //std::cout << " Minimizer move contructor..." << std::endl;
     // lock other side
-    std::unique_lock<std::recursive_mutex> rhs_baselk(other.BaseMtx_, std::defer_lock);
-    std::unique_lock<std::recursive_mutex> rhs_nodelk(other.NodeMtx_, std::defer_lock);
-    std::lock(rhs_baselk, rhs_nodelk);
+    std::unique_lock<std::mutex> rhs_lk((&other)->Mtx_);
     // move members
     grdOpt_ = other.grdOpt_;
     loss_ = other.loss_;
@@ -479,9 +477,9 @@ Minimizer<T> &Minimizer<T>::operator=(Minimizer<T> &&other)
     if (this != &other)
     {
         // lock both base and node class of both sides
-        std::unique_lock<std::recursive_mutex> lhs_nodelk(this->NodeMtx_, std::defer_lock);
-        std::unique_lock<std::recursive_mutex> rhs_nodelk(&other->NodeMtx_, std::defer_lock);
-        std::lock(lhs_nodelk, rhs_nodelk);
+        std::unique_lock<std::mutex> lhs_lk(this->Mtx_, std::defer_lock);
+        std::unique_lock<std::mutex> rhs_lk((&other)->Mtx_, std::defer_lock);
+        std::lock(lhs_lk, rhs_lk);
         // move members
         grdOpt_ = other.grdOpt_;
         loss_ = other.loss_;
@@ -502,7 +500,10 @@ void Minimizer<T>::compute()
     {
         if (n->getNodeType() == nodeType::variable)
         {
-            static_cast<Variable<T> *>(n.get())->updateValue(grdOpt_->learningRate_);
+            std::unique_lock<std::mutex> lck(this->Mtx_);
+            auto v = static_cast<Variable<T> *>(n.get());
+            lck.unlock();
+            v->updateValue(grdOpt_->learningRate_);
         }
     }
 }
