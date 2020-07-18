@@ -10,7 +10,7 @@ class Locking_ptr
 {
 public:
     Locking_ptr(T *ptr);
-    Locking_ptr(T *ptr, std::recursive_mutex* mtx);
+    Locking_ptr(T *ptr, std::mutex* mtx);
     Locking_ptr(Locking_ptr<T> const &other);
     Locking_ptr(Locking_ptr<T> &&other);
 
@@ -26,7 +26,7 @@ public:
     T *get() const;
 
 protected:
-    std::recursive_mutex *Mtx_;
+    std::mutex *Mtx_;
 
 private:
     T* ptr_;
@@ -37,7 +37,7 @@ class Locking_smart_ptr
 {
 public:
     Locking_smart_ptr(T *ptr);
-    Locking_smart_ptr(T *ptr, std::recursive_mutex* mtx);
+    Locking_smart_ptr(T *ptr, std::mutex* mtx);
     Locking_smart_ptr(Locking_smart_ptr<T,U> const &other);
     Locking_smart_ptr(Locking_smart_ptr<T,U> &&other);
 
@@ -53,7 +53,7 @@ public:
     T *get() const;
 
 protected:
-    std::recursive_mutex *Mtx_;
+    std::mutex *Mtx_;
 
 private:
     U<T> ptr_;
