@@ -2,6 +2,8 @@
 #include <iostream>
 
 // --- BaseNode ---
+BaseNode::~BaseNode(){}
+
 void BaseNode::setName(std::string n)
 {
     std::lock_guard<std::mutex> lck(Mtx_);
