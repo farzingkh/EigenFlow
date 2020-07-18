@@ -2,10 +2,11 @@
 template <typename T>
 void Session::Run(BaseNode *n, std::unordered_map<std::string, Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> *> feed)
 {
+    Locking_ptr<BaseNode> nptr(n);
     // empty node list
     _nodesList.clear();
     // obtain inputs for node n in post-order, to resolve inputs befor computation of an operation
-    updateNodesList(n);
+    updateNodesList(nptr.get());
 
     for (auto m : _nodesList)
     {
@@ -13,8 +14,8 @@ void Session::Run(BaseNode *n, std::unordered_map<std::string, Eigen::Matrix<T, 
         if (m->getNodeType() == nodeType::placeholder)
         {
             // set the output value
-            Placeholder<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>> *plc = static_cast<Placeholder<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>> *>(m.get());
-            plc->setValue(std::move(*feed[plc->getName()]));
+            Locking_ptr<Placeholder<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>>> plcptr(static_cast<Placeholder<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>> *>(m.get()));
+            plcptr->setValue(std::move(*feed[plcptr->getName()]));
         } // if it's a operation then compute the value
         else if (m->getNodeType() == nodeType::operation)
         {
@@ -29,16 +30,17 @@ void Session::Run(BaseNode *n, std::unordered_map<std::string, Eigen::Matrix<T, 
 // get post order list of nodes
 void Session::updateNodesList(BaseNode *n)
 {
+    Locking_ptr<BaseNode> nptr(n);
     // only operations have input nodes
-    if (n->getNodeType() == nodeType::operation)
+    if (nptr->getNodeType() == nodeType::operation)
     {
-        auto list = n->getInputs();
+        auto list = nptr->getInputs();
         for (auto &m : list)
         {
             updateNodesList(m.get());
         }
     }
-    _nodesList.push_back(Locking_ptr<BaseNode>(n));
+    _nodesList.push_back(Locking_ptr<BaseNode>(nptr.get()));
 }
 
 // Return  nodes list
