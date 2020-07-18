@@ -45,7 +45,7 @@ public:
 
     // get output value of this node
     template <typename T>
-    Locking_smart_ptr<T, std::shared_ptr>  getValue();
+    Locking_smart_ptr<T, std::shared_ptr> getValue();
 
     // get total gradient from node's consumer
     template <typename T>
@@ -68,9 +68,7 @@ public:
 
     // keep the size of consumers as an atomic data
     std::atomic_int consumerSize_{0};
-
-    std::mutex DataMtx_;
-    std::recursive_mutex BaseMtx_;
+    std::mutex Mtx_;
 
 protected:
     std::string _name = " ";
@@ -92,25 +90,21 @@ template <typename T>
 class Node : public BaseNode
 {
 public:
-    Locking_smart_ptr<T, std::shared_ptr>  getValue();
+    Locking_smart_ptr<T, std::shared_ptr> getValue();
     T getGradient();
 
     void setValue(T &&t);
     void setGrad(T t);
     void clearGrads();
 
-protected:
-    std::recursive_mutex NodeMtx_;
-    std::mutex DataMtx_;
-    std::condition_variable cond_;
-
 private:
+    std::condition_variable cond_;
     // ouput might be shared
-    Locking_smart_ptr<T, std::shared_ptr> _output = Locking_smart_ptr<T, std::shared_ptr>(nullptr, &NodeMtx_);
+    Locking_smart_ptr<T, std::shared_ptr> _output = Locking_smart_ptr<T, std::shared_ptr>(nullptr, &(this->Mtx_));
     std::vector<std::unique_ptr<T>> _grad;
 
-    bool _dataAvailable = false;
-    bool _gradientAvailable = false;
+    std::atomic<bool> _dataAvailable{false};
+    std::atomic<bool> _gradientAvailable{false};
 };
 
 // A class for variables of type T
