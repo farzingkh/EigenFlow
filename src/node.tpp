@@ -70,7 +70,7 @@ void BaseNode::eraseConsumer(BaseNode *n)
 }
 
 template <typename T>
-Locking_smart_ptr<T, std::shared_ptr> BaseNode::getValue()
+Locking_shared_ptr<T> BaseNode::getValue()
 {
     std::unique_lock<std::mutex> lck(Mtx_);
     auto node = static_cast<Node<T> *>(this);
@@ -131,7 +131,7 @@ operationType BaseNode::getOperationType()
 // --- Node  ---
 
 template <typename T>
-Locking_smart_ptr<T, std::shared_ptr> Node<T>::getValue()
+Locking_shared_ptr<T> Node<T>::getValue()
 {
 
     //std::cout << "Variable get value..." << std::endl;
@@ -143,7 +143,7 @@ Locking_smart_ptr<T, std::shared_ptr> Node<T>::getValue()
     else
     {
         //std::cout << "Data not available" << std::endl;
-        return Locking_smart_ptr<T, std::shared_ptr>(nullptr, &Mtx_);
+        return Locking_shared_ptr<T>(nullptr, &Mtx_);
     }
 }
 
@@ -215,8 +215,8 @@ void Node<T>::setGrad(T t)
         std::cout << "Gradient and output have different dimensions!" << std::endl;
     }
     // lock to avoid data race
-    std::unique_lock<std::mutex> lck(Mtx_);
-    _grad.push_back(std::move(std::unique_ptr<T>((new T(t)))));
+    std::lock_guard<std::mutex> lck(Mtx_);
+    _grad.push_back(std::shared_ptr<T>((new T(t))));
     // get the number of consumer of the node; consumerSize_ is atomic
     int cnsSize = this->consumerSize_.load();
     // check if gradient of all consumers are set; use >= as a node might not have a consumer
@@ -322,7 +322,7 @@ void Variable<T>::updateValue(float lr)
     //std::cout << "Variable update value ..." << std::endl;
     //variable has only one input gradient
     T grad = this->getGradient();
-    Locking_smart_ptr<T, std::shared_ptr> output = this->getValue();
+    Locking_shared_ptr<T> output = this->getValue();
     // update variable values based on learning rate and gradient
     this->setValue(output->array() - (grad.array() * lr));
 }

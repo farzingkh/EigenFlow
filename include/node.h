@@ -37,6 +37,7 @@ enum nodeType
 class BaseNode
 {
 public:
+    virtual ~BaseNode() {};
     void addInputs(BaseNode *n);
     void eraseInput(BaseNode *n);
     void addConsumers(BaseNode *n);
@@ -45,7 +46,7 @@ public:
 
     // get output value of this node
     template <typename T>
-    Locking_smart_ptr<T, std::shared_ptr> getValue();
+    Locking_shared_ptr<T> getValue();
 
     // get total gradient from node's consumer
     template <typename T>
@@ -90,7 +91,8 @@ template <typename T>
 class Node : public BaseNode
 {
 public:
-    Locking_smart_ptr<T, std::shared_ptr> getValue();
+    ~Node() {};
+    Locking_shared_ptr<T> getValue();
     T getGradient();
 
     void setValue(T &&t);
@@ -100,8 +102,8 @@ public:
 private:
     std::condition_variable cond_;
     // ouput might be shared
-    Locking_smart_ptr<T, std::shared_ptr> _output = Locking_smart_ptr<T, std::shared_ptr>(nullptr, &(this->Mtx_));
-    std::vector<std::unique_ptr<T>> _grad;
+    Locking_shared_ptr<T> _output = Locking_shared_ptr<T>(nullptr, &(this->Mtx_));
+    std::vector<std::shared_ptr<T>> _grad;
 
     std::atomic<bool> _dataAvailable{false};
     std::atomic<bool> _gradientAvailable{false};
