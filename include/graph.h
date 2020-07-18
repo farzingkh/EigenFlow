@@ -7,15 +7,15 @@ class Graph
 {
 public:
     template <template <typename> class U, typename T>
-    void addNodeOne(std::shared_ptr<U<T>> n);
+    BaseNode *addNodeOne(std::unique_ptr<U<T>> n);
 
     template <template <typename, typename, typename> class U, typename T, typename T1, typename T2>
-    void addNodeTwo(std::shared_ptr<U<T,T1,T2>> n);
+    BaseNode *addNodeTwo(std::unique_ptr<U<T, T1, T2>> n);
 
-    std::vector<std::shared_ptr<BaseNode>> &getNodes();
+    std::vector<std::unique_ptr<BaseNode>> &getNodes();
 
 private:
-    std::vector<std::shared_ptr<BaseNode>> _baseNodes;
+    std::vector<std::unique_ptr<BaseNode>> _baseNodes;
 };
 
 #include "../src/graph.tpp"
