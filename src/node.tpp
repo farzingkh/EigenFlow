@@ -20,6 +20,7 @@ void BaseNode::addInputs(BaseNode *n)
             return;
         }
     }
+    std::lock_guard<std::mutex> lck1(Mtx_);
     _inputs.push_back(Locking_ptr<BaseNode>(n));
 }
 
@@ -52,6 +53,7 @@ void BaseNode::addConsumers(BaseNode *n)
         }
     }
     // add consumer and increment the size
+    std::lock_guard<std::mutex> lck1(Mtx_);
     _consumers.push_back(Locking_ptr<BaseNode>(n));
     consumerSize_++;
 }
@@ -218,19 +220,15 @@ void Node<T>::setGrad(T t)
     {
         std::cout << "Gradient and output have different dimensions!" << std::endl;
     }
-    // lock to avoid data race
     _grad.push_back(std::shared_ptr<T>((new T(t))));
     // get the number of consumer of the node; consumerSize_ is atomic
     int cnsSize = this->consumerSize_.load();
     // check if gradient of all consumers are set; use >= as a node might not have a consumer
-    //std::cout << "consumer size: " << cnsSize << std::endl;
-    //std::cout << "Grad size: " << _grad.size() << std::endl;
     if (_grad.size() >= cnsSize)
     {
         // set flag to true
         _gradientAvailable.store(true);
         // notify all threads waiting for this data
-        //std::cout << " Notify thread...\n";
         cond_.notify_all();
     }
 }
@@ -258,48 +256,31 @@ Variable<T>::Variable(T &&a)
 }
 
 template <typename T>
-Variable<T>::Variable(Variable<T> const &v)
-{
-    std::cout << "Variable copy contructor ..." << std::endl;
-    // copy
-    this->_nType = nodeType::variable;
-    this->_opType = operationType::NA;
-    // set value and get value locks the node, no need to create a lock
-    this->setValue((&v)->getValue());
-}
-
-template <typename T>
-Variable<T>::Variable(Variable<T> &&v)
+Variable<T>::Variable(Variable<T> &&other)
 {
     std::cout << "Variable move contructor ..." << std::endl;
     // move
     this->_nType = nodeType::variable;
     this->_opType = operationType::NA;
     // set value and get value locks the node, no need to create a lock
-    this->setValue(std::move((&v)->getValue()));
-
+    Locking_shared_ptr<T> val = (&other)->getValue();
+    this->setValue(std::move(*val));
 }
 
 template <typename T>
-Variable<T> &Variable<T>::operator=(Variable<T> const &v)
-{
-    std::cout << "Variable copy assignment contructor ..." << std::endl;
-    // move
-    this->_nType = nodeType::variable;
-    this->_opType = operationType::NA;
-    // set value and get value locks the node, no need to create a lock
-    this->setValue((&v)->getValue());
-}
-
-template <typename T>
-Variable<T> &Variable<T>::operator=(Variable<T> &&v)
+Variable<T> &Variable<T>::operator=(Variable<T> &&other)
 {
     std::cout << "Variable move assignment contructor ..." << std::endl;
-    // move
-    this->_nType = nodeType::variable;
-    this->_opType = operationType::NA;
-    // set value and get value locks the node, no need to create a lock
-    this->setValue(std::move((&v)->getValue()));
+    if (this != &other)
+    {
+        // move
+        this->_nType = nodeType::variable;
+        this->_opType = operationType::NA;
+        // set value and get value locks the node, no need to create a lock
+        Locking_shared_ptr<T> val = (&other)->getValue();
+        this->setValue(*val);
+    }
+    return *this;
 }
 
 template <typename T>
@@ -324,7 +305,7 @@ void Variable<T>::updateValue(float lr)
     T grad = this->getGradient();
     Locking_shared_ptr<T> output = this->getValue();
     // update variable values based on learning rate and gradient
-    // setValue locks nodeMtx_  
+    // setValue locks nodeMtx_
     this->setValue(output->array() - (grad.array() * lr));
 }
 

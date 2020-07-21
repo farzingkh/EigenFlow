@@ -63,16 +63,16 @@ public:
 
     nodeType getNodeType();
     operationType getOperationType();
-    // don't pass inputs by ref to avoid data race 
-    std::vector<Locking_ptr<BaseNode>> getConsumers(); 
-    // don't pass inputs by ref to avoid data race 
+    // don't pass inputs by ref to avoid data race
+    std::vector<Locking_ptr<BaseNode>> getConsumers();
+    // don't pass inputs by ref to avoid data race
     std::vector<Locking_ptr<BaseNode>> getInputs();
     std::string getName();
 
     // keep the size of consumers as an atomic data
     std::atomic_int consumerSize_{0};
-    std::mutex Mtx_;     // for ptrs and base node data
-    std::mutex nodeMtx_; // for node data  
+    std::mutex Mtx_;     // for ptrs
+    std::mutex nodeMtx_; // for data
 
 protected:
     std::string _name = " ";
@@ -118,14 +118,16 @@ class Variable : public Node<T>
 {
 public:
     Variable(T &&a);
-    Variable(Variable<T> const &v);
-    Variable(Variable<T> &&v);
-    Variable<T> &operator=(Variable<T> const &v);
-    Variable<T> &operator=(Variable<T> &&v);
+    Variable(Variable<T> &&other);
+    Variable<T> &operator=(Variable<T> &&other);
 
     void compute();
     void gradient();
     void updateValue(float lr);
+
+private:
+    Variable(Variable<T> const &other) = delete;
+    Variable<T> &operator=(Variable<T> const &other) = delete;
 };
 
 // A class for placeholders for values of type T
