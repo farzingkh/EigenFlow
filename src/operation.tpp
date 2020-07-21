@@ -53,7 +53,7 @@ void Add<T, T1, T2>::compute()
     std::vector<Locking_ptr<BaseNode>> inputs = this->getInputs();
     Locking_shared_ptr<T> A = inputs[0]->getValue<T1>();
     Locking_shared_ptr<T> B = inputs[1]->getValue<T2>();
-    
+
     // broadcast column or row vectors
     if (A->rows() != B->rows() & A->cols() == B->cols())
     {
@@ -358,6 +358,7 @@ template <typename T>
 void Sigmoid<T>::gradient()
 {
     //std::cout << "Compute sigmoid gradient..." << std::endl;
+    // Cast this to BaseNode and wrap around with a locking class
     Locking_ptr<BaseNode> ptrthis(this);
     // get inputs of this node
     std::vector<Locking_ptr<BaseNode>> inputs = this->getInputs();
@@ -366,7 +367,6 @@ void Sigmoid<T>::gradient()
     // get sigmoid value
     Locking_shared_ptr<T> sig = ptrthis->getValue<T>();
     // compute gradient
-    // lock for sig
     T grad = G.array() * sig->array() * (1 - sig->array());
     inputs[0]->setGrad<T>(grad);
 }
@@ -388,6 +388,7 @@ Log<T>::Log(BaseNode *a) : UnaryOperation<T>(a)
 template <typename T>
 void Log<T>::compute()
 {
+    // Cast to this to BaseNode and wrape around with a lock
     Locking_ptr<BaseNode> ptrthis(this);
     //std::cout << "Compute log operation ..." << std::endl;
     this->setValue(log(ptrthis->getInputs()[0]->getValue<T>()->array()));
@@ -399,7 +400,7 @@ void Log<T>::gradient()
     //std::cout << "Compute log gradient..." << std::endl;
     // get output gradient from consumer
     T G = this->getGradient();
-    // get inputs of this node
+    // copy inputs of this node to local variable to avoid data
     std::vector<Locking_ptr<BaseNode>> inputs = this->getInputs();
     // get log input value
     Locking_shared_ptr<T> log = inputs[0]->getValue<T>();
@@ -468,19 +469,21 @@ void Sum<T>::gradient()
 /// --- Minimizaer Operation ----
 
 template <typename T>
-Minimizer<T>::Minimizer(GradientDescentOptimizer *grd, BaseNode *loss) : grdOpt_(grd), loss_(loss) {}
+Minimizer<T>::Minimizer(GradientDescentOptimizer *grd, BaseNode *loss)
+{
+    gMtx_ = grd->Mtx_;
+    grdOpt_ = Locking_ptr<GradientDescentOptimizer>(grd, gMtx_.get());
+    loss_ = Locking_ptr<BaseNode>(loss);
+}
 
 template <typename T>
 Minimizer<T>::Minimizer(Minimizer<T> &&other)
 {
     //std::cout << " Minimizer move contructor..." << std::endl;
-    // lock other side
-    std::unique_lock<std::mutex> rhs_lk((&other)->Mtx_);
     // move members
-    grdOpt_ = other.grdOpt_;
-    loss_ = other.loss_;
-    other.grdOpt_ = nullptr;
-    other.loss_ = nullptr;
+    grdOpt_ = std::move(other.grdOpt_);
+    loss_ = std::move(other.loss_);
+    gMtx_ = std::move(other.gMtx_);
 }
 
 template <typename T>
@@ -489,15 +492,10 @@ Minimizer<T> &Minimizer<T>::operator=(Minimizer<T> &&other)
     //std::cout << " Minimizer move assignment contructor..." << std::endl;
     if (this != &other)
     {
-        // lock both base and node class of both sides
-        std::unique_lock<std::mutex> lhs_lk(this->Mtx_, std::defer_lock);
-        std::unique_lock<std::mutex> rhs_lk((&other)->Mtx_, std::defer_lock);
-        std::lock(lhs_lk, rhs_lk);
         // move members
-        grdOpt_ = other.grdOpt_;
-        loss_ = other.loss_;
-        other.grdOpt_ = nullptr;
-        other.loss_ = nullptr;
+        grdOpt_ = std::move(other.grdOpt_);
+        loss_ = std::move(other.loss_);
+        gMtx_ = std::move(other.gMtx_);
     }
     return *this;
 }
@@ -507,15 +505,13 @@ template <typename T>
 void Minimizer<T>::compute()
 {
     //std::cout << "Compute Minimization operation ..." << std::endl;
-    grdOpt_->computeGradients(loss_);
-
-    for (auto &n : grdOpt_->NodesList_)
+    grdOpt_->computeGradients(loss_.get());
+    auto list = grdOpt_->getNodesList();
+    for (auto &n : list)
     {
         if (n->getNodeType() == nodeType::variable)
         {
-            std::unique_lock<std::mutex> lck(this->Mtx_);
             auto v = static_cast<Variable<T> *>(n.get());
-            lck.unlock();
             v->updateValue(grdOpt_->learningRate_);
         }
     }

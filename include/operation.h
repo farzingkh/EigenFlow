@@ -146,8 +146,9 @@ private:
     // cashed varieble nodes list
     Minimizer(Minimizer<T> &other) = delete;
     Minimizer<T> &operator=(Minimizer<T> &other) = delete;
-    GradientDescentOptimizer *grdOpt_;
-    BaseNode *loss_;
+    Locking_ptr<GradientDescentOptimizer> grdOpt_ = Locking_ptr<GradientDescentOptimizer>(nullptr, &(this->Mtx_));
+    Locking_ptr<BaseNode> loss_ = Locking_ptr<BaseNode>(nullptr, &(this->Mtx_));
+    std::shared_ptr<std::mutex> gMtx_;
 };
 #include "../src/operation.tpp"
 
