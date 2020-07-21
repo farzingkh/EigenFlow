@@ -218,7 +218,7 @@ void Node<T>::setGrad(T t)
     std::lock_guard<std::mutex> lck1(nodeMtx_);
     //std::cout << "Gradient set: " << t << ", size: " << t.rows() << "," << t.cols() << std::endl;
     // gradient and value must have same dimensions
-    assert(t.cols() != _output->cols() or t.rows() != _output->rows());
+    assert(t.cols() == _output->cols() or t.rows() == _output->rows());
     // add gradient
     _grad.push_back(Locking_shared_ptr<T>((new T(t)), &(this->Mtx_)));
     // get the number of consumer of the node; consumerSize_ is atomic
