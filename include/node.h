@@ -46,7 +46,7 @@ public:
 
     // get output value of this node
     template <typename T>
-    Locking_shared_ptr<T> getValue();
+    T getValue();
 
     // get total gradient from node's consumer
     template <typename T>
@@ -95,7 +95,7 @@ class Node : public BaseNode
 {
 public:
     ~Node(){};
-    Locking_shared_ptr<T> getValue();
+    T getValue();
     T getGradient();
 
     void setValue(T &&t);
@@ -106,7 +106,7 @@ private:
     std::condition_variable cond_;
     // ouput might be shared
     Locking_shared_ptr<T> _output = Locking_shared_ptr<T>(nullptr, &(this->Mtx_));
-    std::vector<std::shared_ptr<T>> _grad;
+    std::vector<Locking_shared_ptr<T>> _grad;
 
     std::atomic<bool> _dataAvailable{false};
     std::atomic<bool> _gradientAvailable{false};

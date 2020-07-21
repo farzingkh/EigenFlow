@@ -121,8 +121,8 @@ void NN::checkGradient(BaseNode *n, BaseNode *loss, std::unordered_map<std::stri
     long double E = 1.0e-14;
     long double err = 1.0e-3;
     matxxT grad;
-    auto value1 = (*(n->getValue<Matrix<T, Dynamic, Dynamic>>())).array() + E;
-    auto value2 = (*(n->getValue<Matrix<T, Dynamic, Dynamic>>())).array() - E;
+    matxxT value1 = n->getValue<Matrix<T, Dynamic, Dynamic>>().array() + E;
+    matxxT value2 = n->getValue<Matrix<T, Dynamic, Dynamic>>().array() - E;
     // check if n is loss node
     if (n == loss)
     {
@@ -132,20 +132,20 @@ void NN::checkGradient(BaseNode *n, BaseNode *loss, std::unordered_map<std::stri
     else
     {
         // otherwise create variable nodes and run the session on nodes
-        Variable<matxxT> newNodeP(value1);
-        Variable<matxxT> newNodeN(value2);
+        Variable<matxxT> newNodeP(std::move(value1));
+        Variable<matxxT> newNodeN(std::move(value2));
         // swap the node with the new variable node
         swapNodes(&newNodeP, n);
         // compute value of loss
         _session.Run(loss, feed);
-        matxxT outP = *(loss->getValue<matxxT>());
+        matxxT outP = loss->getValue<matxxT>();
         //std::cout << "Loss+:" << outP << std::endl;
         swapNodes(n, &newNodeP);
         _session.Run(loss, feed);
         // swap the node with other new node
         swapNodes(&newNodeN, n);
         _session.Run(loss, feed);
-        matxxT outN = *(loss->getValue<matxxT>());
+        matxxT outN = loss->getValue<matxxT>();
         //std::cout << "Loss-:" << outN << std::endl;
         // swap the node back in and compute the graph
         swapNodes(n, &newNodeN);

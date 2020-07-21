@@ -51,45 +51,45 @@ void Add<T, T1, T2>::compute()
 {
     //std::cout << "Compute add operation ..." << std::endl;
     std::vector<Locking_ptr<BaseNode>> inputs = this->getInputs();
-    Locking_shared_ptr<T> A = inputs[0]->getValue<T1>();
-    Locking_shared_ptr<T> B = inputs[1]->getValue<T2>();
+    T1 A = inputs[0]->getValue<T1>();
+    T2 B = inputs[1]->getValue<T2>();
 
     // broadcast column or row vectors
-    if (A->rows() != B->rows() & A->cols() == B->cols())
+    if (A.rows() != B.rows() & A.cols() == B.cols())
     {
-        if (B->rows() == 1)
+        if (B.rows() == 1)
         {
 
-            this->setValue(A->rowwise() + B->row(0));
+            this->setValue(A.rowwise() + B.row(0));
         }
-        else if (A->rows() == 1)
+        else if (A.rows() == 1)
         {
-            this->setValue(B->rowwise() + A->row(0));
+            this->setValue(B.rowwise() + A.row(0));
         }
     }
-    else if (A->cols() != B->cols() & A->rows() == B->rows())
+    else if (A.cols() != B.cols() & A.rows() == B.rows())
     {
-        if (B->cols() == 1)
+        if (B.cols() == 1)
         {
-            this->setValue(A->colwise() + B->col(0));
+            this->setValue(A.colwise() + B.col(0));
         }
-        else if (A->cols() == 1)
+        else if (A.cols() == 1)
         {
-            this->setValue(B->colwise() + A->col(0));
+            this->setValue(B.colwise() + A.col(0));
         }
     }
-    else if (A->cols() == 1 & A->rows() == 1)
+    else if (A.cols() == 1 & A.rows() == 1)
     {
-        this->setValue((*A)(0) + B->array());
+        this->setValue((A)(0) + B.array());
     }
-    else if (B->cols() == 1 & B->rows() == 1)
+    else if (B.cols() == 1 & B.rows() == 1)
     {
-        this->setValue((*B)(0) + A->array());
+        this->setValue((B)(0) + A.array());
     }
     else
     {
         // they are same size so element-wise addition without broadcasting
-        this->setValue(A->array() + B->array());
+        this->setValue(A.array() + B.array());
     }
 }
 
@@ -103,18 +103,18 @@ void Add<T, T1, T2>::gradient()
 
     // get inputs of this node
     std::vector<Locking_ptr<BaseNode>> inputs = this->getInputs();
-    Locking_shared_ptr<T1> A = inputs[0]->getValue<T1>();
-    Locking_shared_ptr<T2> B = inputs[1]->getValue<T2>();
+    T1 A = inputs[0]->getValue<T1>();
+    T2 B = inputs[1]->getValue<T2>();
 
     // Check for broadcasting
     // If Gradient is larger than A, then A was broadcasted
     // Broadcasted variable is as though it has that many consumers
     // So the gradient is the total gradient (the sum of gradients in the  broadcasted direction)
-    if (grad.cols() > A->cols() or grad.rows() > A->rows())
+    if (grad.cols() > A.cols() or grad.rows() > A.rows())
     {
         T g;
-        g.setOnes(A->rows(), A->cols());
-        if (A->rows() == 1 & A->cols() == 1)
+        g.setOnes(A.rows(), A.cols());
+        if (A.rows() == 1 & A.cols() == 1)
         {
             // if A is scalar
             auto a = grad.sum();
@@ -122,13 +122,13 @@ void Add<T, T1, T2>::gradient()
             gr << a;
             inputs[0]->setGrad<T>(gr);
         }
-        else if (A->rows() == 1)
+        else if (A.rows() == 1)
         {
             // broadcasted in columns direction
             T gr = g * grad;
             inputs[0]->setGrad<T>(gr);
         }
-        else if (A->cols() == 1)
+        else if (A.cols() == 1)
         {
             // broadcasted in rows direction
             T gr = grad * g;
@@ -141,11 +141,11 @@ void Add<T, T1, T2>::gradient()
         inputs[0]->setGrad<T>(grad);
     }
     // If Gradient is larger than B, then B was broadcasted
-    if (grad.cols() > B->cols() or grad.rows() > B->rows())
+    if (grad.cols() > B.cols() or grad.rows() > B.rows())
     {
         T g;
-        g.setOnes(B->rows(), B->cols());
-        if (B->rows() == 1 & B->cols() == 1)
+        g.setOnes(B.rows(), B.cols());
+        if (B.rows() == 1 & B.cols() == 1)
         {
             // if B is scalar
 
@@ -154,13 +154,13 @@ void Add<T, T1, T2>::gradient()
             gr << a;
             inputs[1]->setGrad<T>(gr);
         }
-        else if (B->rows() == 1)
+        else if (B.rows() == 1)
         {
             // broadcasted in columns direction
             T gr = g * grad;
             inputs[1]->setGrad<T>(gr);
         }
-        else if (B->cols() == 1)
+        else if (B.cols() == 1)
         {
             // broadcasted in rows direction
             T gr = grad * g;
@@ -193,7 +193,7 @@ void Negative<T>::compute()
 {
     //std::cout << "Compute negative operation ..." << std::endl;
     Locking_ptr<BaseNode> ptrthis(this);
-    T v = -(*(ptrthis->getInputs()[0]->getValue<T>()));
+    T v = -((ptrthis->getInputs()[0]->getValue<T>()));
     this->setValue(std::move(v));
 }
 
@@ -226,10 +226,10 @@ void Multiply<T, T1, T2>::compute()
     //std::cout << "Compute multiplication operation..." << std::endl;
     std::vector<Locking_ptr<BaseNode>> inputs = this->getInputs();
     // multiplication of scalar and matrix
-    Locking_shared_ptr<T1> A = inputs[0]->getValue<T1>();
-    Locking_shared_ptr<T2> B = inputs[1]->getValue<T2>();
+    T1 A = inputs[0]->getValue<T1>();
+    T2 B = inputs[1]->getValue<T2>();
     // perform matrix multiplication
-    this->setValue(A->array() * B->array());
+    this->setValue(A.array() * B.array());
 }
 
 template <typename T, typename T1, typename T2>
@@ -240,12 +240,12 @@ void Multiply<T, T1, T2>::gradient()
     T G = this->getGradient();
     // get inputs of this node
     std::vector<Locking_ptr<BaseNode>> inputs = this->getInputs();
-    Locking_shared_ptr<T1> A = inputs[0]->getValue<T1>();
-    Locking_shared_ptr<T2> B = inputs[1]->getValue<T2>();
+    T1 A = inputs[0]->getValue<T1>();
+    T2 B = inputs[1]->getValue<T2>();
     // calculate and set gradient for first input "A"
-    inputs[0]->setGrad<T>(G.array() * B->array());
+    inputs[0]->setGrad<T>(G.array() * B.array());
     // calculate and set gradient for first input "B"
-    inputs[1]->setGrad<T>(G.array() * A->array());
+    inputs[1]->setGrad<T>(G.array() * A.array());
 }
 
 // --- MatMultiply Operation ---
@@ -268,10 +268,10 @@ void MatMultiply<T, T1, T2>::compute()
     //std::cout << "Compute matrix multiplication operation..." << std::endl;
     std::vector<Locking_ptr<BaseNode>> inputs = this->getInputs();
     // multiplication of scalar and matrix
-    Locking_shared_ptr<T1> A = inputs[0]->getValue<T1>();
-    Locking_shared_ptr<T2> B = inputs[1]->getValue<T2>();
+    T1 A = inputs[0]->getValue<T1>();
+    T2 B = inputs[1]->getValue<T2>();
     // perform matrix multiplication
-    this->setValue((*A) * (*B));
+    this->setValue((A) * (B));
 }
 
 template <typename T, typename T1, typename T2>
@@ -282,13 +282,13 @@ void MatMultiply<T, T1, T2>::gradient()
     T G = this->getGradient();
     // get inputs of this node
     std::vector<Locking_ptr<BaseNode>> inputs = this->getInputs();
-    Locking_shared_ptr<T1> A = inputs[0]->getValue<T1>();
-    Locking_shared_ptr<T2> B = inputs[1]->getValue<T2>();
+    T1 A = inputs[0]->getValue<T1>();
+    T2 B = inputs[1]->getValue<T2>();
     // calculate and set gradient for first input "A"
-    T C = G * B->transpose();
+    T C = G * B.transpose();
     inputs[0]->setGrad<T>(C);
     // calculate and set gradient for second input "B"
-    T D = A->transpose() * G;
+    T D = A.transpose() * G;
     inputs[1]->setGrad<T>(D);
 }
 
@@ -322,13 +322,13 @@ void Dot<T, T1, T2>::gradient()
     T G = this->getGradient();
     // get inputs of this node
     std::vector<Locking_ptr<BaseNode>> inputs = this->getInputs();
-    Locking_shared_ptr<T1> A = inputs[0]->getValue<T1>();
-    Locking_shared_ptr<T2> B = inputs[1]->getValue<T2>();
+    T1 A = inputs[0]->getValue<T1>();
+    T2 B = inputs[1]->getValue<T2>();
     // calculate and set gradient for first input "A"
-    T C = G * B->transpose();
+    T C = G * B.transpose();
     inputs[0]->setGrad<T>(C);
     // calculate and set gradient for first input "B"
-    T D = A->transpose() * G;
+    T D = A.transpose() * G;
     inputs[1]->setGrad<T>(D);
 }
 
@@ -351,7 +351,7 @@ void Sigmoid<T>::compute()
 {
     Locking_ptr<BaseNode> ptrthis(this);
     //std::cout << "Compute sigmoid operation ..." << std::endl;
-    this->setValue(1 / (1 + exp(-(ptrthis->getInputs()[0]->getValue<T>()->array()))));
+    this->setValue(1 / (1 + exp(-(ptrthis->getInputs()[0]->getValue<T>().array()))));
 }
 
 template <typename T>
@@ -365,9 +365,9 @@ void Sigmoid<T>::gradient()
     // get output gradient from consumer
     T G = this->getGradient();
     // get sigmoid value
-    Locking_shared_ptr<T> sig = ptrthis->getValue<T>();
+    T sig = ptrthis->getValue<T>();
     // compute gradient
-    T grad = G.array() * sig->array() * (1 - sig->array());
+    T grad = G.array() * sig.array() * (1 - sig.array());
     inputs[0]->setGrad<T>(grad);
 }
 
@@ -391,7 +391,7 @@ void Log<T>::compute()
     // Cast to this to BaseNode and wrape around with a lock
     Locking_ptr<BaseNode> ptrthis(this);
     //std::cout << "Compute log operation ..." << std::endl;
-    this->setValue(log(ptrthis->getInputs()[0]->getValue<T>()->array()));
+    this->setValue(log(ptrthis->getInputs()[0]->getValue<T>().array()));
 }
 
 template <typename T>
@@ -403,9 +403,9 @@ void Log<T>::gradient()
     // copy inputs of this node to local variable to avoid data
     std::vector<Locking_ptr<BaseNode>> inputs = this->getInputs();
     // get log input value
-    Locking_shared_ptr<T> log = inputs[0]->getValue<T>();
+    T log = inputs[0]->getValue<T>();
     // compute gradient; elementwise division
-    T grad = G.array() / log->array();
+    T grad = G.array() / log.array();
     inputs[0]->setGrad<T>(grad);
 }
 
@@ -431,12 +431,12 @@ void Sum<T>::compute()
     if (_axis == 0)
     {
         // if axis = 0 then sum colwise
-        this->setValue(ptrthis->getInputs()[0]->getValue<T>()->colwise().sum());
+        this->setValue(ptrthis->getInputs()[0]->getValue<T>().colwise().sum());
     }
     else if (_axis == 1)
     {
         // if axis = 1 then sum rowwise
-        this->setValue(ptrthis->getInputs()[0]->getValue<T>()->rowwise().sum());
+        this->setValue(ptrthis->getInputs()[0]->getValue<T>().rowwise().sum());
     }
 }
 
@@ -449,15 +449,15 @@ void Sum<T>::gradient()
     T g;
     // get inputs of this node
     std::vector<Locking_ptr<BaseNode>> inputs = this->getInputs();
-    Locking_shared_ptr<T> A = inputs[0]->getValue<T>();
+    T A = inputs[0]->getValue<T>();
     if (G.rows() == 1)
     {
-        g = G.replicate(A->rows(), 1);
+        g = G.replicate(A.rows(), 1);
         inputs[0]->setGrad<T>(g);
     }
     else if (G.cols() == 1)
     {
-        g = G.replicate(1, A->cols());
+        g = G.replicate(1, A.cols());
         inputs[0]->setGrad<T>(g);
     }
     else

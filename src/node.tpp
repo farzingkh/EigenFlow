@@ -11,7 +11,7 @@ void BaseNode::setName(std::string n)
 
 void BaseNode::addInputs(BaseNode *n)
 {
-    std::lock_guard<std::mutex> lck(nodeMtx_);
+    std::lock_guard<std::mutex> lck1(Mtx_);
     for (int i = 0; i < _inputs.size(); i++)
     {
         if (_inputs[i].get() == nullptr)
@@ -20,13 +20,12 @@ void BaseNode::addInputs(BaseNode *n)
             return;
         }
     }
-    std::lock_guard<std::mutex> lck1(Mtx_);
     _inputs.push_back(Locking_ptr<BaseNode>(n));
 }
 
 void BaseNode::eraseInput(BaseNode *n)
 {
-    std::lock_guard<std::mutex> lck(nodeMtx_);
+    std::lock_guard<std::mutex> lck(Mtx_);
     // remove the input node but keep the place
     for (int i = 0; i < _inputs.size(); i++)
     {
@@ -40,7 +39,7 @@ void BaseNode::eraseInput(BaseNode *n)
 
 void BaseNode::addConsumers(BaseNode *n)
 {
-    std::lock_guard<std::mutex> lck(nodeMtx_);
+    std::lock_guard<std::mutex> lck(Mtx_);
     // remove consumer but keep the place
     for (int i = 0; i < _consumers.size(); i++)
     {
@@ -53,14 +52,13 @@ void BaseNode::addConsumers(BaseNode *n)
         }
     }
     // add consumer and increment the size
-    std::lock_guard<std::mutex> lck1(Mtx_);
     _consumers.push_back(Locking_ptr<BaseNode>(n));
     consumerSize_++;
 }
 
 void BaseNode::eraseConsumer(BaseNode *n)
 {
-    std::lock_guard<std::mutex> lck(nodeMtx_);
+    std::lock_guard<std::mutex> lck(Mtx_);
     // remove consumer but keep the place
     for (int i = 0; i < _consumers.size(); i++)
     {
@@ -73,7 +71,7 @@ void BaseNode::eraseConsumer(BaseNode *n)
 }
 
 template <typename T>
-Locking_shared_ptr<T> BaseNode::getValue()
+T BaseNode::getValue()
 {
     std::unique_lock<std::mutex> lck(Mtx_);
     auto node = static_cast<Node<T> *>(this);
@@ -134,19 +132,20 @@ operationType BaseNode::getOperationType()
 // --- Node  ---
 
 template <typename T>
-Locking_shared_ptr<T> Node<T>::getValue()
+T Node<T>::getValue()
 {
     std::lock_guard<std::mutex> lck(nodeMtx_);
     //std::cout << "Variable get value..." << std::endl;
     if (_dataAvailable.load())
     {
         //std::cout << "Output get: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
-        return _output;
+        // return value to avoid data race complications with pointers
+        return *_output;
     }
     else
     {
         //std::cout << "Data not available" << std::endl;
-        return Locking_shared_ptr<T>(nullptr, &Mtx_);
+        return T();
     }
 }
 
@@ -220,7 +219,7 @@ void Node<T>::setGrad(T t)
     {
         std::cout << "Gradient and output have different dimensions!" << std::endl;
     }
-    _grad.push_back(std::shared_ptr<T>((new T(t))));
+    _grad.push_back(Locking_shared_ptr<T>((new T(t)), &(this->Mtx_)));
     // get the number of consumer of the node; consumerSize_ is atomic
     int cnsSize = this->consumerSize_.load();
     // check if gradient of all consumers are set; use >= as a node might not have a consumer
@@ -263,7 +262,7 @@ Variable<T>::Variable(Variable<T> &&other)
     this->_nType = nodeType::variable;
     this->_opType = operationType::NA;
     // set value and get value locks the node, no need to create a lock
-    Locking_shared_ptr<T> val = (&other)->getValue();
+    T val = (&other)->getValue();
     this->setValue(std::move(*val));
 }
 
@@ -277,7 +276,7 @@ Variable<T> &Variable<T>::operator=(Variable<T> &&other)
         this->_nType = nodeType::variable;
         this->_opType = operationType::NA;
         // set value and get value locks the node, no need to create a lock
-        Locking_shared_ptr<T> val = (&other)->getValue();
+        T val = (&other)->getValue();
         this->setValue(*val);
     }
     return *this;
@@ -303,10 +302,10 @@ void Variable<T>::updateValue(float lr)
     // grad and output are local variables; no need for a lock
     // output is pointer but wraped aroud a locking class
     T grad = this->getGradient();
-    Locking_shared_ptr<T> output = this->getValue();
+    T output = this->getValue();
     // update variable values based on learning rate and gradient
     // setValue locks nodeMtx_
-    this->setValue(output->array() - (grad.array() * lr));
+    this->setValue(output.array() - (grad.array() * lr));
 }
 
 // --- Placeholder ---
