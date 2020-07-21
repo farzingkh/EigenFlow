@@ -23,6 +23,7 @@ UnaryOperation<T>::UnaryOperation(BaseNode *rhs)
 template <typename T>
 BinaryOperation<T>::BinaryOperation(BaseNode *lhs, BaseNode *rhs)
 {
+    // use Locking_ptr<BaseNode> to cast to BaseNode
     Locking_ptr<BaseNode> rhsptr(rhs);
     Locking_ptr<BaseNode> lhsptr(lhs);
     Locking_ptr<BaseNode> ptrthis(this);
@@ -53,13 +54,11 @@ void Add<T, T1, T2>::compute()
     std::vector<Locking_ptr<BaseNode>> inputs = this->getInputs();
     T1 A = inputs[0]->getValue<T1>();
     T2 B = inputs[1]->getValue<T2>();
-
     // broadcast column or row vectors
     if (A.rows() != B.rows() & A.cols() == B.cols())
     {
         if (B.rows() == 1)
         {
-
             this->setValue(A.rowwise() + B.row(0));
         }
         else if (A.rows() == 1)
@@ -97,19 +96,15 @@ template <typename T, typename T1, typename T2>
 void Add<T, T1, T2>::gradient()
 {
     //std::cout << "Compute Add operation geradient ..." << std::endl;
-
-    // get output gradient
     T grad = this->getGradient();
-
-    // get inputs of this node
     std::vector<Locking_ptr<BaseNode>> inputs = this->getInputs();
     T1 A = inputs[0]->getValue<T1>();
     T2 B = inputs[1]->getValue<T2>();
-
-    // Check for broadcasting
-    // If Gradient is larger than A, then A was broadcasted
-    // Broadcasted variable is as though it has that many consumers
-    // So the gradient is the total gradient (the sum of gradients in the  broadcasted direction)
+    /* Check for broadcasting
+     If Gradient is larger than A, then A was broadcasted
+     Broadcasted variable is as though it has that many consumers
+     So the gradient is the total gradient (the sum of gradients in 
+     the  broadcasted direction) */
     if (grad.cols() > A.cols() or grad.rows() > A.rows())
     {
         T g;
@@ -193,8 +188,7 @@ void Negative<T>::compute()
 {
     //std::cout << "Compute negative operation ..." << std::endl;
     Locking_ptr<BaseNode> ptrthis(this);
-    T v = -((ptrthis->getInputs()[0]->getValue<T>()));
-    this->setValue(std::move(v));
+    this->setValue(-((ptrthis->getInputs()[0]->getValue<T>())));
 }
 
 template <typename T>
@@ -368,6 +362,7 @@ void Sigmoid<T>::gradient()
     T sig = ptrthis->getValue<T>();
     // compute gradient
     T grad = G.array() * sig.array() * (1 - sig.array());
+    // set gradient for input
     inputs[0]->setGrad<T>(grad);
 }
 
@@ -406,6 +401,7 @@ void Log<T>::gradient()
     T log = inputs[0]->getValue<T>();
     // compute gradient; elementwise division
     T grad = G.array() / log.array();
+    // set gradient for input
     inputs[0]->setGrad<T>(grad);
 }
 
@@ -505,7 +501,9 @@ template <typename T>
 void Minimizer<T>::compute()
 {
     //std::cout << "Compute Minimization operation ..." << std::endl;
+    // compute grdients 
     grdOpt_->computeGradients(loss_.get());
+    // iterate through nodes and update variable values
     auto list = grdOpt_->getNodesList();
     for (auto &n : list)
     {
