@@ -14,8 +14,8 @@ template <typename T>
 Locking_ptr<T>::Locking_ptr(Locking_ptr<T> const &other)
 {
     //std::cout << "Locking_ptr copy constructor..." << std::endl;
-    Mtx_ = other.Mtx_;
-    std::unique_lock<std::mutex> lc1(*Mtx_);
+    Mtx_.store(other.Mtx_.load());
+    std::unique_lock<std::mutex> lc1(*(Mtx_.load()));
     ptr_ = other.ptr_;
 }
 
@@ -23,22 +23,22 @@ template <typename T>
 Locking_ptr<T>::Locking_ptr(Locking_ptr<T> &&other)
 {
     //std::cout << "Locking_ptr move constructor..." << std::endl;
-    Mtx_ = std::move(other.Mtx_);
+    Mtx_.store(other.Mtx_.load());
     std::unique_lock<std::mutex> lc1(*Mtx_);
     ptr_ = std::move(other.ptr_);
-    other.Mtx_ = nullptr;
+    other.Mtx_.store(nullptr);
 }
 
 template <typename T>
 Locking_ptr<T> &Locking_ptr<T>::operator=(Locking_ptr<T> &&other)
 {
-    Mtx_ = other.Mtx_;
+    Mtx_.store(other.Mtx_.load());
     std::unique_lock<std::mutex> lc1(*Mtx_);
     //std::cout << "Locking_ptr move assignment constructor..." << std::endl;
     if (this != &other)
     {
         ptr_ = std::move(other.ptr_);
-        other.Mtx_ = nullptr;
+        other.Mtx_.store(nullptr);
     }
     return *this;
 }
@@ -46,7 +46,7 @@ Locking_ptr<T> &Locking_ptr<T>::operator=(Locking_ptr<T> &&other)
 template <typename T>
 Locking_ptr<T> &Locking_ptr<T>::operator=(Locking_ptr<T> const &other)
 {
-    Mtx_ = other.Mtx_;
+    Mtx_.store(other.Mtx_.load());
     std::unique_lock<std::mutex> lc1(*Mtx_);
     //std::cout << "Locking_ptr copy assignment constructor..." << std::endl;
     if (this != &other)
@@ -100,7 +100,7 @@ Locking_shared_ptr<T>::Locking_shared_ptr(T *ptr, std::mutex *mtx) : ptr_(ptr), 
 template <typename T>
 Locking_shared_ptr<T>::Locking_shared_ptr(std::shared_ptr<T> ptr)
 {
-    Mtx_ = (&ptr->Mtx_);
+    Mtx_.store((&ptr->Mtx_).load());
     ptr_ = ptr;
 }
 
@@ -111,7 +111,7 @@ template <typename T>
 Locking_shared_ptr<T>::Locking_shared_ptr(Locking_shared_ptr<T> const &other)
 {
     //std::cout << "Locking_shared_ptr copy constructor..." << std::endl;
-    Mtx_ = other.Mtx_;
+    Mtx_.store(other.Mtx_.load());
     std::unique_lock<std::mutex> lc1(*Mtx_);
     ptr_ = other.ptr_;
 }
@@ -120,22 +120,22 @@ template <typename T>
 Locking_shared_ptr<T>::Locking_shared_ptr(Locking_shared_ptr<T> &&other)
 {
     //std::cout << "Locking_shared_ptr move constructor..." << std::endl;
-    Mtx_ = other.Mtx_;
+    Mtx_.store(other.Mtx_.load());
     std::unique_lock<std::mutex> lc1(*Mtx_);
     ptr_ = std::move(other.ptr_);
-    other.Mtx_ = nullptr;
+    other.Mtx_.store(nullptr);
 }
 
 template <typename T>
 Locking_shared_ptr<T> &Locking_shared_ptr<T>::operator=(Locking_shared_ptr<T> &&other)
 {
-    Mtx_ = other.Mtx_;
+    Mtx_.store(other.Mtx_.load());
     std::unique_lock<std::mutex> lc1(*Mtx_);
     //std::cout << "Locking_shared_ptr move assignment constructor..." << std::endl;
     if (this != &other)
     {
         ptr_ = std::move(other.ptr_);
-        other.Mtx_ = nullptr;
+        other.Mtx_.store(nullptr);
     }
     return *this;
 }
@@ -143,7 +143,7 @@ Locking_shared_ptr<T> &Locking_shared_ptr<T>::operator=(Locking_shared_ptr<T> &&
 template <typename T>
 Locking_shared_ptr<T> &Locking_shared_ptr<T>::operator=(Locking_shared_ptr<T> const &other)
 {
-    Mtx_ = other.Mtx_;
+    Mtx_.store(other.Mtx_.load());
     std::unique_lock<std::mutex> lc1(*Mtx_);
     //std::cout << "Locking_shared_ptr copy assignment constructor..." << std::endl;
     if (this != &other)
@@ -198,7 +198,7 @@ Locking_unique_ptr<T>::Locking_unique_ptr(T *ptr, std::mutex *mtx) : ptr_(ptr), 
 template <typename T>
 Locking_unique_ptr<T>::Locking_unique_ptr(std::unique_ptr<T> &&ptr)
 {
-    Mtx_ = (&ptr->Mtx_);
+    Mtx_.store((&ptr->Mtx_).load());
     std::unique_lock<std::mutex> lc1(*Mtx_);
     ptr_ = std::move(ptr);
 }
@@ -210,22 +210,22 @@ template <typename T>
 Locking_unique_ptr<T>::Locking_unique_ptr(Locking_unique_ptr<T> &&other)
 {
     //std::cout << "Locking_shared_ptr move constructor..." << std::endl;
-    Mtx_ = other.Mtx_;
+    Mtx_.store(other.Mtx_.load());
     std::unique_lock<std::mutex> lc1(*Mtx_);
     ptr_ = std::move(other.ptr_);
-    other.Mtx_ = nullptr;
+    other.Mtx_.store(nullptr);
 }
 
 template <typename T>
 Locking_unique_ptr<T> &Locking_unique_ptr<T>::operator=(Locking_unique_ptr<T> &&other)
 {
-    Mtx_ = other.Mtx_;
+    Mtx_.store(other.Mtx_.load());
     std::unique_lock<std::mutex> lc1(*Mtx_);
     //std::cout << "Locking_shared_ptr move assignment constructor..." << std::endl;
     if (this != &other)
     {
         ptr_ = std::move(other.ptr_);
-        other.Mtx_ = nullptr;
+        other.Mtx_.store(nullptr);
     }
     return *this;
 }

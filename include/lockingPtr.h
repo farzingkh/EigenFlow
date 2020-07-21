@@ -26,7 +26,7 @@ public:
     T *get() const;
 
 protected:
-    std::mutex *Mtx_;
+    std::atomic<std::mutex *> Mtx_;
 
 private:
     T *ptr_;
@@ -55,7 +55,7 @@ public:
     T *get() const;
 
 protected:
-    std::mutex *Mtx_;
+    std::atomic<std::mutex *> Mtx_;
 
 private:
     std::shared_ptr<T> ptr_;
@@ -81,7 +81,7 @@ public:
     T *get() const;
 
 protected:
-    std::mutex *Mtx_;
+    std::atomic<std::mutex *> Mtx_;
 
 private:
     Locking_unique_ptr<T> &operator=(Locking_unique_ptr<T> const &other) = delete;
