@@ -37,7 +37,7 @@ enum nodeType
 class BaseNode
 {
 public:
-    virtual ~BaseNode() {};
+    virtual ~BaseNode(){};
     void addInputs(BaseNode *n);
     void eraseInput(BaseNode *n);
     void addConsumers(BaseNode *n);
@@ -63,13 +63,16 @@ public:
 
     nodeType getNodeType();
     operationType getOperationType();
-    std::vector<Locking_ptr<BaseNode>> &getConsumers();
-    std::vector<Locking_ptr<BaseNode>> &getInputs();
+    // don't pass inputs by ref to avoid data race 
+    std::vector<Locking_ptr<BaseNode>> getConsumers(); 
+    // don't pass inputs by ref to avoid data race 
+    std::vector<Locking_ptr<BaseNode>> getInputs();
     std::string getName();
 
     // keep the size of consumers as an atomic data
     std::atomic_int consumerSize_{0};
-    std::mutex Mtx_;
+    std::mutex Mtx_;     // for ptrs and base node data
+    std::mutex nodeMtx_; // for node data  
 
 protected:
     std::string _name = " ";
@@ -91,7 +94,7 @@ template <typename T>
 class Node : public BaseNode
 {
 public:
-    ~Node() {};
+    ~Node(){};
     Locking_shared_ptr<T> getValue();
     T getGradient();
 

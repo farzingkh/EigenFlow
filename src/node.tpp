@@ -2,7 +2,6 @@
 #include <iostream>
 
 // --- BaseNode ---
-BaseNode::~BaseNode(){}
 
 void BaseNode::setName(std::string n)
 {
@@ -12,7 +11,7 @@ void BaseNode::setName(std::string n)
 
 void BaseNode::addInputs(BaseNode *n)
 {
-
+    std::lock_guard<std::mutex> lck(nodeMtx_);
     for (int i = 0; i < _inputs.size(); i++)
     {
         if (_inputs[i].get() == nullptr)
@@ -21,12 +20,12 @@ void BaseNode::addInputs(BaseNode *n)
             return;
         }
     }
-    std::lock_guard<std::mutex> lck(Mtx_);
     _inputs.push_back(Locking_ptr<BaseNode>(n));
 }
 
 void BaseNode::eraseInput(BaseNode *n)
 {
+    std::lock_guard<std::mutex> lck(nodeMtx_);
     // remove the input node but keep the place
     for (int i = 0; i < _inputs.size(); i++)
     {
@@ -40,6 +39,7 @@ void BaseNode::eraseInput(BaseNode *n)
 
 void BaseNode::addConsumers(BaseNode *n)
 {
+    std::lock_guard<std::mutex> lck(nodeMtx_);
     // remove consumer but keep the place
     for (int i = 0; i < _consumers.size(); i++)
     {
@@ -52,14 +52,13 @@ void BaseNode::addConsumers(BaseNode *n)
         }
     }
     // add consumer and increment the size
-    std::lock_guard<std::mutex> lck(Mtx_);
     _consumers.push_back(Locking_ptr<BaseNode>(n));
     consumerSize_++;
 }
 
 void BaseNode::eraseConsumer(BaseNode *n)
 {
-    // std::lock_guard<std::mutex> lck(Mtx_);
+    std::lock_guard<std::mutex> lck(nodeMtx_);
     // remove consumer but keep the place
     for (int i = 0; i < _consumers.size(); i++)
     {
@@ -104,14 +103,14 @@ std::string BaseNode::getName()
     return _name;
 }
 
-std::vector<Locking_ptr<BaseNode>> &BaseNode::getInputs()
+std::vector<Locking_ptr<BaseNode>> BaseNode::getInputs()
 {
     // return a copy to avoid data races
     std::lock_guard<std::mutex> lck(Mtx_);
     return _inputs;
 }
 
-std::vector<Locking_ptr<BaseNode>> &BaseNode::getConsumers()
+std::vector<Locking_ptr<BaseNode>> BaseNode::getConsumers()
 {
     // return a copy to avoid data races
     std::lock_guard<std::mutex> lck(Mtx_);
@@ -135,7 +134,7 @@ operationType BaseNode::getOperationType()
 template <typename T>
 Locking_shared_ptr<T> Node<T>::getValue()
 {
-
+    std::lock_guard<std::mutex> lck(nodeMtx_);
     //std::cout << "Variable get value..." << std::endl;
     if (_dataAvailable.load())
     {
@@ -152,6 +151,8 @@ Locking_shared_ptr<T> Node<T>::getValue()
 template <typename T>
 T Node<T>::getGradient()
 {
+    // lock for all _grad and _output direct read and write
+    std::unique_lock<std::mutex> lck1(nodeMtx_);
     //std::cout << "Get gradient ...\n";
     //std::cout << "Thread ID: " << std::this_thread::get_id() << std::endl;
     // Initialize node's gradient
@@ -160,8 +161,6 @@ T Node<T>::getGradient()
     int cnsSize = this->consumerSize_.load();
     if (cnsSize > 0)
     {
-        // lock to avoid data race
-        std::unique_lock<std::mutex> lck(Mtx_);
         // wait until gradient data is available
         if ((this->_gradientAvailable.load()))
         {
@@ -177,7 +176,7 @@ T Node<T>::getGradient()
         }
         else
         {
-            cond_.wait(lck, [this]() { return this->_gradientAvailable.load(); });
+            cond_.wait(lck1, [this]() { return this->_gradientAvailable.load(); });
             //std::cout << "Notified Thread ID: " << std::this_thread::get_id() << std::endl;
             grad.setZero(_grad[0]->rows(), _grad[0]->cols());
             //  get total derivative
@@ -201,6 +200,7 @@ T Node<T>::getGradient()
 template <typename T>
 void Node<T>::setValue(T &&t)
 {
+    std::lock_guard<std::mutex> lck(nodeMtx_);
     // lock to avoid data race
     _dataAvailable.store(true);
     _output.reset(new T(t));
@@ -210,6 +210,8 @@ void Node<T>::setValue(T &&t)
 template <typename T>
 void Node<T>::setGrad(T t)
 {
+    // lock for all _grad and _output direct read and write
+    std::lock_guard<std::mutex> lck1(nodeMtx_);
     //std::cout << "Gradient set: " << t << ", size: " << t.rows() << "," << t.cols() << std::endl;
     // gradient and value must have same dimensions
     if (t.cols() != _output->cols() or t.rows() != _output->rows())
@@ -217,7 +219,6 @@ void Node<T>::setGrad(T t)
         std::cout << "Gradient and output have different dimensions!" << std::endl;
     }
     // lock to avoid data race
-    std::lock_guard<std::mutex> lck(Mtx_);
     _grad.push_back(std::shared_ptr<T>((new T(t))));
     // get the number of consumer of the node; consumerSize_ is atomic
     int cnsSize = this->consumerSize_.load();
@@ -237,9 +238,9 @@ void Node<T>::setGrad(T t)
 template <typename T>
 void Node<T>::clearGrads()
 {
+    // lock for all _grad read and write
+    std::lock_guard<std::mutex> lck1(nodeMtx_);
     _gradientAvailable.store(false);
-    // lock to avoid data race
-    std::unique_lock<std::mutex> lk2(Mtx_);
     // reset gradients
     _grad.clear();
 }
@@ -252,6 +253,7 @@ Variable<T>::Variable(T &&a)
     std::cout << "Variable contructor ..." << std::endl;
     this->_nType = nodeType::variable;
     this->_opType = operationType::NA;
+    // set value locks the node, no need to create a lock
     this->setValue(std::move(a));
 }
 
@@ -270,15 +272,12 @@ template <typename T>
 Variable<T>::Variable(Variable<T> &&v)
 {
     std::cout << "Variable move contructor ..." << std::endl;
-    // lock
-    std::unique_lock<std::mutex> rhs(v.Mtx_, std::defer_lock);
-    std::unique_lock<std::mutex> lhs(this->Mtx_, std::defer_lock);
-    std::lock(rhs, lhs);
     // move
     this->_nType = nodeType::variable;
     this->_opType = operationType::NA;
-    this->_output = std::move(v->_output);
-    v->_nType = NA;
+    // set value and get value locks the node, no need to create a lock
+    this->setValue(std::move((&v)->getValue()));
+
 }
 
 template <typename T>
@@ -296,14 +295,11 @@ template <typename T>
 Variable<T> &Variable<T>::operator=(Variable<T> &&v)
 {
     std::cout << "Variable move assignment contructor ..." << std::endl;
-    // lock
-    std::unique_lock<std::mutex> rhs((&v)->Mtx_, std::defer_lock);
-    std::unique_lock<std::mutex> lhs(this->Mtx_, std::defer_lock);
-    std::lock(rhs, lhs);
     // move
     this->_nType = nodeType::variable;
     this->_opType = operationType::NA;
-    this->_output = std::move(v->_output);
+    // set value and get value locks the node, no need to create a lock
+    this->setValue(std::move((&v)->getValue()));
 }
 
 template <typename T>
@@ -322,10 +318,13 @@ template <typename T>
 void Variable<T>::updateValue(float lr)
 {
     //std::cout << "Variable update value ..." << std::endl;
-    //variable has only one input gradient
+    // variable has only one input gradient
+    // grad and output are local variables; no need for a lock
+    // output is pointer but wraped aroud a locking class
     T grad = this->getGradient();
     Locking_shared_ptr<T> output = this->getValue();
     // update variable values based on learning rate and gradient
+    // setValue locks nodeMtx_  
     this->setValue(output->array() - (grad.array() * lr));
 }
 
