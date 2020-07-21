@@ -4,6 +4,8 @@ GradientDescentOptimizer::GradientDescentOptimizer(float lr) : learningRate_(lr)
 
 void GradientDescentOptimizer::computeGradients(BaseNode *loss)
 {
+    std::unique_lock<std::mutex> lck(*Mtx_);
+    Locking_ptr<BaseNode> lss{loss};
     std::vector<Locking_ptr<BaseNode>> nodes;
     // clear nodes list and queue
     NodesList_.clear();
@@ -21,9 +23,9 @@ void GradientDescentOptimizer::computeGradients(BaseNode *loss)
         nodeQueue_.pop_front();
     }
     // calculate gradients
-    for(auto &node : nodes)
+    for (auto &node : nodes)
     {
-        ftrs.emplace_back(std::async(std::launch::async, [node] {  node->gradient(); }));
+        ftrs.emplace_back(std::async(std::launch::async, [node] { node->gradient(); }));
     }
     // wait for results
     for_each(ftrs.begin(), ftrs.end(), [](std::future<void> &ftr) { ftr.wait(); });
@@ -40,7 +42,7 @@ Minimizer<T> GradientDescentOptimizer::minimize(BaseNode *loss)
 
 void GradientDescentOptimizer::getNodeQueue(BaseNode *loss)
 {
-    // Do BFS 
+    // Do BFS
     std::deque<Locking_ptr<BaseNode>> nodeQueue;
     std::unordered_map<BaseNode *, bool> visitedNodes;
     nodeQueue.push_front(Locking_ptr<BaseNode>(loss));
@@ -64,4 +66,10 @@ void GradientDescentOptimizer::getNodeQueue(BaseNode *loss)
             }
         }
     }
+}
+
+std::vector<Locking_ptr<BaseNode>> GradientDescentOptimizer::getNodesList()
+{
+    std::unique_lock<std::mutex> lk(*Mtx_);
+    return NodesList_;
 }
