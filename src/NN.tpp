@@ -121,8 +121,9 @@ void NN::checkGradient(BaseNode *n, BaseNode *loss, std::unordered_map<std::stri
     long double E = 1.0e-14;
     long double err = 1.0e-3;
     matxxT grad;
-    matxxT value1 = n->getValue<Matrix<T, Dynamic, Dynamic>>().array() + E;
-    matxxT value2 = n->getValue<Matrix<T, Dynamic, Dynamic>>().array() - E;
+    // create +E and -E values
+    matxxT value1 = n->getValue<Matrix<T, Dynamic, Dynamic>>()->array() + E;
+    matxxT value2 = n->getValue<Matrix<T, Dynamic, Dynamic>>()->array() - E;
     // check if n is loss node
     if (n == loss)
     {
@@ -138,21 +139,21 @@ void NN::checkGradient(BaseNode *n, BaseNode *loss, std::unordered_map<std::stri
         swapNodes(&newNodeP, n);
         // compute value of loss
         _session.Run(loss, feed);
-        matxxT outP = loss->getValue<matxxT>();
+        matxxT outP = *loss->getValue<matxxT>();
         //std::cout << "Loss+:" << outP << std::endl;
-        swapNodes(n, &newNodeP);
-        _session.Run(loss, feed);
         // swap the node with other new node
-        swapNodes(&newNodeN, n);
+        swapNodes(&newNodeN, &newNodeP);
         _session.Run(loss, feed);
-        matxxT outN = loss->getValue<matxxT>();
+        matxxT outN = *loss->getValue<matxxT>();
         //std::cout << "Loss-:" << outN << std::endl;
         // swap the node back in and compute the graph
         swapNodes(n, &newNodeN);
         // find numerical gradient and check the node gradient
         grad = (outP - outN) / (2 * E);
     }
+    // As E is added to each element of the matrix we consider the difference of the sum of matrices
     auto er = grad.sum() - n->getGradient<matxxT>().sum();
+    // check if the error is within the threshold
     assert(er < err);
     std::cout << "Numerical gradient: " << grad.sum() << std::endl;
     std::cout << "Node gradient: " << n->getGradient<matxxT>().sum() << std::endl;
