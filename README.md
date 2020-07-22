@@ -19,6 +19,7 @@ This project was created with educational purposes in mind and does not offer th
   * Windows: recommend using [MinGW](http://www.mingw.org/)
 * Eigen3 >= 3.3
     * All Oses: [download and extract Eigen's source code](http://eigen.tuxfamily.org/index.php?title=Main_Page#Download). 
+    * build using ```cmake``` and ```make```
     * The directory in which you placed Eigen's source code must be in the include path
     * Or use the -I option with GCC to achieve:
      ``` g++ -I /path/to/eigen/ my_program.cpp -o my_program ```
@@ -134,6 +135,10 @@ General information for class structure of the API. For more detailed informatio
   *  Provides factory methods to create new unary and binary operations with dynamic memory allocation and store them using ```graph``` methods
   * Provides methods to run the operations by using methods from ```session``` 
   * Provides helper methods to check gradient calculations numerically for all the nodes
+  
+* ```lockingPtr.h```  
+  * a wrapper class for raw and smart pointers with locking 
+  * locks the object that the pointer points to when deferencing and calling other methods on them
 
 ## How to Use
 
@@ -309,9 +314,11 @@ Use nn.checkAllGradient() to see if the gradient calculations are correct. It co
   * The project makes use of references in function declarations.
     * mathematical operation constructors take value by ref or ptr
       * ```operation.h``` lines 37, 49, 61, 73, 85, 97, 109, 121,
+      
   * The project follows the Rule of 5.  
     * ```node.h``` lines 118, 119, 120, 121, 122  
     * ```operation.h``` in ```Minimizer``` class
+    * ```lockingPtr.h``` 
 
   * The project uses move semantics to move data, instead of copying it, where possible. 
     * ```node.h``` in ```Node``` class lines 93, 118, 116, 
@@ -328,6 +335,7 @@ Use nn.checkAllGradient() to see if the gradient calculations are correct. It co
     * ```gradientDescentOptimizer.tpp``` lines  13, 25, 28
 
   * A mutex or lock is used in the project.
-    * ```nide.tpp``` lines   7, 13, 27, 41, 60, 75, ...
+    * ```node.tpp``` lines   7, 13, 27, 41, 60, 75, ...
+    
   * A condition variable is used in the project. 
-     * ```nide.tpp``` line 162
+     * ```node.tpp``` line 162
