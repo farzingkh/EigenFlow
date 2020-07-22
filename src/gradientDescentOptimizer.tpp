@@ -4,32 +4,21 @@ GradientDescentOptimizer::GradientDescentOptimizer(float lr) : learningRate_(lr)
 
 void GradientDescentOptimizer::computeGradients(BaseNode *loss)
 {
-    std::unique_lock<std::mutex> lck(*Mtx_);
     Locking_ptr<BaseNode> lss{loss};
-    std::vector<Locking_ptr<BaseNode>> nodes;
-    // clear nodes list and queue
-    NodesList_.clear();
-    nodeQueue_.clear();
     // get node queue in level order traversal like BFS
-    getNodeQueue(loss);
+    std::vector<Locking_ptr<BaseNode>> nodes = getNodeQueue(loss);
     // store ftrs to wait for them later
     std::vector<std::future<void>> ftrs;
     // clear gradients from previous epoch
-    while (!nodeQueue_.empty())
-    {
-        auto node = nodeQueue_.front();
-        nodes.push_back(node);
-        node->clearGrads();
-        nodeQueue_.pop_front();
-    }
+    std::for_each(nodes.begin(), nodes.end(), [](Locking_ptr<BaseNode> n){ n->clearGrads(); });    
     // calculate gradients
     for (auto &node : nodes)
     {
+        // calculate node gradients 
         ftrs.emplace_back(std::async(std::launch::async, [node] { node->gradient(); }));
     }
     // wait for results
     for_each(ftrs.begin(), ftrs.end(), [](std::future<void> &ftr) { ftr.wait(); });
-
     //std::cout << "gradients computed! " << std::endl;
 }
 
@@ -40,20 +29,26 @@ Minimizer<T> GradientDescentOptimizer::minimize(BaseNode *loss)
     return Minimizer<T>(this, loss);
 }
 
-void GradientDescentOptimizer::getNodeQueue(BaseNode *loss)
+std::vector<Locking_ptr<BaseNode>> GradientDescentOptimizer::getNodeQueue(BaseNode *loss)
 {
-    // Do BFS
+    // Do level-order traversal 
+    // create a deque 
     std::deque<Locking_ptr<BaseNode>> nodeQueue;
+    // create a vector of nodes to return the nodes
+    std::vector<Locking_ptr<BaseNode>> nodesList;
+    // create a map for exitance ckeck in constant time
     std::unordered_map<BaseNode *, bool> visitedNodes;
     nodeQueue.push_front(Locking_ptr<BaseNode>(loss));
     while (!nodeQueue.empty())
     {
         Locking_ptr<BaseNode> node = nodeQueue.front();
-        nodeQueue_.push_back(node);
         // cash in node list
-        NodesList_.push_back(node);
+        nodesList.push_back(node);
+        // set node to visited
         visitedNodes[node.get()] = true;
+        // remove the visited node from queue
         nodeQueue.pop_front();
+        // get the inputs
         auto nodes = node->getInputs();
         // go through all inputs of the node
         for (auto &n : nodes)
@@ -66,10 +61,6 @@ void GradientDescentOptimizer::getNodeQueue(BaseNode *loss)
             }
         }
     }
-}
-
-std::vector<Locking_ptr<BaseNode>> GradientDescentOptimizer::getNodesList()
-{
-    std::unique_lock<std::mutex> lk(*Mtx_);
-    return NodesList_;
+    // return the node list
+    return nodesList;
 }
