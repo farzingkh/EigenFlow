@@ -467,9 +467,9 @@ void Sum<T>::gradient()
 template <typename T>
 Minimizer<T>::Minimizer(GradientDescentOptimizer *grd, BaseNode *loss)
 {
-    gMtx_ = grd->Mtx_;
-    grdOpt_ = Locking_ptr<GradientDescentOptimizer>(grd, gMtx_.get());
+    grdOpt_ = Locking_ptr<GradientDescentOptimizer>(grd, &gMtx_);
     loss_ = Locking_ptr<BaseNode>(loss);
+    learningRate_ = grd->learningRate_;
 }
 
 template <typename T>
@@ -479,7 +479,7 @@ Minimizer<T>::Minimizer(Minimizer<T> &&other)
     // move members
     grdOpt_ = std::move(other.grdOpt_);
     loss_ = std::move(other.loss_);
-    gMtx_ = std::move(other.gMtx_);
+    learningRate_ = std::move(other.learningRate_);
 }
 
 template <typename T>
@@ -491,7 +491,7 @@ Minimizer<T> &Minimizer<T>::operator=(Minimizer<T> &&other)
         // move members
         grdOpt_ = std::move(other.grdOpt_);
         loss_ = std::move(other.loss_);
-        gMtx_ = std::move(other.gMtx_);
+        learningRate_ = std::move(other.learningRate_);
     }
     return *this;
 }
@@ -504,13 +504,13 @@ void Minimizer<T>::compute()
     // compute grdients 
     grdOpt_->computeGradients(loss_.get());
     // iterate through nodes and update variable values
-    auto list = grdOpt_->getNodesList();
+    auto list = grdOpt_->getNodeQueue(loss_.get());
     for (auto &n : list)
     {
         if (n->getNodeType() == nodeType::variable)
         {
             auto v = static_cast<Variable<T> *>(n.get());
-            v->updateValue(grdOpt_->learningRate_);
+            v->updateValue(learningRate_);
         }
     }
 }

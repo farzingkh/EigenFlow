@@ -148,7 +148,8 @@ private:
     Minimizer<T> &operator=(Minimizer<T> &other) = delete;
     Locking_ptr<GradientDescentOptimizer> grdOpt_ = Locking_ptr<GradientDescentOptimizer>(nullptr, &(this->Mtx_));
     Locking_ptr<BaseNode> loss_ = Locking_ptr<BaseNode>(nullptr, &(this->Mtx_));
-    std::shared_ptr<std::mutex> gMtx_;
+    std::mutex gMtx_;
+    float learningRate_;
 };
 #include "../src/operation.tpp"
 
