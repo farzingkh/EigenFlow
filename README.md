@@ -18,8 +18,9 @@ This project was created with educational purposes in mind and does not offer th
   * Mac: same deal as make - [install Xcode command line tools](https://developer.apple.com/xcode/features/)
   * Windows: recommend using [MinGW](http://www.mingw.org/)
 * Eigen3 >= 3.3
-    * All Oses: [download and extract Eigen's source code](http://eigen.tuxfamily.org/index.php?title=Main_Page#Download). 
-    * build using ```cmake``` and ```make```
+    * All Oses: clone the [git repository] (https://gitlab.com/libeigen/eigen.git)
+    [download and extract Eigen's source code](http://eigen.tuxfamily.org/index.php?title=Main_Page#Download). 
+    * build using ```cmake``` and ```make install```
     * The directory in which you placed Eigen's source code must be in the include path
     * Or use the -I option with GCC to achieve:
      ``` g++ -I /path/to/eigen/ my_program.cpp -o my_program ```
