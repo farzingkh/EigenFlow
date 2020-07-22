@@ -5,13 +5,13 @@
 
 void BaseNode::setName(std::string n)
 {
-    std::lock_guard<std::mutex> lck(Mtx_);
+    std::lock_guard<std::mutex> lck(nodeMtx_);
     _name = n;
 }
 
 void BaseNode::addInputs(BaseNode *n)
 {
-    std::lock_guard<std::mutex> lck1(Mtx_);
+    std::lock_guard<std::mutex> lck1(nodeMtx_);
     // Look if a node is previously replaced with nullptr
     for (int i = 0; i < _inputs.size(); i++)
     {
@@ -27,7 +27,7 @@ void BaseNode::addInputs(BaseNode *n)
 
 void BaseNode::eraseInput(BaseNode *n)
 {
-    std::lock_guard<std::mutex> lck(Mtx_);
+    std::lock_guard<std::mutex> lck(nodeMtx_);
     // remove the input node but keep the place
     for (int i = 0; i < _inputs.size(); i++)
     {
@@ -41,7 +41,7 @@ void BaseNode::eraseInput(BaseNode *n)
 
 void BaseNode::addConsumers(BaseNode *n)
 {
-    std::lock_guard<std::mutex> lck(Mtx_);
+    std::lock_guard<std::mutex> lck(nodeMtx_);
     // remove consumer but keep the place
     for (int i = 0; i < _consumers.size(); i++)
     {
@@ -61,7 +61,7 @@ void BaseNode::addConsumers(BaseNode *n)
 
 void BaseNode::eraseConsumer(BaseNode *n)
 {
-    std::lock_guard<std::mutex> lck(Mtx_);
+    std::lock_guard<std::mutex> lck(nodeMtx_);
     // remove consumer but keep the place
     for (int i = 0; i < _consumers.size(); i++)
     {
@@ -77,7 +77,7 @@ void BaseNode::eraseConsumer(BaseNode *n)
 template <typename T>
 T BaseNode::getValue()
 {
-    std::unique_lock<std::mutex> lck(Mtx_);
+    std::unique_lock<std::mutex> lck(nodeMtx_);
     auto node = static_cast<Node<T> *>(this);
     lck.unlock();
     return node->getValue();
@@ -86,7 +86,7 @@ T BaseNode::getValue()
 template <typename T>
 T BaseNode::getGradient()
 {
-    std::unique_lock<std::mutex> lck(Mtx_);
+    std::unique_lock<std::mutex> lck(nodeMtx_);
     auto node = static_cast<Node<T> *>(this);
     lck.unlock();
     return node->getGradient();
@@ -95,7 +95,7 @@ T BaseNode::getGradient()
 template <typename T>
 void BaseNode::setGrad(T t)
 {
-    std::unique_lock<std::mutex> lck(Mtx_);
+    std::unique_lock<std::mutex> lck(nodeMtx_);
     auto node = static_cast<Node<T> *>(this);
     lck.unlock();
     node->setGrad(t);
@@ -103,33 +103,33 @@ void BaseNode::setGrad(T t)
 
 std::string BaseNode::getName()
 {
-    std::lock_guard<std::mutex> lck(Mtx_);
+    std::lock_guard<std::mutex> lck(nodeMtx_);
     return _name;
 }
 
 std::vector<Locking_ptr<BaseNode>> BaseNode::getInputs()
 {
-    std::lock_guard<std::mutex> lck(Mtx_);
+    std::lock_guard<std::mutex> lck(nodeMtx_);
     // return a copy to avoid data races
     return _inputs;
 }
 
 std::vector<Locking_ptr<BaseNode>> BaseNode::getConsumers()
 {
-    std::lock_guard<std::mutex> lck(Mtx_);
+    std::lock_guard<std::mutex> lck(nodeMtx_);
     // return a copy to avoid data races
     return _consumers;
 }
 
 nodeType BaseNode::getNodeType()
 {
-    std::lock_guard<std::mutex> lck(Mtx_);
+    std::lock_guard<std::mutex> lck(nodeMtx_);
     return _nType;
 }
 
 operationType BaseNode::getOperationType()
 {
-    std::lock_guard<std::mutex> lck(Mtx_);
+    std::lock_guard<std::mutex> lck(nodeMtx_);
     return _opType;
 }
 
