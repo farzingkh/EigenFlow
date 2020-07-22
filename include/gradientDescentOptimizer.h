@@ -13,9 +13,11 @@ class GradientDescentOptimizer
 {
 public:
     GradientDescentOptimizer(float lr);
-    ~GradientDescentOptimizer() {};
+
+    // compute gradients
     void computeGradients(BaseNode *loss);
 
+    // get node list doing level order traversal
     std::vector<Locking_ptr<BaseNode>> getNodeQueue(BaseNode *loss);
 
     template <typename T>

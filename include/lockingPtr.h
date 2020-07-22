@@ -4,7 +4,9 @@
 #include <memory>
 #include <mutex>
 
-// a wrapper class to avoid data races when accessing data from shared ptrs
+/* a wrapper class to avoid data races when accessing data 
+from raw pointers by different threads. It is move/copy constructable.
+Pointer access is atomic. */
 template <typename T>
 class Locking_ptr
 {
@@ -32,6 +34,10 @@ private:
     T *ptr_;
 };
 
+
+/* a wrapper class to avoid data races when accessing data 
+from shared smart pointers by different threads. 
+It is move/copy constructable. Pointer access is atomic. */
 template <typename T>
 class Locking_shared_ptr
 {
@@ -61,6 +67,9 @@ private:
     std::shared_ptr<T> ptr_;
 };
 
+/* a wrapper class to avoid data races when accessing data 
+from unique smart pointers by different threads. 
+It is only movable. Pointer access is atomic. */
 template <typename T>
 class Locking_unique_ptr
 {

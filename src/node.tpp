@@ -110,14 +110,12 @@ std::string BaseNode::getName()
 std::vector<Locking_ptr<BaseNode>> &BaseNode::getInputs()
 {
     std::lock_guard<std::mutex> lck(nodeMtx_);
-    // return a copy to avoid data races
     return _inputs;
 }
 
 std::vector<Locking_ptr<BaseNode>> &BaseNode::getConsumers()
 {
     std::lock_guard<std::mutex> lck(nodeMtx_);
-    // return a copy to avoid data races
     return _consumers;
 }
 
@@ -142,7 +140,6 @@ Locking_shared_ptr<T> Node<T>::getValue()
     //std::cout << "Variable get value..." << std::endl;
     assert (_dataAvailable.load());
     //std::cout << "Output get: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
-    // return value to avoid data race complications with pointers
     return _output;
 
 }
@@ -175,6 +172,7 @@ T Node<T>::getGradient()
         }
         else
         {
+            //  wait until gradient is available
             cond_.wait(lck1, [this]() { return this->_gradientAvailable.load(); });
             //std::cout << "Notified Thread ID: " << std::this_thread::get_id() << std::endl;
             grad.setZero(_grad[0]->rows(), _grad[0]->cols());
@@ -291,7 +289,6 @@ void Variable<T>::updateValue(float lr)
 {
     //std::cout << "Variable update value ..." << std::endl;
     // variable has only one input gradient
-    // grad and output are local copies so no need for a lock
     T grad = this->getGradient();
     Locking_shared_ptr<T> output = this->getValue();
     // update variable values based on learning rate and gradient

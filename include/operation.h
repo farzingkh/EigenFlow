@@ -27,7 +27,7 @@ public:
     BinaryOperation(BaseNode *lhs, BaseNode *rhs);
 };
 
-// Operations
+// ---- Operations ----
 
 // addition operation with T return type value, T1 and T2 input type value
 template <typename T, typename T1, typename T2>
@@ -89,7 +89,7 @@ public:
     void gradient();
 };
 
-// Elementwise sigmoid function
+// Element-wise sigmoid function
 template <typename T>
 class Sigmoid : public UnaryOperation<T>
 {
@@ -101,7 +101,7 @@ public:
     void gradient();
 };
 
-// Elementwise Log operation
+// Element-wise Log operation
 template <typename T>
 class Log : public UnaryOperation<T>
 {
@@ -129,8 +129,8 @@ private:
     int _axis = 0;
 };
 
-// Minimization Operation
-// Node doesn't have any inputs or consumers
+/* Minimization Operation. Minimization node doesn't have any inputs or consumers. 
+It's only move constructable. */
 template <typename T>
 class Minimizer : public Operation<T>
 {
@@ -143,9 +143,10 @@ public:
     void gradient();
 
 private:
-    // cashed varieble nodes list
+    // copy/assgn deleted
     Minimizer(Minimizer<T> &other) = delete;
     Minimizer<T> &operator=(Minimizer<T> &other) = delete;
+    // cash the optimization class to access methods
     Locking_ptr<GradientDescentOptimizer> grdOpt_ = Locking_ptr<GradientDescentOptimizer>(nullptr, &(this->Mtx_));
     Locking_ptr<BaseNode> loss_ = Locking_ptr<BaseNode>(nullptr, &(this->Mtx_));
     std::mutex gMtx_;

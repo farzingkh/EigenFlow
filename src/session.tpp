@@ -23,8 +23,6 @@ void Session::Run(BaseNode *n, std::unordered_map<std::string, Eigen::Matrix<T, 
             m->compute();
         }
     }
-    // empty node list
-    _nodesList.clear();
 }
 
 // get post order list of nodes
@@ -34,12 +32,14 @@ void Session::updateNodesList(BaseNode *n)
     // only operations have input nodes
     if (nptr->getNodeType() == nodeType::operation)
     {
+        // go through input nodes recoursively
         auto list = nptr->getInputs();
         for (auto &m : list)
         {
             updateNodesList(m.get());
         }
     }
+    // add node to the list
     _nodesList.push_back(Locking_ptr<BaseNode>(nptr.get()));
 }
 

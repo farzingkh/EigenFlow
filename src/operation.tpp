@@ -2,6 +2,7 @@
 #include <math.h>
 
 // --- Operation ---
+
 template <typename T>
 Operation<T>::Operation()
 {
@@ -9,17 +10,21 @@ Operation<T>::Operation()
 }
 
 // --- UnaryOperation ---
+
 template <typename T>
 UnaryOperation<T>::UnaryOperation(BaseNode *rhs)
 {
     // use Locking_ptr<BaseNode> to cast to BaseNode
     Locking_ptr<BaseNode> rhsptr(rhs);
     Locking_ptr<BaseNode> ptrthis(this);
+    // add inpupts
     ptrthis->addInputs(rhs);
+    // add consumers
     rhsptr->addConsumers(this);
 }
 
 // --- BinaryOperation ---
+
 template <typename T>
 BinaryOperation<T>::BinaryOperation(BaseNode *lhs, BaseNode *rhs)
 {
@@ -27,8 +32,10 @@ BinaryOperation<T>::BinaryOperation(BaseNode *lhs, BaseNode *rhs)
     Locking_ptr<BaseNode> rhsptr(rhs);
     Locking_ptr<BaseNode> lhsptr(lhs);
     Locking_ptr<BaseNode> ptrthis(this);
+    // add inputs
     ptrthis->addInputs(lhs);
     ptrthis->addInputs(rhs);
+    // add consumers
     lhsptr->addConsumers(this);
     rhsptr->addConsumers(this);
 }
@@ -52,35 +59,43 @@ void Add<T, T1, T2>::compute()
 {
     //std::cout << "Compute add operation ..." << std::endl;
     std::vector<Locking_ptr<BaseNode>> inputs = this->getInputs();
+    // get value of input nodes
     Locking_shared_ptr<T1> A = inputs[0]->getValue<T1>();
     Locking_shared_ptr<T2> B = inputs[1]->getValue<T2>();
-    // broadcast column or row vectors
+    // broadcast column or row vectors if both inputs have same number of columns
     if (A->rows() != B->rows() & A->cols() == B->cols())
     {
         if (B->rows() == 1)
         {
+            // add B to each row of A
             this->setValue(A->rowwise() + B->row(0));
         }
         else if (A->rows() == 1)
         {
+            // Add A to each row of B
             this->setValue(B->rowwise() + A->row(0));
         }
     }
+    // broadcast column or row vectors if both inputs have same number of rows
     else if (A->cols() != B->cols() & A->rows() == B->rows())
     {
         if (B->cols() == 1)
         {
+            // add B to each column of A
             this->setValue(A->colwise() + B->col(0));
         }
         else if (A->cols() == 1)
         {
+            // add A to each colun of B
             this->setValue(B->colwise() + A->col(0));
         }
     }
+    // if A is scalar
     else if (A->cols() == 1 & A->rows() == 1)
     {
         this->setValue((*A)(0) + B->array());
     }
+    // if B is scalar
     else if (B->cols() == 1 & B->rows() == 1)
     {
         this->setValue((*B)(0) + A->array());
@@ -100,11 +115,9 @@ void Add<T, T1, T2>::gradient()
     std::vector<Locking_ptr<BaseNode>> inputs = this->getInputs();
     Locking_shared_ptr<T1> A = inputs[0]->getValue<T1>();
     Locking_shared_ptr<T2> B = inputs[1]->getValue<T2>();
-    /* Check for broadcasting
-     If Gradient is larger than A, then A was broadcasted
-     Broadcasted variable is as though it has that many consumers
-     So the gradient is the total gradient (the sum of gradients in 
-     the  broadcasted direction) */
+    /* Check for broadcasting. If Gradient is larger than A, then A was broadcasted.
+     Broadcasted variable is as though it has that many consumers. So the gradient is 
+     the total gradient  (the sum of gradients in the broadcasted direction) */
     if (grad.cols() > A->cols() or grad.rows() > A->rows())
     {
         T g;
@@ -143,7 +156,6 @@ void Add<T, T1, T2>::gradient()
         if (B->rows() == 1 & B->cols() == 1)
         {
             // if B is scalar
-
             auto a = grad.sum();
             T gr(1, 1);
             gr << a;
@@ -194,7 +206,7 @@ void Negative<T>::compute()
 template <typename T>
 void Negative<T>::gradient()
 {
-    // get inputs of this node
+    // get inputs of this node; it only has one input
     std::vector<Locking_ptr<BaseNode>> inputs = this->getInputs();
     //std::cout << "Compute negative operation geradient ..." << std::endl;
     inputs[0]->setGrad<T>(-(this->getGradient()));
@@ -261,7 +273,7 @@ void MatMultiply<T, T1, T2>::compute()
 {
     //std::cout << "Compute matrix multiplication operation..." << std::endl;
     std::vector<Locking_ptr<BaseNode>> inputs = this->getInputs();
-    // multiplication of scalar and matrix
+    // get input node values
     Locking_shared_ptr<T1> A = inputs[0]->getValue<T1>();
     Locking_shared_ptr<T2> B = inputs[1]->getValue<T2>();
     // perform matrix multiplication

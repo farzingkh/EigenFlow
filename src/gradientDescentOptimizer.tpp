@@ -5,7 +5,7 @@ GradientDescentOptimizer::GradientDescentOptimizer(float lr) : learningRate_(lr)
 void GradientDescentOptimizer::computeGradients(BaseNode *loss)
 {
     Locking_ptr<BaseNode> lss{loss};
-    // get node queue in level order traversal like BFS
+    // get node queue in level order traversal 
     std::vector<Locking_ptr<BaseNode>> nodes = getNodeQueue(loss);
     // store ftrs to wait for them later
     std::vector<std::future<void>> ftrs;
@@ -36,11 +36,12 @@ std::vector<Locking_ptr<BaseNode>> GradientDescentOptimizer::getNodeQueue(BaseNo
     std::deque<Locking_ptr<BaseNode>> nodeQueue;
     // create a vector of nodes to return the nodes
     std::vector<Locking_ptr<BaseNode>> nodesList;
-    // create a map for exitance ckeck in constant time
+    // create a map for exitence ckeck in constant time
     std::unordered_map<BaseNode *, bool> visitedNodes;
     nodeQueue.push_front(Locking_ptr<BaseNode>(loss));
     while (!nodeQueue.empty())
     {
+        // get the front element
         Locking_ptr<BaseNode> node = nodeQueue.front();
         // cash in node list
         nodesList.push_back(node);
