@@ -46,7 +46,7 @@ public:
 
     // get output value of this node
     template <typename T>
-    T getValue();
+    Locking_shared_ptr<T> getValue();
 
     // get total gradient from node's consumer
     template <typename T>
@@ -63,10 +63,8 @@ public:
 
     nodeType getNodeType();
     operationType getOperationType();
-    // don't pass inputs by ref to avoid data race
-    std::vector<Locking_ptr<BaseNode>> getConsumers();
-    // don't pass inputs by ref to avoid data race
-    std::vector<Locking_ptr<BaseNode>> getInputs();
+    std::vector<Locking_ptr<BaseNode>> &getConsumers();
+    std::vector<Locking_ptr<BaseNode>> &getInputs();
     std::string getName();
 
     // keep the size of consumers as an atomic data
@@ -95,7 +93,7 @@ class Node : public BaseNode
 {
 public:
     ~Node(){};
-    T getValue();
+    Locking_shared_ptr<T> getValue();
     T getGradient();
 
     void setValue(T &&t);

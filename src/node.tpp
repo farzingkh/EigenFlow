@@ -75,7 +75,7 @@ void BaseNode::eraseConsumer(BaseNode *n)
 }
 
 template <typename T>
-T BaseNode::getValue()
+Locking_shared_ptr<T> BaseNode::getValue()
 {
     std::unique_lock<std::mutex> lck(nodeMtx_);
     auto node = static_cast<Node<T> *>(this);
@@ -107,14 +107,14 @@ std::string BaseNode::getName()
     return _name;
 }
 
-std::vector<Locking_ptr<BaseNode>> BaseNode::getInputs()
+std::vector<Locking_ptr<BaseNode>> &BaseNode::getInputs()
 {
     std::lock_guard<std::mutex> lck(nodeMtx_);
     // return a copy to avoid data races
     return _inputs;
 }
 
-std::vector<Locking_ptr<BaseNode>> BaseNode::getConsumers()
+std::vector<Locking_ptr<BaseNode>> &BaseNode::getConsumers()
 {
     std::lock_guard<std::mutex> lck(nodeMtx_);
     // return a copy to avoid data races
@@ -136,21 +136,15 @@ operationType BaseNode::getOperationType()
 // --- Node  ---
 
 template <typename T>
-T Node<T>::getValue()
+Locking_shared_ptr<T> Node<T>::getValue()
 {
     std::lock_guard<std::mutex> lck(nodeMtx_);
     //std::cout << "Variable get value..." << std::endl;
-    if (_dataAvailable.load())
-    {
-        //std::cout << "Output get: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
-        // return value to avoid data race complications with pointers
-        return *_output;
-    }
-    else
-    {
-        //std::cout << "Data not available" << std::endl;
-        return T();
-    }
+    assert (_dataAvailable.load());
+    //std::cout << "Output get: " << *_output << ", size: " << (*_output).rows() << "," << (*_output).cols() << std::endl;
+    // return value to avoid data race complications with pointers
+    return _output;
+
 }
 
 template <typename T>
@@ -299,9 +293,9 @@ void Variable<T>::updateValue(float lr)
     // variable has only one input gradient
     // grad and output are local copies so no need for a lock
     T grad = this->getGradient();
-    T output = this->getValue();
+    Locking_shared_ptr<T> output = this->getValue();
     // update variable values based on learning rate and gradient
-    this->setValue(output.array() - (grad.array() * lr));
+    this->setValue(output->array() - (grad.array() * lr));
 }
 
 // --- Placeholder ---
